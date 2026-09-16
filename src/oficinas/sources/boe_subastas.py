@@ -50,10 +50,12 @@ class FuenteBOE(FuenteBase):
             "page_hits": "50",
         }
         url = f"{BUSQUEDA}?{urlencode(consulta)}"
+        self.errores_red = []
         try:
             resp = self.fetcher.get(url)
         except Exception as exc:
             log.warning("[%s] no se pudo consultar el BOE: %s", self.id, exc)
+            self.errores_red.append(str(exc)[:120])
             return []
 
         sopa = BeautifulSoup(resp.texto, "lxml")

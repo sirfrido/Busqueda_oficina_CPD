@@ -74,24 +74,32 @@ def cmd_diagnostico(args: argparse.Namespace) -> int:
             if args.fuentes and id_fuente not in args.fuentes:
                 continue
             if not cfg_fuente.get("activo") and not args.todas:
-                print(f"{id_fuente:24s} {'inactiva':10s} {'-':>8s}")
+                print(f"{id_fuente:24s} {'inactiva':10s} {'-':>8s}", flush=True)
                 continue
             fuente = crear_fuente(cfg_fuente, agente.fetcher, agente.defaults)
             if fuente is None:
-                print(f"{id_fuente:24s} {'sin-adapt':10s} {'-':>8s}")
+                print(f"{id_fuente:24s} {'sin-adapt':10s} {'-':>8s}", flush=True)
                 continue
             bloqueadas = [
                 u for u in (cfg_fuente.get("urls") or []) if not agente.fetcher.permitido(u)
             ]
             try:
                 encontrados = fuente.buscar()
-                estado = "ok" if encontrados else "vacía"
-                detalle = "robots bloquea: " + ", ".join(bloqueadas) if bloqueadas else ""
-                if not encontrados and not bloqueadas:
-                    detalle = "revisar selectores en config/fuentes.yaml"
-                print(f"{id_fuente:24s} {estado:10s} {len(encontrados):>8d}  {detalle}")
+                errores_red = getattr(fuente, "errores_red", [])
+                if encontrados:
+                    estado, detalle = "ok", ""
+                elif bloqueadas:
+                    estado = "robots"
+                    detalle = "robots.txt no permite: " + ", ".join(bloqueadas)
+                elif errores_red:
+                    estado = "sin-red"
+                    detalle = errores_red[0]
+                else:
+                    estado = "vacía"
+                    detalle = "el portal respondió pero no se extrajo nada: revisar selectores"
+                print(f"{id_fuente:24s} {estado:10s} {len(encontrados):>8d}  {detalle}", flush=True)
             except Exception as exc:
-                print(f"{id_fuente:24s} {'ERROR':10s} {'-':>8s}  {exc}")
+                print(f"{id_fuente:24s} {'ERROR':10s} {'-':>8s}  {exc}", flush=True)
     finally:
         agente.cerrar()
     return 0

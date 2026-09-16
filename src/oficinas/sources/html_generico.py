@@ -52,11 +52,13 @@ class FuenteHTML(FuenteBase):
     # -- listado ------------------------------------------------------------
     def buscar(self) -> list[Anuncio]:
         anuncios: list[Anuncio] = []
+        self.errores_red = []
         for url in self.urls:
             try:
                 resp = self.fetcher.get(url)
             except Exception as exc:
                 log.warning("[%s] no se pudo leer %s: %s", self.id, url, exc)
+                self.errores_red.append(f"{url}: {_resumen_error(exc)}")
                 continue
             sopa = BeautifulSoup(resp.texto, "lxml")
             encontrados = list(self._por_selectores(sopa, url))
@@ -217,6 +219,22 @@ def _aplanar_jsonld(datos: Any) -> Iterable[dict]:
     for valor in datos.values():
         if isinstance(valor, (list, dict)) and valor is not datos.get("@graph"):
             yield from _aplanar_jsonld(valor)
+
+
+def _resumen_error(exc: Exception) -> str:
+    """Mensaje corto y legible a partir de una excepción de requests."""
+    texto = str(exc)
+    for marca, resumen in (
+        ("Tunnel connection failed", "bloqueado por el proxy de salida"),
+        ("NameResolutionError", "dominio no resuelve"),
+        ("SSLError", "error de TLS"),
+        ("timed out", "tiempo de espera agotado"),
+        ("403", "403 Forbidden (el portal rechaza al agente)"),
+        ("404", "404: la URL de búsqueda ya no existe"),
+    ):
+        if marca in texto:
+            return resumen
+    return texto[:120]
 
 
 def _es_numero(valor: Any) -> bool:

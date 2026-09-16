@@ -34,7 +34,7 @@ def aplicar(anuncio: Anuncio, ev: Evaluacion, criterios: dict[str, Any]) -> tupl
     texto = normalizar(f"{anuncio.tipologia} {anuncio.titulo}")
     for excluida in tip.get("excluir", []):
         etiqueta = normalizar(excluida).replace("_", " ")
-        if normalizar(anuncio.tipologia) == normalizar(excluida):
+        if normalizar(anuncio.tipologia).replace("_", " ") == etiqueta:
             return False, f"Tipología excluida: {excluida}"
         if etiqueta in ("vivienda", "garaje", "trastero", "terreno") and etiqueta in texto:
             # Sólo veta si domina el título; 'oficina con plaza de garaje' no cuenta.

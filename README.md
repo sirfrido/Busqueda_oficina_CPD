@@ -114,7 +114,26 @@ las 07:15 hora de Valencia. Configura los secretos del repositorio
 
 Cada fuente declara sus selectores CSS; si el portal cambia el maquetado, el
 adaptador cae automáticamente al **JSON-LD** incrustado, que sobrevive a casi
-todos los rediseños. `oficinas diagnostico` dice cuál hay que retocar.
+todos los rediseños.
+
+> ⚠️ **Los selectores no están validados contra los portales en vivo**: el
+> entorno donde se desarrolló esto tiene la salida a internet restringida por
+> política de red (403 en el proxy para todos los dominios inmobiliarios), así
+> que están escritos a partir de la estructura conocida de cada portal. El
+> primer día, ejecuta `oficinas diagnostico` desde tu máquina y ajusta lo que
+> salga `vacía` siguiendo [`docs/OPERACION.md`](docs/OPERACION.md). Lo que sí
+> está probado de extremo a extremo es el pipeline completo (filtros, zonas,
+> puntuación, informe y contactos), con 38 tests.
+
+Estados de `oficinas diagnostico`:
+
+| Estado | Significa |
+|---|---|
+| `ok` | La fuente devuelve anuncios |
+| `vacía` | El portal respondió pero no se extrajo nada → ajustar selectores |
+| `sin-red` | No se pudo conectar (proxy, DNS, 403 del portal) |
+| `robots` | El `robots.txt` del portal no permite esa ruta |
+| `inactiva` | Desactivada en `config/fuentes.yaml` |
 
 ### Sobre legalidad y buenas maneras
 

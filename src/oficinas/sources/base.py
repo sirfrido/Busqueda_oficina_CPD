@@ -46,6 +46,9 @@ class FuenteBase:
         self.defaults = defaults
         self.id = cfg.get("id", "desconocida")
         self.nombre = cfg.get("nombre", self.id)
+        # Errores de red de la última pasada: sirven para que el diagnóstico
+        # distinga "el portal no respondió" de "los selectores ya no valen".
+        self.errores_red: list[str] = []
         self.max_paginas = int(cfg.get("max_paginas", defaults.get("max_paginas", 5)))
 
     def buscar(self) -> list[Anuncio]:  # pragma: no cover - lo implementan las hijas

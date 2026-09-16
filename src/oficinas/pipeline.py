@@ -240,7 +240,8 @@ class Agente:
         para_email = [c for c in candidatos if c.puntuacion >= self.cfg.umbral_email]
         # Cumplen los filtros duros pero el anuncio calla lo importante: se
         # listan aparte en vez de tirarlos, que es donde está media Valencia.
-        vigilar = [c for c in candidatos if c not in para_email]
+        ids_email = {c.id for c in para_email}
+        vigilar = [c for c in candidatos if c.id not in ids_email]
         resumen.candidatos = len(para_email)
         resumen.en_vigilancia = len(vigilar)
 
