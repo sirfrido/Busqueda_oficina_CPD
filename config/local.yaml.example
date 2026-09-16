@@ -1,0 +1,13 @@
+# Copia a config/local.yaml para ajustes propios (no se versiona).
+agente:
+  modo_contacto: borrador     # borrador | auto | off
+  llm_max_anuncios: 40
+
+fuentes:
+  fuentes:
+    # Fuente de demostración sin red: útil para ver el informe de ejemplo.
+    - id: demo
+      nombre: "Demo (fixture local)"
+      adapter: fixture
+      activo: false
+      archivo: tests/fixtures/anuncios.json

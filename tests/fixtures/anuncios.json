@@ -1,0 +1,69 @@
+[
+  {
+    "url": "https://ejemplo.test/oficina-campanar-240",
+    "titulo": "Oficina de 240 m² en edificio exclusivo de oficinas — Campanar",
+    "descripcion": "Planta diáfana de 240 m² construidos en edificio de oficinas de Av. de las Cortes Valencianas. Buen estado, listo para entrar. El edificio dispone de centro de transformación propio y permite instalar unidades exteriores en la azotea de uso común con autorización. Fibra óptica, aire acondicionado, dos plazas de aparcamiento, seguridad 24h.",
+    "precio_eur": 595000,
+    "superficie_m2": 240,
+    "municipio": "València",
+    "zona": "Campanar",
+    "tipologia": "oficina"
+  },
+  {
+    "url": "https://ejemplo.test/nave-fuente-del-jarro-280",
+    "titulo": "Nave industrial de 280 m² en Fuente del Jarro, Paterna",
+    "descripcion": "Nave de 280 m² en el polígono Fuente del Jarro. Altura libre 7 m, acometida trifásica con 150 kW y posibilidad de ampliación a 400 kW según la distribuidora. Cubierta propia diáfana. Oficinas en altillo reformadas en 2021, poca obra necesaria. Puerta para camión y muelle de carga.",
+    "precio_eur": 390000,
+    "superficie_m2": 280,
+    "municipio": "Paterna",
+    "zona": "Fuente del Jarro",
+    "tipologia": "nave"
+  },
+  {
+    "url": "https://ejemplo.test/local-paiporta-200",
+    "titulo": "Local diáfano de 200 m² en Paiporta, muy buen precio",
+    "descripcion": "Local comercial en planta baja con salida a dos calles. Reformado tras la riada. Zona céntrica de Paiporta.",
+    "precio_eur": 145000,
+    "superficie_m2": 200,
+    "municipio": "Paiporta",
+    "tipologia": "local"
+  },
+  {
+    "url": "https://ejemplo.test/entresuelo-ruzafa-180",
+    "titulo": "Entresuelo de 180 m² en Ruzafa, València",
+    "descripcion": "Entresuelo en edificio de viviendas, actualmente despacho profesional. Comunidad de vecinos tranquila. A reformar. Sin acceso a cubierta.",
+    "precio_eur": 320000,
+    "superficie_m2": 180,
+    "municipio": "València",
+    "zona": "Ruzafa",
+    "tipologia": "local"
+  },
+  {
+    "url": "https://ejemplo.test/oficina-alboraya-160",
+    "titulo": "Oficina 160 m² en edificio terciario, Alboraya",
+    "descripcion": "Oficina en edificio de oficinas junto a Av. Mediterráneo. Seminueva. No se especifica potencia eléctrica ni acceso a cubierta.",
+    "precio_eur": 280000,
+    "superficie_m2": 160,
+    "municipio": "Alboraya",
+    "tipologia": "oficina"
+  },
+  {
+    "url": "https://ejemplo.test/nave-riba-roja-260",
+    "titulo": "Nave de 260 m² en Riba-roja de Túria",
+    "descripcion": "Nave en polígono con buena acometida eléctrica y cubierta propia. 260 m².",
+    "precio_eur": 250000,
+    "superficie_m2": 260,
+    "municipio": "Riba-roja de Túria",
+    "tipologia": "nave"
+  },
+  {
+    "url": "https://ejemplo.test/oficina-120-colon",
+    "titulo": "Oficina de 120 m² en calle Colón",
+    "descripcion": "Oficina reformada en edificio de oficinas.",
+    "precio_eur": 390000,
+    "superficie_m2": 120,
+    "municipio": "València",
+    "zona": "Colón",
+    "tipologia": "oficina"
+  }
+]

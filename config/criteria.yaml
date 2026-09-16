@@ -1,0 +1,80 @@
+# ---------------------------------------------------------------------------
+# Criterios de búsqueda — Oficina / nave para CPD (Valencia)
+# Editable sin tocar código. Todo el pipeline lee de aquí.
+# ---------------------------------------------------------------------------
+
+operacion: venta          # venta | alquiler | ambos
+
+superficie:
+  min_m2: 150
+  max_m2: 300
+  # Tolerancia para no descartar anuncios con superficie mal declarada
+  # (p.ej. 145 m2 "ampliables" o 310 m2 con planta divisible).
+  tolerancia_pct: 10
+
+tipologias:
+  incluir:
+    - oficina
+    - nave                 # naves industriales pequeñas, poca reforma
+    - local                # sólo si está en edificio de oficinas (ver requisitos)
+  excluir:
+    - vivienda
+    - garaje
+    - trastero
+    - terreno
+    - hotel
+    - local_hosteleria
+
+# --- Requisitos duros: si fallan de forma demostrable, se descarta -----------
+requisitos_duros:
+  # Nada en edificio residencial: el CPD necesita acometida propia,
+  # horario 24x7 y no depender de una comunidad de vecinos.
+  no_edificio_viviendas: true
+  # Debe poder ubicarse maquinaria de clima en cubierta/azotea o patio propio,
+  # con espacio para ESCALAR el número de máquinas.
+  cubierta_o_azotea_ampliable: true
+  # Potencia eléctrica objetivo del CPD.
+  potencia:
+    objetivo_kw: 250          # el usuario habla de 200-300 kW (o más)
+    minimo_aceptable_kw: 200
+    deseable_kw: 400          # margen de crecimiento
+  # Desplazamiento máximo en coche desde el centro de Valencia.
+  max_minutos_coche: 20
+  # Riesgo de inundación (DANA): se descartan municipios y zonas marcadas.
+  excluir_zonas_inundables: true
+
+# --- Preferencias: suman/restan puntos, no descartan -------------------------
+preferencias:
+  estado:
+    preferido: [buen_estado, reformado, seminuevo, obra_nueva]
+    penalizado: [a_reformar, ruina]           # "poca reforma" pide el usuario
+  plantas:
+    # Planta baja / primera facilita la entrada de equipos y grupo electrógeno.
+    bonus_planta_baja: true
+  extras_valorados:
+    - montacargas
+    - acceso_camion
+    - muelle_carga
+    - grupo_electrogeno
+    - centro_transformacion
+    - fibra_optica
+    - altura_libre_alta          # >3,5 m: falso suelo + clima
+    - aparcamiento
+    - seguridad_24h
+  precio:
+    max_eur: 900000              # tope orientativo; sólo penaliza, no descarta
+    max_eur_m2: 3000
+
+# --- Umbrales de decisión ----------------------------------------------------
+scoring:
+  # Puntuación 0-100. Por debajo de `umbral_descartar` no se envía nunca.
+  umbral_descartar: 38
+  # A partir de aquí entra en el email diario.
+  umbral_email: 55
+  # A partir de aquí el agente propone contactar con la propiedad.
+  umbral_contacto: 72
+
+# --- Ámbito geográfico -------------------------------------------------------
+geo:
+  centro_referencia: [39.4699, -0.3763]   # Plaza del Ayuntamiento, València
+  radio_max_km: 25                        # filtro barato previo al cálculo real

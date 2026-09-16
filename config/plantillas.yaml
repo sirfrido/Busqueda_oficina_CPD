@@ -1,0 +1,47 @@
+# Plantillas de comunicación. {llaves} se sustituyen en composer.py.
+
+contacto_propiedad:
+  asunto: "Interés en {titulo_corto} — solicitud de visita"
+  cuerpo: |
+    Buenos días:
+
+    Me pongo en contacto por el inmueble publicado en {fuente}:
+    {url}
+
+    Estamos buscando una oficina o nave de entre 150 y 300 m² en Valencia o
+    alrededores para instalar la sede y un pequeño centro de proceso de datos
+    (CPD) propio de la empresa. Este inmueble encaja con lo que buscamos y me
+    gustaría concertar una visita.
+
+    Antes de la visita, y para no hacerle perder tiempo, hay tres puntos que
+    nos condicionan y que le agradecería poder confirmar:
+
+    {preguntas}
+
+    ¿Sería posible visitarlo esta semana o la próxima? Tengo disponibilidad de
+    lunes a viernes; dígame qué día y hora le vienen bien.
+
+    Muchas gracias por su ayuda.
+
+    Un saludo,
+    {firma_nombre}{firma_empresa}
+    {firma_contacto}
+
+  # Preguntas mínimas que se incluyen siempre, aunque el anuncio parezca claro.
+  preguntas_imprescindibles:
+    - "Potencia eléctrica: ¿qué potencia hay contratada y hasta cuánto se puede ampliar? Necesitaríamos llegar a 200-300 kW. ¿Hay centro de transformación en el edificio o próximo?"
+    - "Climatización: ¿se pueden instalar máquinas de aire acondicionado en la azotea o cubierta, y ampliar el número de unidades más adelante si crecemos?"
+    - "Uso del edificio: ¿es un edificio de oficinas/industrial, sin viviendas, con acceso 24x7?"
+
+seguimiento:
+  asunto: "Re: {titulo_corto} — seguimiento"
+  cuerpo: |
+    Buenos días:
+
+    Le escribí hace unos días interesándome por {url}. ¿Ha podido revisar las
+    consultas sobre potencia eléctrica y uso de la cubierta?
+
+    Sigo interesado en visitarlo si el inmueble admite esas condiciones.
+
+    Un saludo,
+    {firma_nombre}

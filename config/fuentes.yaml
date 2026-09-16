@@ -1,0 +1,344 @@
+# ---------------------------------------------------------------------------
+# Fuentes de búsqueda. Cada entrada declara CÓMO se obtiene el listado.
+#
+# adapter:
+#   idealista_api  -> API oficial de Idealista (OAuth2, requiere credenciales)
+#   html           -> listado HTML con selectores CSS (adaptador genérico)
+#   json           -> endpoint JSON/XHR interno con mapeo de campos
+#   sitemap        -> sitemap.xml / feed con URLs de ficha
+#   boe_subastas   -> API abierta del Portal de Subastas del BOE
+#
+# Política: el fetcher consulta robots.txt y respeta Crawl-delay.
+# Una fuente con `respect_robots: false` NO se ejecuta salvo que la actives
+# explícitamente en config/local.yaml y asumas los términos del portal.
+# Lo legalmente sólido es: API oficial donde exista, y feed/portal propio del
+# banco o servicer donde la haya. Ver README → "Fuentes y legalidad".
+# ---------------------------------------------------------------------------
+
+defaults:
+  rate_limit_segundos: 4.0
+  timeout_segundos: 30
+  reintentos: 3
+  user_agent: "BusquedaOficinaCPD/0.1 (+contacto: {EMAIL_CONTACTO})"
+  respetar_robots: true
+  max_paginas: 5
+
+fuentes:
+
+  # ======================= PORTALES GENERALISTAS ==========================
+  - id: idealista_api
+    nombre: "Idealista (API oficial)"
+    adapter: idealista_api
+    activo: true
+    requiere_credenciales: [IDEALISTA_API_KEY, IDEALISTA_API_SECRET]
+    params:
+      country: es
+      propertyType: premises      # locales/oficinas/naves
+      operation: sale
+      # Búsquedas: una por zona admitida, con centro+radio.
+      busquedas:
+        - {nombre: "València capital", center: "39.4699,-0.3763", distance: 6000}
+        - {nombre: "Norte (Paterna/Burjassot/Godella)", center: "39.5027,-0.4409", distance: 5000}
+        - {nombre: "Horta Nord (Alboraya/Massalfassar)", center: "39.5300,-0.3300", distance: 7000}
+      minSize: 140
+      maxSize: 330
+
+  - id: fotocasa
+    nombre: "Fotocasa — oficinas y naves en venta"
+    adapter: html
+    activo: true
+    respetar_robots: true
+    urls:
+      - "https://www.fotocasa.es/es/comprar/oficinas/valencia-capital/todas-las-zonas/l"
+      - "https://www.fotocasa.es/es/comprar/naves/valencia-capital/todas-las-zonas/l"
+      - "https://www.fotocasa.es/es/comprar/oficinas/paterna/todas-las-zonas/l"
+    selectores:
+      item: "article.re-CardPackMinimal, article.re-CardPackAdvance"
+      url: "a.re-CardPackMinimal-slider-info, a[href*='/comprar/']"
+      titulo: ".re-CardTitle, h3"
+      precio: ".re-CardPrice, .re-CardPriceBlock"
+      superficie: ".re-CardFeaturesWithIcons-feature-icon--surface, li[aria-label*='m²']"
+      ubicacion: ".re-CardTitle, .re-CardDescription"
+      descripcion: ".re-CardDescription"
+
+  - id: habitaclia
+    nombre: "Habitaclia — oficinas/naves"
+    adapter: html
+    activo: true
+    urls:
+      - "https://www.habitaclia.com/venta-oficinas-en-valencia_capital.htm"
+      - "https://www.habitaclia.com/venta-naves-en-valencia_capital.htm"
+      - "https://www.habitaclia.com/venta-oficinas-en-paterna.htm"
+    selectores:
+      item: "article.js-list-item, div.list-item"
+      url: "a.list-item-title, h3 a"
+      titulo: "h3, .list-item-title"
+      precio: ".list-item-price, .price"
+      superficie: ".list-item-feature, .feature"
+      ubicacion: ".list-item-location, .location"
+      descripcion: ".list-item-description, p"
+
+  - id: pisos_com
+    nombre: "pisos.com — oficinas/naves"
+    adapter: html
+    activo: true
+    urls:
+      - "https://www.pisos.com/venta/oficinas-valencia_capital/"
+      - "https://www.pisos.com/venta/naves-valencia_capital/"
+      - "https://www.pisos.com/venta/oficinas-paterna/"
+    selectores:
+      item: "div.ad-preview"
+      url: "a.ad-preview__title"
+      titulo: "a.ad-preview__title"
+      precio: ".ad-preview__price"
+      superficie: ".ad-preview__char--surface, .ad-preview__char"
+      ubicacion: ".ad-preview__subtitle"
+      descripcion: ".ad-preview__description"
+
+  - id: yaencontre
+    nombre: "yaencontre — oficinas/naves"
+    adapter: html
+    activo: true
+    urls:
+      - "https://www.yaencontre.com/venta/oficinas/valencia"
+      - "https://www.yaencontre.com/venta/naves/valencia"
+    selectores:
+      item: "article.card, div.list-item"
+      url: "a[href*='/venta/']"
+      titulo: "h2, h3"
+      precio: ".price, .Price"
+      superficie: ".features, .icon-size"
+      ubicacion: ".location, h3"
+      descripcion: ".description"
+
+  - id: idealista_sitemap
+    nombre: "Idealista — sitemap de obra/locales (respaldo sin API)"
+    adapter: sitemap
+    activo: false
+    nota: "Sólo como respaldo documentado; preferir la API oficial."
+    urls: ["https://www.idealista.com/robots.txt"]
+
+  - id: milanuncios
+    nombre: "Milanuncios — locales y naves"
+    adapter: html
+    activo: false
+    nota: "Mucho ruido y protección anti-bot; activar sólo si se acepta revisión manual."
+    urls:
+      - "https://www.milanuncios.com/venta-de-locales-y-naves/valencia.htm"
+    selectores:
+      item: "article.ma-AdCardV2"
+      url: "a.ma-AdCardV2-link"
+      titulo: ".ma-AdCardV2-title"
+      precio: ".ma-AdPrice-value"
+      superficie: ".ma-AdTagList-item"
+      ubicacion: ".ma-AdLocation-text"
+      descripcion: ".ma-AdCardV2-description"
+
+  # ================== ESPECIALIZADO EN TERCIARIO / INDUSTRIAL ==============
+  - id: inmovalencia
+    nombre: "Inmovalencia — naves y oficinas (local, muy activo en Paterna)"
+    adapter: html
+    activo: true
+    urls:
+      - "https://www.inmovalencia.com/es/venta/naves-industriales/valencia"
+      - "https://www.inmovalencia.com/es/venta/oficinas/valencia"
+    selectores:
+      item: ".property-item, article"
+      url: "a[href*='/inmueble'], a[href*='/propiedad']"
+      titulo: "h2, h3, .property-title"
+      precio: ".price, .property-price"
+      superficie: ".surface, .property-surface, li"
+      ubicacion: ".location, .property-location"
+      descripcion: ".description, p"
+
+  - id: naves_industriales_es
+    nombre: "Naves Industriales / portales industriales"
+    adapter: html
+    activo: false
+    nota: "Plantilla lista: fija aquí el portal industrial que prefieras."
+    urls: []
+    selectores: {}
+
+  # ========================= BANCA Y SERVICERS =============================
+  # Inmuebles procedentes de embargo/adjudicación. Suelen tener menos
+  # competencia y precios por debajo de mercado, pero fichas pobres:
+  # el cualificador LLM marca casi siempre "verificar".
+  - id: haya_diglo
+    nombre: "Diglo (ex Haya Real Estate) — terciario"
+    adapter: html
+    activo: true
+    urls:
+      - "https://www.diglo.com/es/comprar/locales-comerciales/valencia"
+      - "https://www.diglo.com/es/comprar/naves-industriales/valencia"
+    selectores:
+      item: ".property-card, article"
+      url: "a[href*='/inmueble']"
+      titulo: ".property-card__title, h3"
+      precio: ".property-card__price, .price"
+      superficie: ".property-card__features, .features"
+      ubicacion: ".property-card__location"
+      descripcion: ".property-card__description"
+
+  - id: servihabitat
+    nombre: "Servihabitat — locales, naves y oficinas"
+    adapter: html
+    activo: true
+    urls:
+      - "https://www.servihabitat.com/es/comprar/local/valencia"
+      - "https://www.servihabitat.com/es/comprar/nave/valencia"
+    selectores:
+      item: ".card-property, article.property"
+      url: "a[href*='/inmueble'], a[href*='/propiedad']"
+      titulo: "h3, .card-title"
+      precio: ".price, .card-price"
+      superficie: ".surface, .card-features"
+      ubicacion: ".location, .card-location"
+      descripcion: ".description"
+
+  - id: altamira_dovalue
+    nombre: "Altamira (doValue) — terciario"
+    adapter: html
+    activo: true
+    urls:
+      - "https://www.altamirainmuebles.com/es/venta/locales/valencia"
+      - "https://www.altamirainmuebles.com/es/venta/naves/valencia"
+    selectores:
+      item: ".asset-card, article"
+      url: "a[href*='/inmueble'], a[href*='/asset']"
+      titulo: "h3, .asset-title"
+      precio: ".price"
+      superficie: ".surface, .features"
+      ubicacion: ".location"
+      descripcion: ".description"
+
+  - id: aliseda
+    nombre: "Aliseda / Anticipa (Blackstone) — terciario"
+    adapter: html
+    activo: true
+    urls:
+      - "https://www.alisedainmobiliaria.com/es/comprar/local/valencia"
+      - "https://www.alisedainmobiliaria.com/es/comprar/nave/valencia"
+    selectores:
+      item: ".property, article, .card"
+      url: "a[href*='/inmueble']"
+      titulo: "h3, .title"
+      precio: ".price"
+      superficie: ".surface, .features"
+      ubicacion: ".location"
+      descripcion: ".description"
+
+  - id: solvia
+    nombre: "Solvia (Intrum) — locales y naves"
+    adapter: html
+    activo: true
+    urls:
+      - "https://www.solvia.es/es/comprar/locales/valencia"
+      - "https://www.solvia.es/es/comprar/naves/valencia"
+    selectores:
+      item: ".property-card, article"
+      url: "a[href*='/inmueble']"
+      titulo: "h3"
+      precio: ".price"
+      superficie: ".features"
+      ubicacion: ".location"
+      descripcion: ".description"
+
+  - id: casaktua
+    nombre: "Casaktua — terciario"
+    adapter: html
+    activo: true
+    urls:
+      - "https://www.casaktua.com/comprar/locales/valencia/"
+      - "https://www.casaktua.com/comprar/naves/valencia/"
+    selectores:
+      item: ".card-inmueble, article"
+      url: "a[href*='/inmueble']"
+      titulo: "h3, .titulo"
+      precio: ".precio, .price"
+      superficie: ".superficie, .caracteristicas"
+      ubicacion: ".localizacion"
+      descripcion: ".descripcion"
+
+  - id: caixabank_inmuebles
+    nombre: "CaixaBank (Building Center) — terciario"
+    adapter: html
+    activo: true
+    urls:
+      - "https://www.caixabankinmuebles.com/es/comprar/locales/valencia"
+      - "https://www.caixabankinmuebles.com/es/comprar/naves/valencia"
+    selectores:
+      item: ".property-card, article"
+      url: "a[href*='/inmueble']"
+      titulo: "h3"
+      precio: ".price, .precio"
+      superficie: ".features, .superficie"
+      ubicacion: ".location"
+      descripcion: ".description"
+
+  - id: bbva_vivienda
+    nombre: "BBVA Vivienda (ex Anida) — terciario"
+    adapter: html
+    activo: true
+    urls:
+      - "https://www.bbvavivienda.com/es/comprar/local/valencia"
+      - "https://www.bbvavivienda.com/es/comprar/nave/valencia"
+    selectores:
+      item: ".property-card, article, .card"
+      url: "a[href*='/inmueble']"
+      titulo: "h3"
+      precio: ".price"
+      superficie: ".features"
+      ubicacion: ".location"
+      descripcion: ".description"
+
+  - id: sabadell_hubsa
+    nombre: "Banco Sabadell (Hubsa/Solvia) — terciario"
+    adapter: html
+    activo: false
+    nota: "Plantilla: ajustar URL vigente del portal de inmuebles de Sabadell."
+    urls: []
+    selectores: {}
+
+  - id: sareb
+    nombre: "Sareb — inmuebles terciarios"
+    adapter: html
+    activo: true
+    urls:
+      - "https://www.sareb.es/es_ES/inmuebles/locales-comerciales/valencia"
+      - "https://www.sareb.es/es_ES/inmuebles/naves-industriales/valencia"
+    selectores:
+      item: ".asset, article, .card"
+      url: "a[href*='/inmueble'], a[href*='/asset']"
+      titulo: "h3"
+      precio: ".price"
+      superficie: ".features"
+      ubicacion: ".location"
+      descripcion: ".description"
+
+  # ============================ SUBASTAS ==================================
+  - id: boe_subastas
+    nombre: "Portal de Subastas del BOE (judiciales y notariales)"
+    adapter: boe_subastas
+    activo: true
+    params:
+      # Tipos de bien inmueble: locales, naves, oficinas.
+      provincia: "46"            # Valencia
+      categorias: ["Inmuebles"]
+      subtipos: ["Locales", "Naves", "Oficinas", "Otros inmuebles urbanos"]
+      valor_max_eur: 1200000
+
+  - id: subastas_tesoro
+    nombre: "Subastas del Tesoro / AEAT (bienes embargados)"
+    adapter: html
+    activo: false
+    nota: "Plantilla: requiere navegación con formulario; activar cuando se ajuste."
+    urls: []
+    selectores: {}
+
+  # ===================== DEMOSTRACIÓN (sin red) ===========================
+  - id: demo
+    nombre: "Demo (fixture local)"
+    adapter: fixture
+    activo: false
+    archivo: tests/fixtures/anuncios.json
+    nota: "Ejecuta `oficinas buscar --fuentes demo --sin-email` para ver el informe sin tocar la red."

@@ -1,0 +1,73 @@
+name: Búsqueda diaria de oficinas
+
+on:
+  schedule:
+    # 07:15 en Valencia (05:15 UTC en verano, 06:15 en invierno).
+    - cron: "15 5 * * *"
+  workflow_dispatch:
+    inputs:
+      sin_email:
+        description: "Ejecutar sin enviar el email (sólo generar el informe)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: busqueda-diaria
+  cancel-in-progress: false
+
+jobs:
+  buscar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      # La base de datos es la memoria del agente: sin ella repetiría cada día
+      # los mismos anuncios en el email.
+      - name: Recuperar memoria del agente
+        uses: actions/cache@v4
+        with:
+          path: data
+          key: oficinas-db-${{ github.run_id }}
+          restore-keys: |
+            oficinas-db-
+
+      - name: Ejecutar búsqueda
+        env:
+          PYTHONPATH: src
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          IDEALISTA_API_KEY: ${{ secrets.IDEALISTA_API_KEY }}
+          IDEALISTA_API_SECRET: ${{ secrets.IDEALISTA_API_SECRET }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PUERTO: ${{ secrets.SMTP_PUERTO }}
+          SMTP_USUARIO: ${{ secrets.SMTP_USUARIO }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_REMITENTE: ${{ secrets.EMAIL_REMITENTE }}
+          EMAIL_DESTINATARIOS: ${{ secrets.EMAIL_DESTINATARIOS }}
+          EMAIL_CONTACTO: ${{ secrets.EMAIL_CONTACTO }}
+          CONTACTO_NOMBRE: ${{ secrets.CONTACTO_NOMBRE }}
+          CONTACTO_EMPRESA: ${{ secrets.CONTACTO_EMPRESA }}
+          CONTACTO_TELEFONO: ${{ secrets.CONTACTO_TELEFONO }}
+          # borrador = el agente redacta pero no envía nada a terceros.
+          MODO_CONTACTO: ${{ vars.MODO_CONTACTO || 'borrador' }}
+        run: |
+          python -m oficinas.cli buscar ${{ inputs.sin_email && '--sin-email' || '' }}
+
+      - name: Guardar informe y borradores
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: informe-${{ github.run_number }}
+          path: |
+            data/out/*.html
+            data/out/borradores/*.eml
+          if-no-files-found: ignore
+          retention-days: 30

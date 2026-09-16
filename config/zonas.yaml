@@ -1,0 +1,151 @@
+# ---------------------------------------------------------------------------
+# Mapa de zonas: qué entra, qué se descarta y a cuántos minutos en coche.
+#
+# `minutos_coche` = tiempo orientativo desde Pl. del Ayuntamiento (València)
+# en hora valle. Se usa como fallback cuando no hay routing online disponible
+# (OSRM). Si hay coordenadas y routing, manda el cálculo real.
+#
+# `riesgo_inundacion`: alto | medio | bajo  — basado en la comarca, el sistema
+# de barrancos (Poyo, Saleta, Torrent, Magro) y el alcance de la DANA de
+# octubre de 2024. Con `excluir_zonas_inundables: true` se descarta todo "alto".
+# ---------------------------------------------------------------------------
+
+# === EXCLUIDOS: l'Horta Sud y el resto del área afectada por la DANA ========
+excluidos:
+  motivo_por_defecto: "Zona inundable / afectada por la DANA de octubre 2024"
+  municipios:
+    # --- Comarca de l'Horta Sud (exclusión completa, petición del cliente) ---
+    - {nombre: "Paiporta", riesgo_inundacion: alto}
+    - {nombre: "Picanya", riesgo_inundacion: alto}
+    - {nombre: "Catarroja", riesgo_inundacion: alto}
+    - {nombre: "Massanassa", riesgo_inundacion: alto}
+    - {nombre: "Alfafar", riesgo_inundacion: alto}
+    - {nombre: "Benetússer", riesgo_inundacion: alto}
+    - {nombre: "Sedaví", riesgo_inundacion: alto}
+    - {nombre: "Albal", riesgo_inundacion: alto}
+    - {nombre: "Beniparrell", riesgo_inundacion: alto}
+    - {nombre: "Silla", riesgo_inundacion: alto}
+    - {nombre: "Alcàsser", riesgo_inundacion: alto}
+    - {nombre: "Picassent", riesgo_inundacion: alto}
+    - {nombre: "Torrent", riesgo_inundacion: alto}
+    - {nombre: "Aldaia", riesgo_inundacion: alto}
+    - {nombre: "Alaquàs", riesgo_inundacion: alto}
+    - {nombre: "Xirivella", riesgo_inundacion: alto}
+    - {nombre: "Quart de Poblet", riesgo_inundacion: alto}
+    - {nombre: "Manises", riesgo_inundacion: alto}
+    - {nombre: "Llocnou de la Corona", riesgo_inundacion: alto}
+    - {nombre: "Lugar Nuevo de la Corona", riesgo_inundacion: alto}
+    # --- Resto del corredor del Poyo / Magro / Turia afectado por la DANA ---
+    - {nombre: "Riba-roja de Túria", riesgo_inundacion: alto}
+    - {nombre: "Loriguilla", riesgo_inundacion: alto}
+    - {nombre: "Chiva", riesgo_inundacion: alto}
+    - {nombre: "Cheste", riesgo_inundacion: alto}
+    - {nombre: "Buñol", riesgo_inundacion: alto}
+    - {nombre: "Godelleta", riesgo_inundacion: alto}
+    - {nombre: "Turís", riesgo_inundacion: alto}
+    - {nombre: "Montserrat", riesgo_inundacion: alto}
+    - {nombre: "Montroy", riesgo_inundacion: alto}
+    - {nombre: "Real", riesgo_inundacion: alto}
+    - {nombre: "Utiel", riesgo_inundacion: alto}
+    - {nombre: "Requena", riesgo_inundacion: alto}
+    - {nombre: "Algemesí", riesgo_inundacion: alto}
+    - {nombre: "Alzira", riesgo_inundacion: alto}
+    - {nombre: "Carlet", riesgo_inundacion: alto}
+    - {nombre: "Sollana", riesgo_inundacion: alto}
+    - {nombre: "Benifaió", riesgo_inundacion: alto}
+    - {nombre: "Almussafes", riesgo_inundacion: alto}
+    - {nombre: "Sueca", riesgo_inundacion: alto}
+    - {nombre: "Cullera", riesgo_inundacion: alto}
+    - {nombre: "Guadassuar", riesgo_inundacion: alto}
+    - {nombre: "L'Alcúdia", riesgo_inundacion: alto}
+    - {nombre: "Alginet", riesgo_inundacion: alto}
+    - {nombre: "Pedralba", riesgo_inundacion: alto}
+    - {nombre: "Bugarra", riesgo_inundacion: alto}
+  # Barrios/pedanías de València capital descartados (Poblats del Sud y
+  # entorno del barranco del Poyo / huerta sur; inundados en 2024).
+  barrios_valencia:
+    - "La Torre"
+    - "Faitanar"
+    - "Forn d'Alcedo"
+    - "Horno de Alcedo"
+    - "Castellar-l'Oliveral"
+    - "Castellar-Oliveral"
+    - "Pinedo"
+    - "El Saler"
+    - "El Palmar"
+    - "El Perellonet"
+    - "La Punta"
+    - "Massarrojos"   # no inundable, pero fuera del foco de oficinas
+  # Palabras que en el texto del anuncio delatan zona descartada
+  terminos_veto:
+    - "horta sud"
+    - "l'horta sud"
+    - "afectado por la dana"
+    - "afectada por la dana"
+    - "inundado"
+    - "inundada"
+    - "zona inundable"
+
+# === VALÈNCIA CAPITAL: distritos y ejes de oficinas =========================
+valencia_capital:
+  nombre_municipio: "València"
+  minutos_coche: 0
+  riesgo_inundacion: bajo
+  # Ejes con parque real de edificios de oficinas exclusivos.
+  zonas_prime:
+    - {nombre: "Avenida de las Cortes Valencianas", bonus: 12}
+    - {nombre: "Campanar", bonus: 10}
+    - {nombre: "Nuevo Centro", bonus: 8}
+    - {nombre: "Avenida Aragón", bonus: 10}
+    - {nombre: "Ciutat de les Arts i les Ciències", bonus: 10}
+    - {nombre: "Camins al Grau", bonus: 8}
+    - {nombre: "Ayora", bonus: 6}
+    - {nombre: "Gran Vía Marqués del Turia", bonus: 8}
+    - {nombre: "Colón", bonus: 6}
+    - {nombre: "Pla del Remei", bonus: 6}
+    - {nombre: "Alameda", bonus: 8}
+    - {nombre: "Blasco Ibáñez", bonus: 5}
+    - {nombre: "Ademuz", bonus: 8}
+    - {nombre: "Benicalap", bonus: 4}
+    - {nombre: "Marítim", bonus: 5}
+    - {nombre: "Grao", bonus: 5}
+  # Polígonos industriales dentro del término municipal (para naves).
+  poligonos:
+    - {nombre: "Vara de Quart", bonus: 8, riesgo_inundacion: medio}
+    - {nombre: "Ciudad del Transporte", bonus: 4, riesgo_inundacion: medio}
+    - {nombre: "Moreras", bonus: 6, riesgo_inundacion: bajo}
+    - {nombre: "Zona Franca / Puerto", bonus: 4, riesgo_inundacion: medio}
+
+# === ALREDEDORES ADMITIDOS (norte y oeste alto, ≤20 min) ===================
+# Nota: el norte (l'Horta Nord / Camp de Túria) es la zona natural de
+# expansión sin el riesgo hidrológico del sur.
+alrededores:
+  - {nombre: "Paterna", minutos_coche: 15, riesgo_inundacion: bajo, bonus: 12,
+     nota: "Parque Tecnológico, Fuente del Jarro, Táctica: el mejor caladero de naves y oficinas técnicas"}
+  - {nombre: "Burjassot", minutos_coche: 13, riesgo_inundacion: bajo, bonus: 6}
+  - {nombre: "Godella", minutos_coche: 15, riesgo_inundacion: bajo, bonus: 5}
+  - {nombre: "Rocafort", minutos_coche: 16, riesgo_inundacion: bajo, bonus: 4}
+  - {nombre: "Moncada", minutos_coche: 18, riesgo_inundacion: bajo, bonus: 5}
+  - {nombre: "Alfara del Patriarca", minutos_coche: 18, riesgo_inundacion: bajo, bonus: 4}
+  - {nombre: "Bétera", minutos_coche: 20, riesgo_inundacion: bajo, bonus: 4}
+  - {nombre: "San Antonio de Benagéber", minutos_coche: 18, riesgo_inundacion: bajo, bonus: 4}
+  - {nombre: "L'Eliana", minutos_coche: 20, riesgo_inundacion: bajo, bonus: 3}
+  - {nombre: "Alboraya", minutos_coche: 12, riesgo_inundacion: medio, bonus: 6}
+  - {nombre: "Tavernes Blanques", minutos_coche: 12, riesgo_inundacion: medio, bonus: 4}
+  - {nombre: "Almàssera", minutos_coche: 13, riesgo_inundacion: medio, bonus: 3}
+  - {nombre: "Meliana", minutos_coche: 15, riesgo_inundacion: medio, bonus: 3}
+  - {nombre: "Foios", minutos_coche: 16, riesgo_inundacion: medio, bonus: 3}
+  - {nombre: "Albalat dels Sorells", minutos_coche: 17, riesgo_inundacion: medio, bonus: 3}
+  - {nombre: "Museros", minutos_coche: 18, riesgo_inundacion: bajo, bonus: 5}
+  - {nombre: "Massalfassar", minutos_coche: 18, riesgo_inundacion: medio, bonus: 5,
+     nota: "Polígono con naves modernas y buena acometida"}
+  - {nombre: "Albuixech", minutos_coche: 17, riesgo_inundacion: medio, bonus: 5}
+  - {nombre: "La Pobla de Farnals", minutos_coche: 19, riesgo_inundacion: medio, bonus: 3}
+  - {nombre: "Rafelbunyol", minutos_coche: 20, riesgo_inundacion: bajo, bonus: 3}
+  - {nombre: "Puçol", minutos_coche: 20, riesgo_inundacion: bajo, bonus: 4}
+  - {nombre: "El Puig", minutos_coche: 20, riesgo_inundacion: bajo, bonus: 3}
+  - {nombre: "Náquera", minutos_coche: 20, riesgo_inundacion: bajo, bonus: 2}
+  - {nombre: "Vinalesa", minutos_coche: 16, riesgo_inundacion: bajo, bonus: 2}
+  - {nombre: "Bonrepòs i Mirambell", minutos_coche: 15, riesgo_inundacion: medio, bonus: 2}
+  - {nombre: "Emperador", minutos_coche: 19, riesgo_inundacion: medio, bonus: 1}
+  - {nombre: "Massamagrell", minutos_coche: 18, riesgo_inundacion: medio, bonus: 3}
