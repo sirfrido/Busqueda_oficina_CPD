@@ -5,15 +5,30 @@
 
 operacion: venta          # venta | alquiler | ambos
 
+# ---------------------------------------------------------------------------
+# CRIBADO EN DOS NIVELES
+#
+#   vetos    -> lo que no tiene arreglo posible. Descarta, sin matices.
+#   bandas   -> todo lo demás. No hay muros: hay rampas. Pasarse un poco
+#               resta unos puntos; pasarse mucho resta muchos; y lo que se
+#               queda cerca aparece en el email como "casi", nunca se pierde.
+#
+# La lógica: un precio o unos metros son negociables y compensables; estar en
+# zona inundable o debajo de unos vecinos, no.
+# ---------------------------------------------------------------------------
+
 superficie:
-  min_m2: 130
-  max_m2: 300
-  # Por encima de max_m2 sólo se acepta si el inmueble está muy bien:
-  # hasta `max_m2_si_impecable` cuando no requiere apenas reforma.
-  max_m2_si_impecable: 500
-  # Tolerancia para no descartar anuncios con superficie mal declarada
-  # (p.ej. 128 m2 "ampliables" o 310 m2 con planta divisible).
-  tolerancia_pct: 10
+  # Banda plena: aquí no se resta nada.
+  ideal_min_m2: 150
+  ideal_max_m2: 300
+  min_m2: 130            # por debajo empieza a restar
+  max_m2: 320            # por encima empieza a restar
+  # Zona gris: entra penalizado y marcado como "se pasa / se queda corto".
+  gris_min_m2: 100
+  gris_max_m2: 500
+  # Fuera de esto no hay conversación posible: veto.
+  veto_min_m2: 100
+  veto_max_m2: 600        # el doble del máximo: más allá no hay conversación
 
 tipologias:
   incluir:
@@ -39,8 +54,11 @@ requisitos_duros:
   # aunque los metros y la zona encajen (escaparate, ruido, y sobre todo
   # riesgo de agua a cota cero).
   no_bajo_comercial: true
-  # Tope de precio: por encima, fuera.
-  precio_max_eur: 400000
+  # Precio: 400.000 € es el objetivo declarado. Un anuncio a 430.000 no está
+  # "fuera": está a un 7 % de negociación. El veto se pone donde ya no hay
+  # negociación posible.
+  precio_objetivo_eur: 400000
+  precio_veto_eur: 550000
   # Debe poder ubicarse maquinaria de clima en cubierta/azotea o patio propio,
   # con espacio para ESCALAR el número de máquinas.
   cubierta_o_azotea_ampliable: true
@@ -49,8 +67,10 @@ requisitos_duros:
     objetivo_kw: 250          # el usuario habla de 200-300 kW (o más)
     minimo_aceptable_kw: 200
     deseable_kw: 400          # margen de crecimiento
-  # Desplazamiento máximo en coche desde el centro de Valencia.
+  # Desplazamiento en coche desde el centro de Valencia: 20 min es el
+  # objetivo, no un muro. A partir de ahí resta; a partir de veto, fuera.
   max_minutos_coche: 20
+  veto_minutos_coche: 30
   # Riesgo de inundación (DANA): se descartan municipios y zonas marcadas.
   excluir_zonas_inundables: true
 
@@ -74,9 +94,12 @@ preferencias:
     - aparcamiento
     - seguridad_24h
   precio:
-    # El tope duro está en requisitos_duros.precio_max_eur (400.000 €).
-    # Este es el precio por m² a partir del cual se penaliza.
+    # Por debajo de esto, el precio es un argumento a favor.
+    bueno_eur: 350000
+    # Precio por m² a partir del cual se penaliza, y por debajo del cual
+    # se premia (una nave a 750 €/m² merece una visita aunque sobren metros).
     max_eur_m2: 2600
+    chollo_eur_m2: 1200
   # La nave pequeña con azotea propia y sin vecinos es el escenario ideal;
   # la oficina en altura es la alternativa por el miedo al agua.
   tipologia_preferida: nave
@@ -91,6 +114,21 @@ scoring:
   umbral_email: 55
   # A partir de aquí el agente propone contactar con la propiedad.
   umbral_contacto: 72
+  # Los que se quedan a menos de esto del umbral van al bloque "casi" del
+  # email, con una línea explicando qué les falta.
+  margen_casi: 15
+  # Umbral adaptativo: si la semana viene floja, el listón baja para no
+  # dejarte sin nada que mirar; si viene cargada, sube para no saturar.
+  adaptativo:
+    activo: true
+    dias_ventana: 7
+    pocos_si_menos_de: 3      # menos de 3 envíos en la ventana...
+    baja_umbral: 10           # ...baja el listón 10 puntos
+    muchos_si_mas_de: 12      # más de 12 envíos...
+    sube_umbral: 8            # ...lo sube 8
+  # Pasarse en un eje se perdona; pasarse en dos exige excelencia.
+  max_excesos_sin_excelencia: 1
+  puntuacion_excelencia: 85
 
 # --- Ámbito geográfico -------------------------------------------------------
 geo:

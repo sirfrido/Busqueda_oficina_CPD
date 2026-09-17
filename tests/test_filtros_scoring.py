@@ -18,46 +18,69 @@ def test_descarta_por_superficie_pequena(criterios):
     assert not ok and "mínimo" in motivo
 
 
-def test_el_minimo_de_130_es_estricto(criterios):
-    """130 m² es un mínimo de trabajo: 120 no cuela por tolerancia."""
-    assert aplicar(anuncio(superficie_m2=130), Evaluacion(), criterios)[0] is True
-    ok, motivo = aplicar(anuncio(superficie_m2=120), Evaluacion(), criterios)
-    assert not ok and "mínimo" in motivo
+def test_pasarse_un_poco_no_descarta_nunca(criterios):
+    """El corazón del cribado: 310 m² o 420.000 € no son un 'no'."""
+    for metros, precio in ((310, 380000), (125, 350000), (200, 420000), (340, 300000)):
+        a = anuncio(superficie_m2=metros, precio_eur=precio)
+        ok, motivo = aplicar(a, Evaluacion(), criterios)
+        assert ok, f"{metros} m² / {precio} € no debería vetarse: {motivo}"
 
 
-def test_precio_por_encima_del_tope_descarta(criterios):
-    ok, motivo = aplicar(anuncio(superficie_m2=200, precio_eur=450000), Evaluacion(), criterios)
-    assert not ok and "tope" in motivo
-    assert aplicar(anuncio(superficie_m2=200, precio_eur=399000), Evaluacion(), criterios)[0] is True
+def test_los_vetos_siguen_siendo_vetos(criterios):
+    """Lo que no tiene arreglo sí se corta: extremos absolutos."""
+    casos = [
+        (anuncio(superficie_m2=60, precio_eur=200000), "pequeño"),
+        (anuncio(superficie_m2=800, precio_eur=300000), "grande"),
+        (anuncio(superficie_m2=200, precio_eur=700000), "negociación"),
+    ]
+    for a, esperado in casos:
+        ok, motivo = aplicar(a, Evaluacion(), criterios)
+        assert not ok and esperado in motivo, motivo
 
 
-def test_entre_300_y_500_solo_si_no_hay_que_reformar(criterios):
+def test_la_rampa_castiga_mas_cuanto_mas_te_pasas(criterios):
+    from oficinas.bandas import evaluar as evaluar_bandas
+
+    ev = Evaluacion(minutos_coche=12)
+    justo = evaluar_bandas(anuncio(superficie_m2=330, precio_eur=380000), ev, criterios).total
+    lejos = evaluar_bandas(anuncio(superficie_m2=480, precio_eur=380000), ev, criterios).total
+    assert justo > lejos, "pasarse 10 m² no puede costar lo mismo que pasarse 160"
+
+
+def test_un_buen_precio_por_m2_compensa_los_metros_de_mas(criterios):
+    """El caso real: nave de 400 m² a 300.000 € (750 €/m²)."""
+    from oficinas.bandas import evaluar as evaluar_bandas
+
+    barata = anuncio(superficie_m2=400, precio_eur=300000, tipologia="nave")
+    bandas = evaluar_bandas(barata, Evaluacion(minutos_coche=13), criterios)
+    assert bandas.total > 0, "un chollo por m² debe compensar el exceso de metros"
+    assert "se pasa 80 m²" in bandas.excesos
+
+
+def test_metros_de_mas_con_obra_es_la_peor_combinacion(criterios):
+    """Pagar suelo de más y encima tener que invertir en él: doble castigo."""
+    from oficinas.bandas import evaluar as evaluar_bandas
+
     impecable = anuncio(
         superficie_m2=450, precio_eur=395000,
         titulo="Nave de 450 m² seminueva",
         descripcion="Nave seminueva, listo para entrar, sin necesidad de reforma. Cubierta propia.",
     )
-    assert aplicar(impecable, detectar(impecable), criterios)[0] is True
-
     con_obra = anuncio(
-        superficie_m2=450, precio_eur=300000,
+        superficie_m2=450, precio_eur=395000,
         titulo="Nave de 450 m² a reformar", descripcion="Necesita reforma integral.",
     )
-    ok, motivo = aplicar(con_obra, detectar(con_obra), criterios)
-    assert not ok and "supera" in motivo
+    b_ok = evaluar_bandas(impecable, detectar(impecable), criterios)
+    b_obra = evaluar_bandas(con_obra, detectar(con_obra), criterios)
+    assert b_obra.total < b_ok.total - 5
+    # Ninguno de los dos se veta: el que tiene obra simplemente no puntúa.
+    assert aplicar(impecable, detectar(impecable), criterios)[0] is True
+    assert puntuar(impecable, detectar(impecable), criterios)[0] > puntuar(
+        con_obra, detectar(con_obra), criterios
+    )[0]
 
-    # Estado desconocido: sigue vivo, pero marcado y penalizado.
-    sin_datos = anuncio(
-        superficie_m2=400, precio_eur=300000, tipologia="nave",
-        titulo="Nave industrial en venta en Burjassot", descripcion="Nave en venta en Mendizábal.",
-    )
-    ev = detectar(sin_datos)
-    assert aplicar(sin_datos, ev, criterios)[0] is True
-    assert sin_datos.extra.get("superficie_ampliada") is True
-    _, desglose = puntuar(sin_datos, ev, criterios)
-    assert any("impecable" in k for k in desglose)
-
-    demasiado = anuncio(superficie_m2=620, precio_eur=390000, descripcion="Impecable, listo para entrar")
+    # El doble del máximo ya no es "pasarse un poco": ahí sí hay veto.
+    demasiado = anuncio(superficie_m2=650, precio_eur=390000, descripcion="Impecable, listo para entrar")
     assert aplicar(demasiado, detectar(demasiado), criterios)[0] is False
 
 
@@ -141,3 +164,19 @@ def test_la_puntuacion_se_mantiene_en_rango(criterios):
     a = anuncio(superficie_m2=225)
     p, _ = puntuar(a, detectar(a), criterios, bonus_zona=99)
     assert 0 <= p <= 100
+
+
+def test_regla_de_compensacion(criterios):
+    """Pasarse en un eje se perdona; en dos, sólo con el resto sobresaliente."""
+    from oficinas.bandas import evaluar as evaluar_bandas
+
+    un_exceso = anuncio(superficie_m2=340, precio_eur=360000, tipologia="nave")
+    dos_excesos = anuncio(superficie_m2=340, precio_eur=460000, tipologia="nave")
+    ev = Evaluacion(minutos_coche=14)
+
+    assert len(evaluar_bandas(un_exceso, ev, criterios).ejes_excedidos) == 1
+    excedidos = evaluar_bandas(dos_excesos, ev, criterios).ejes_excedidos
+    assert set(excedidos) == {"superficie", "precio"}
+    # Ninguno de los dos está vetado: la decisión es de puntuación, no de corte.
+    assert aplicar(un_exceso, ev, criterios)[0] is True
+    assert aplicar(dos_excesos, ev, criterios)[0] is True

@@ -16,9 +16,10 @@ from typing import Any
 
 import yaml
 
+from .bandas import evaluar as evaluar_bandas, resumen_excesos
 from .config import Config
 from .fetch import Fetcher
-from .filtros import aplicar as aplicar_filtros, rango_superficie
+from .filtros import aplicar as aplicar_filtros, limites_absolutos
 from .geo import MapaZonas, estimar_minutos, distancia_km, minutos_en_coche
 from .models import Anuncio, Candidato
 from .notify.email_digest import enviar_digest
@@ -40,6 +41,7 @@ class Resumen:
     descartados: int = 0
     candidatos: int = 0
     en_vigilancia: int = 0
+    umbral_aplicado: float = 0.0
     fuentes_ok: int = 0
     fuentes_error: int = 0
     por_fuente: dict[str, int] = field(default_factory=dict)
@@ -174,7 +176,26 @@ class Agente:
         se_mantiene, motivo = aplicar_filtros(anuncio, ev, self.cfg.criterios)
         if not se_mantiene:
             ev.motivo_descarte = motivo
-        puntuacion, desglose = puntuar(anuncio, ev, self.cfg.criterios, bonus_zona=zona.bonus)
+
+        bandas = evaluar_bandas(anuncio, ev, self.cfg.criterios)
+        puntuacion, desglose = puntuar(
+            anuncio, ev, self.cfg.criterios, bonus_zona=zona.bonus, bandas=bandas
+        )
+
+        # Regla de compensación: pasarse en un eje se perdona; pasarse en dos
+        # sólo lo salva una puntuación sobresaliente en todo lo demás.
+        scoring = self.cfg.criterios.get("scoring", {})
+        max_excesos = int(scoring.get("max_excesos_sin_excelencia", 1))
+        excelencia = float(scoring.get("puntuacion_excelencia", 85))
+        if se_mantiene and len(bandas.ejes_excedidos) > max_excesos and puntuacion < excelencia:
+            se_mantiene = False
+            ev.motivo_descarte = (
+                f"Se sale por varios sitios a la vez ({resumen_excesos(bandas)}) "
+                f"y no compensa con el resto"
+            )
+
+        if bandas.excesos:
+            anuncio.extra["excesos"] = resumen_excesos(bandas)
         return Candidato(
             anuncio=anuncio,
             evaluacion=ev,
@@ -183,6 +204,23 @@ class Agente:
             descartado=not se_mantiene or puntuacion < self.cfg.umbral_descartar,
         )
 
+    def umbral_efectivo(self) -> float:
+        """Listón del día, ajustado al caudal de las últimas semanas.
+
+        Si apenas ha entrado nada, se baja para no dejar al usuario a ciegas;
+        si ha entrado mucho, se sube para que el email siga siendo corto.
+        """
+        base = self.cfg.umbral_email
+        cfg = self.cfg.criterios.get("scoring", {}).get("adaptativo", {})
+        if not cfg.get("activo", False):
+            return base
+        recientes = self.almacen.enviados_ultimos_dias(int(cfg.get("dias_ventana", 7)))
+        if recientes < int(cfg.get("pocos_si_menos_de", 3)):
+            return max(self.cfg.umbral_descartar, base - float(cfg.get("baja_umbral", 10)))
+        if recientes > int(cfg.get("muchos_si_mas_de", 12)):
+            return base + float(cfg.get("sube_umbral", 8))
+        return base
+
     def _prefiltro(self, anuncio: Anuncio) -> str:
         """Descarte barato antes de gastar red o modelo. '' = sigue vivo.
 
@@ -190,9 +228,7 @@ class Agente:
         está impecable puede compensar, y eso lo decide la evaluación
         completa, no este corte previo.
         """
-        minimo, maximo = rango_superficie(self.cfg.criterios)
-        sup_cfg = self.cfg.criterios["superficie"]
-        maximo = max(maximo, float(sup_cfg.get("max_m2_si_impecable", maximo)))
+        minimo, maximo = limites_absolutos(self.cfg.criterios)
         if anuncio.superficie_m2 is not None and not (minimo <= anuncio.superficie_m2 <= maximo):
             return f"{anuncio.superficie_m2:g} m² fuera de {minimo:g}-{maximo:g}"
         zona = self.zonas.resolver(
@@ -244,11 +280,19 @@ class Agente:
                 candidatos.append(cand)
 
         candidatos.sort(key=lambda c: c.puntuacion, reverse=True)
-        para_email = [c for c in candidatos if c.puntuacion >= self.cfg.umbral_email]
+        umbral = self.umbral_efectivo()
+        resumen.umbral_aplicado = umbral
+        para_email = [c for c in candidatos if c.puntuacion >= umbral]
         # Cumplen los filtros duros pero el anuncio calla lo importante: se
         # listan aparte en vez de tirarlos, que es donde está media Valencia.
+        # "Casi": los que se quedan a tiro del umbral. No se tiran nunca en
+        # silencio; van al final del email con una línea de qué les falta.
+        margen = float(self.cfg.criterios.get("scoring", {}).get("margen_casi", 15))
         ids_email = {c.id for c in para_email}
-        vigilar = [c for c in candidatos if c.id not in ids_email]
+        vigilar = [
+            c for c in candidatos
+            if c.id not in ids_email and c.puntuacion >= umbral - margen
+        ]
         resumen.candidatos = len(para_email)
         resumen.en_vigilancia = len(vigilar)
 

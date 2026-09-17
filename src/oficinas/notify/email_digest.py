@@ -65,13 +65,19 @@ def _euros(valor: float | None) -> str:
 
 
 def _fila_vigilar(cand: Candidato) -> str:
+    """Una línea por inmueble que se queda a las puertas, diciendo por qué."""
     a, ev = cand.anuncio, cand.evaluacion
+    motivos: list[str] = []
+    if a.extra.get("excesos"):
+        motivos.append(str(a.extra["excesos"]))
     faltan = [
         etiqueta for etiqueta, veredicto in (
             ("potencia", ev.potencia_ampliable), ("cubierta", ev.cubierta_ampliable),
             ("tipo de edificio", ev.edificio_oficinas), ("estado", ev.poca_reforma),
         ) if veredicto == "verificar"
     ]
+    if faltan:
+        motivos.append("sin datos de " + ", ".join(faltan))
     datos = " · ".join(x for x in (
         f"{a.superficie_m2:g} m²" if a.superficie_m2 else "",
         _euros(a.precio_eur), a.municipio or a.zona,
@@ -79,7 +85,7 @@ def _fila_vigilar(cand: Candidato) -> str:
     return (
         f"<li><a href='{html.escape(a.url)}'>{html.escape(a.titulo or a.url)}</a> "
         f"<span class='detalle'>({cand.puntuacion:g} · {html.escape(datos)}"
-        + (f" · falta confirmar: {html.escape(', '.join(faltan))}" if faltan else "")
+        + (f" — {html.escape('; '.join(motivos))}" if motivos else "")
         + ")</span></li>"
     )
 
@@ -156,6 +162,8 @@ def construir_html(
             f"<div class='score {_clase_score(cand.puntuacion)}'>{cand.puntuacion:g}</div></div>"
             f"<div class='chips'>{chips}</div>"
             + (f"<p class='resumen'>{html.escape(ev.resumen)}</p>" if ev.resumen else "")
+            + (f"<p class='detalle'><b>Se le perdona:</b> {html.escape(str(a.extra['excesos']))}</p>"
+               if a.extra.get("excesos") else "")
             + (f"<p class='detalle'><b>Por confirmar:</b> {html.escape(' / '.join(ev.preguntas_clave[:3]))}</p>"
                if ev.preguntas_clave else "")
             + f"<p class='detalle'>Puntuación: {html.escape(desglose)}</p>"
@@ -165,9 +173,10 @@ def construir_html(
 
     if vigilar:
         partes.append(
-            "<div class='card'><p class='title'>Para vigilar — cumplen lo básico pero falta información</p>"
-            "<p class='detalle'>No llegan al umbral del informe porque el anuncio no dice nada de potencia "
-            "o de cubierta. Si alguno te interesa, el agente puede preguntarlo.</p><ul>"
+            "<div class='card'><p class='title'>Casi — se quedan a las puertas</p>"
+            "<p class='detalle'>Ninguno se ha tirado: se quedan cerca del listón porque se pasan un poco "
+            "en algo o porque el anuncio no dice lo que hace falta. Si alguno te interesa, el agente "
+            "pregunta y lo sube al bloque principal.</p><ul>"
             + "".join(_fila_vigilar(c) for c in vigilar[:12])
             + "</ul></div>"
         )

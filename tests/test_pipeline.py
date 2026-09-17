@@ -25,17 +25,77 @@ def agente(tmp_path, monkeypatch):
     a.cerrar()
 
 
+def _clasificacion(agente):
+    """{url: (pasa, motivo)} de la última pasada, leído de la base de datos."""
+    import json
+
+    salida = {}
+    for fila in agente.almacen.con.execute("SELECT datos FROM evaluaciones"):
+        d = json.loads(fila["datos"])
+        salida[d["anuncio"]["url"]] = (not d["descartado"], d["evaluacion"]["motivo_descarte"])
+    return salida
+
+
 def test_pasada_completa_clasifica_como_se_espera(agente):
     resumen = agente.ejecutar(solo_fuentes=["demo"], enviar=False)
-
     assert resumen.analizados == 10
     assert resumen.nuevos == 10
-    # Descartados: Paiporta (DANA), 120 m² (por debajo del mínimo), oficina de
-    # 595.000 € (precio), nave de 460 m² a reformar, bajo comercial y entresuelo.
-    assert resumen.descartados == 6
-    assert resumen.candidatos >= 2
     assert resumen.fuentes_error == 0
     assert "Informe guardado" in resumen.mensaje_email
+
+    clas = _clasificacion(agente)
+
+    # Lo que tiene que pasar el cribado.
+    for url in (
+        "https://ejemplo.test/nave-fuente-del-jarro-280",          # el caso ideal
+        "https://ejemplo.test/oficina-atico-campanar-240",         # oficina en ático
+        "https://ejemplo.test/nave-museros-450",                   # 450 m² pero impecable
+    ):
+        assert clas[url][0], f"debería pasar: {url}"
+
+    # Lo que tiene que caer, y por el motivo correcto.
+    vetados = {
+        "https://ejemplo.test/oficina-cara-cortes-240": "negociación",
+        "https://ejemplo.test/bajo-comercial-benimaclet-200": "viviendas",
+        "https://ejemplo.test/entresuelo-ruzafa-180": "viviendas",
+    }
+    for url, esperado in vetados.items():
+        pasa, motivo = clas[url]
+        assert not pasa and esperado in motivo, f"{url}: {motivo}"
+
+    # Paiporta ni siquiera llega a evaluarse: lo corta el prefiltro de zona.
+    assert "https://ejemplo.test/local-paiporta-200" not in clas
+
+
+def test_lo_que_se_queda_cerca_no_se_pierde(agente):
+    """Una oficina de 120 m² no se tira: entra marcada como 'le faltan 10 m²'."""
+    import json
+
+    agente.ejecutar(solo_fuentes=["demo"], enviar=False)
+    fila = agente.almacen.con.execute(
+        "SELECT datos FROM evaluaciones WHERE id_anuncio = ?",
+        (_id_de(agente, "oficina-120-colon"),),
+    ).fetchone()
+    datos = json.loads(fila["datos"])
+    assert not datos["descartado"]
+    assert "le faltan" in datos["anuncio"]["extra"].get("excesos", "")
+
+
+def _id_de(agente, fragmento_url):
+    fila = agente.almacen.con.execute(
+        "SELECT id FROM anuncios WHERE url LIKE ?", (f"%{fragmento_url}%",)
+    ).fetchone()
+    return fila["id"]
+
+
+def test_umbral_se_adapta_al_caudal(agente):
+    """Semana floja: baja el listón. Semana cargada: lo sube."""
+    base = agente.cfg.umbral_email
+    assert agente.umbral_efectivo() < base, "sin envíos recientes, el listón debe bajar"
+
+    for i in range(15):
+        agente.almacen.marcar_enviado(f"falso-{i}", "digest")
+    assert agente.umbral_efectivo() > base, "con muchos envíos, el listón debe subir"
 
 
 def test_no_repite_lo_ya_enviado(agente):

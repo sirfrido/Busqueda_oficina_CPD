@@ -1,9 +1,22 @@
-"""Filtros duros: lo que descarta un anuncio sin llegar al email.
+"""Vetos: lo poco que descarta un anuncio de forma inapelable.
 
-Regla de oro: sólo se descarta con evidencia. La ausencia de dato ("no dice
-nada de la cubierta") nunca descarta — pasa a "verificar" y acaba siendo una
-pregunta a la propiedad. Lo que sí descarta es un incumplimiento demostrado
-(está en l'Horta Sud, está en un edificio de viviendas, tiene 80 m²...).
+Este módulo se ha quedado deliberadamente corto. Antes descartaba por
+metros, por precio y por minutos con cortes secos, y así se perdían
+inmuebles buenos por 10 m² o por 20.000 € negociables. Eso ahora vive en
+`bandas.py`, que penaliza en vez de matar.
+
+Aquí sólo queda lo que no tiene arreglo posible:
+
+  · zona inundable o afectada por la DANA        (no se negocia con el agua)
+  · edificio de viviendas / comunidad de vecinos (no hay CPD posible)
+  · bajo comercial o local a pie de calle        (agua, ruido y escaparate)
+  · alquiler cuando se busca compra
+  · tipologías que no son ni nave ni oficina
+  · estar tan fuera de banda que no hay conversación: menos de 100 m²,
+    más de 700 m², más de 550.000 € o más de 30 minutos en coche
+
+Y una regla que no cambia: la falta de dato nunca descarta. Que un anuncio
+no diga nada de la potencia significa "hay que preguntarlo", no "no vale".
 """
 
 from __future__ import annotations
@@ -15,18 +28,19 @@ from .textutils import normalizar
 
 
 def rango_superficie(criterios: dict[str, Any]) -> tuple[float, float]:
-    """Rango habitual. El tramo ampliado (hasta 500 m²) se trata aparte.
-
-    La tolerancia sólo se aplica por arriba: 130 m² es un mínimo real de
-    trabajo, mientras que un anuncio de 310 m² puede ser en realidad de 295.
-    """
+    """Banda plena de superficie (la que no resta puntos)."""
     sup = criterios["superficie"]
-    tol = float(sup.get("tolerancia_pct", 0)) / 100.0
-    return float(sup["min_m2"]), float(sup["max_m2"]) * (1 + tol)
+    return float(sup["min_m2"]), float(sup["max_m2"])
+
+
+def limites_absolutos(criterios: dict[str, Any]) -> tuple[float, float]:
+    """Metros fuera de los cuales ni se mira."""
+    sup = criterios["superficie"]
+    return float(sup.get("veto_min_m2", 0)), float(sup.get("veto_max_m2", 10000))
 
 
 def aplicar(anuncio: Anuncio, ev: Evaluacion, criterios: dict[str, Any]) -> tuple[bool, str]:
-    """Devuelve (se_mantiene, motivo_de_descarte)."""
+    """Devuelve (se_mantiene, motivo_de_veto)."""
     duros = criterios.get("requisitos_duros", {})
     tip = criterios.get("tipologias", {})
 
@@ -46,57 +60,40 @@ def aplicar(anuncio: Anuncio, ev: Evaluacion, criterios: dict[str, Any]) -> tupl
             if not any(ok in texto for ok in ("oficina", "nave", "local", "edificio")):
                 return False, f"Tipología excluida: {excluida}"
 
-    # 3. Superficie. Por encima del máximo sólo pasa lo que está impecable:
-    #    hasta 500 m² se acepta si el anuncio deja claro que no hay que
-    #    reformar. Si hay que meter obra, no compensa el sobrecoste.
-    sup_cfg = criterios["superficie"]
-    minimo, maximo = rango_superficie(criterios)
-    ampliado = float(sup_cfg.get("max_m2_si_impecable", sup_cfg["max_m2"]))
+    # 3. Superficie: sólo los extremos absolutos.
+    veto_min, veto_max = limites_absolutos(criterios)
     if anuncio.superficie_m2 is not None:
-        if anuncio.superficie_m2 < minimo:
-            return False, f"{anuncio.superficie_m2:g} m² < mínimo {minimo:g} m²"
-        if anuncio.superficie_m2 > maximo:
-            if anuncio.superficie_m2 > ampliado:
-                return False, f"{anuncio.superficie_m2:g} m² > máximo ampliado {ampliado:g} m²"
-            # En el tramo 300-500 m² sólo descarta la obra demostrada. Si el
-            # anuncio no dice en qué estado está, el inmueble sigue vivo pero
-            # marcado: el estado pasa a ser la primera pregunta de la visita.
-            if ev.poca_reforma == "no":
-                return False, (
-                    f"{anuncio.superficie_m2:g} m² supera los {maximo:g} m² y además hay que reformar"
-                )
-            anuncio.extra["superficie_ampliada"] = True
+        if anuncio.superficie_m2 < veto_min:
+            return False, f"{anuncio.superficie_m2:g} m²: demasiado pequeño (mínimo {veto_min:g} m²)"
+        if anuncio.superficie_m2 > veto_max:
+            return False, f"{anuncio.superficie_m2:g} m²: demasiado grande (máximo {veto_max:g} m²)"
 
-    # 3 bis. Precio: tope duro.
-    tope = float(duros.get("precio_max_eur", 0) or 0)
-    if tope and anuncio.precio_eur and anuncio.precio_eur > tope:
-        return False, f"{anuncio.precio_eur:,.0f} € > tope {tope:,.0f} €".replace(",", ".")
+    # 4. Precio: sólo el veto. El objetivo de 400.000 € lo gestiona bandas.py.
+    veto_precio = float(duros.get("precio_veto_eur", 0) or 0)
+    if veto_precio and anuncio.precio_eur and anuncio.precio_eur > veto_precio:
+        return False, f"{anuncio.precio_eur:,.0f} €: fuera de toda negociación".replace(",", ".")
 
-    # 4. Zona (l'Horta Sud / DANA / distancia)
+    # 5. Zona (l'Horta Sud / DANA)
     if duros.get("excluir_zonas_inundables", True) and not ev.zona_admitida:
         return False, ev.motivo_descarte or "Zona excluida"
-    max_min = float(duros.get("max_minutos_coche", 20))
-    if ev.minutos_coche is not None and ev.minutos_coche > max_min:
-        return False, f"A {ev.minutos_coche:g} min en coche (máximo {max_min:g})"
+    veto_minutos = float(duros.get("veto_minutos_coche", 30))
+    if ev.minutos_coche is not None and ev.minutos_coche > veto_minutos:
+        return False, f"A {ev.minutos_coche:g} min en coche: demasiado lejos"
 
-    # 5. Edificio de viviendas demostrado
+    # 6. Edificio de viviendas demostrado
     if duros.get("no_edificio_viviendas", True) and ev.en_edificio_viviendas == "si":
         return False, "En edificio de viviendas (el CPD necesita edificio terciario)"
 
-    # 5 bis. Bajo comercial, local a pie de calle o entresuelo: fuera.
+    # 7. Bajo comercial, local a pie de calle o entresuelo
     if duros.get("no_bajo_comercial", True) and ev.bajo_o_calle == "si":
         return False, "Bajo comercial / local a pie de calle (descartado: agua y vecinos)"
 
-    # 6. Cubierta explícitamente vetada
+    # 8. Cubierta explícitamente vetada
     if duros.get("cubierta_o_azotea_ampliable", True) and ev.cubierta_ampliable == "no":
         return False, "Sin posibilidad de instalar/ampliar máquinas en cubierta"
 
-    # 7. Potencia explícitamente insuficiente y no ampliable
+    # 9. Suministro eléctrico insuficiente y sin margen
     if ev.potencia_ampliable == "no":
         return False, "Suministro eléctrico insuficiente y sin margen de ampliación"
-    kw = anuncio.extra.get("kw_declarados")
-    minimo_kw = float(duros.get("potencia", {}).get("minimo_aceptable_kw", 0))
-    if kw and kw < minimo_kw and ev.potencia_ampliable == "no":
-        return False, f"Sólo {kw:g} kW y sin ampliación posible (mínimo {minimo_kw:g} kW)"
 
     return True, ""

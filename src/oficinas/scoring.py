@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from .bandas import Bandas
+from .bandas import evaluar as evaluar_bandas
 from .models import Anuncio, Evaluacion
 from .textutils import normalizar
 
@@ -45,7 +47,10 @@ def puntuar(
     ev: Evaluacion,
     criterios: dict[str, Any],
     bonus_zona: float = 0.0,
+    bandas: Bandas | None = None,
 ) -> tuple[float, dict[str, float]]:
+    """Puntúa 0-100 con desglose. Las rampas de metros, precio y distancia
+    las calcula `bandas.py`; aquí se suman al resto de méritos."""
     d: dict[str, float] = {"base": PESOS["base"]}
     duros = criterios.get("requisitos_duros", {})
     prefs = criterios.get("preferencias", {})
@@ -92,18 +97,18 @@ def puntuar(
     elif ev.poca_reforma == "no":
         d["Requiere reforma"] = PESOS["poca_reforma_no"]
 
-    # --- Superficie ---
+    # --- Superficie: premio por estar en la banda ideal (el castigo por
+    #     salirse lo pone bandas.py con su rampa).
     sup = criterios["superficie"]
     if anuncio.superficie_m2 is None:
         d["Superficie no declarada"] = PESOS["superficie_desconocida"]
     else:
-        centro = (float(sup["min_m2"]) + float(sup["max_m2"])) / 2
-        ancho = (float(sup["max_m2"]) - float(sup["min_m2"])) / 2 or 1.0
+        ideal_min = float(sup.get("ideal_min_m2", sup["min_m2"]))
+        ideal_max = float(sup.get("ideal_max_m2", sup["max_m2"]))
+        centro = (ideal_min + ideal_max) / 2
+        ancho = (ideal_max - ideal_min) / 2 or 1.0
         cercania = max(0.0, 1 - abs(anuncio.superficie_m2 - centro) / ancho)
         d[f"Superficie {anuncio.superficie_m2:g} m²"] = round(PESOS["superficie_optima"] * cercania, 2)
-        if anuncio.extra.get("superficie_ampliada"):
-            etiqueta = "Por encima del rango: sólo si está impecable"
-            d[etiqueta] = PESOS["superficie_ampliada"] / (2 if ev.poca_reforma == "si" else 1)
 
     # --- Zona ---
     if bonus_zona:
@@ -112,21 +117,10 @@ def puntuar(
         d["Riesgo de inundación medio"] = PESOS["riesgo_medio"]
     elif ev.riesgo_inundacion == "desconocido":
         d["Riesgo de inundación sin evaluar"] = PESOS["riesgo_desconocido"]
-    if ev.minutos_coche and ev.minutos_coche > 10:
-        d[f"{ev.minutos_coche:g} min en coche"] = round(PESOS["penalizacion_minutos"] * (ev.minutos_coche - 10), 2)
 
-    # --- Precio ---
-    precio_max = float(prefs.get("precio", {}).get("max_eur", 0) or 0)
-    precio_m2_max = float(prefs.get("precio", {}).get("max_eur_m2", 0) or 0)
+    # --- Precio: sólo el caso "no lo publican"; el resto lo pone bandas.py.
     if anuncio.precio_eur is None:
         d["Precio no publicado"] = PESOS["precio_desconocido"]
-    else:
-        caro = (precio_max and anuncio.precio_eur > precio_max) or (
-            precio_m2_max and (anuncio.precio_m2 or 0) > precio_m2_max
-        )
-        d["Precio fuera de rango" if caro else "Precio en rango"] = (
-            PESOS["precio_alto"] if caro else PESOS["precio_ok"]
-        )
 
     # --- Extras valorados ---
     texto = normalizar(anuncio.texto_completo)
@@ -139,6 +133,12 @@ def puntuar(
     # --- Confianza del cualificador LLM ---
     if ev.evaluado_por != "heuristica" and ev.confianza:
         d["Confianza del análisis"] = round((ev.confianza - 0.5) * 6, 2)
+
+    # --- Rampas de metros, precio y distancia ---
+    if bandas is None:
+        bandas = evaluar_bandas(anuncio, ev, criterios)
+    for etiqueta, valor in bandas.penalizaciones.items():
+        d[etiqueta] = round(valor, 2)
 
     total = max(0.0, min(100.0, sum(d.values())))
     return round(total, 1), d

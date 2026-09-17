@@ -19,11 +19,39 @@ email diario  +  cola de contactos pendientes de tu aprobación
 
 ## Qué busca exactamente
 
+### El cribado: pocos vetos, muchas rampas
+
+Un umbral binario tira cosas buenas por 10 m² o por 20.000 € negociables. Por eso
+el cribado tiene dos niveles:
+
+**Vetos** (descartan, sin matices) — lo que no tiene arreglo posible:
+zona inundable o DANA · edificio de viviendas · bajo comercial o local a pie de
+calle · alquiler · tipologías que no son nave ni oficina · y los extremos
+absolutos: menos de 100 m², más de 600 m², más de 550.000 €, más de 30 min.
+
+**Bandas con rampa** (restan puntos, no matan) — todo lo demás:
+
+| Eje | Banda plena (0 puntos) | Zona gris (resta progresivo) | Veto |
+|---|---|---|---|
+| Superficie | 130-320 m² (ideal 150-300) | 100-130 y 320-500 m² | <100 o >600 m² |
+| Precio | ≤ 400.000 € (≤350.000 suma) | 400.000-550.000 € | > 550.000 € |
+| Distancia | ≤ 15 min | 15-30 min | > 30 min |
+| €/m² | ≤ 2.600 €/m² (≤1.200 suma) | > 2.600 €/m² | — |
+
+**Compensación:** pasarse en un eje se perdona; pasarse en dos exige 85+ puntos
+en todo lo demás. Un ejemplo real: una nave de 400 m² (se pasa 80) a 300.000 €
+sale *sumando*, porque 750 €/m² compensa de sobra los metros de más.
+
+**Umbral adaptativo:** si en los últimos 7 días ha entrado poco, el listón baja
+10 puntos para no dejarte a ciegas; si ha entrado mucho, sube 8 para que el
+email siga siendo corto.
+
+**Nada se pierde en silencio:** lo que se queda a menos de 15 puntos del umbral
+va al bloque «Casi» del email, en una línea y con el motivo («se pasa 30.000 €»,
+«le faltan 12 m²»).
+
 | Requisito | Cómo se aplica |
 |---|---|
-| **130-300 m²** | Mínimo estricto; por arriba, ±10 % de tolerancia |
-| **Hasta 500 m²** | Sólo si el anuncio acredita que está listo para entrar (sin reforma) |
-| **Máximo 400.000 €** | Filtro duro: por encima, fuera |
 | **València capital o ≤ 20 min en coche** | Tabla de municipios + routing real (OSRM) cuando hay coordenadas |
 | **Fuera de l'Horta Sud y zona DANA** | Veto por municipio (45 municipios), por barrio de València (La Torre, Castellar, Pinedo…) y por texto del anuncio |
 | **Edificio de oficinas, no de viviendas** | Señales de texto + criterio del modelo; una nave en polígono cumple por naturaleza |

@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterator
 
@@ -189,6 +189,18 @@ class Almacen:
             (limite,),
         )
         return [json.loads(f["datos"]) for f in cur.fetchall()]
+
+    def enviados_ultimos_dias(self, dias: int = 7, tipo: str = "digest") -> int:
+        """Cuántos inmuebles se han enviado en la ventana reciente.
+
+        Es lo que permite mover el listón: una semana floja no debe dejar al
+        usuario sin nada que mirar, y una semana cargada no debe saturarle.
+        """
+        desde = (datetime.now(timezone.utc) - timedelta(days=dias)).isoformat(timespec="seconds")
+        cur = self.con.execute(
+            "SELECT COUNT(*) FROM envios WHERE tipo = ? AND fecha >= ?", (tipo, desde)
+        )
+        return int(cur.fetchone()[0])
 
     def estadisticas(self) -> dict[str, int]:
         def uno(sql: str) -> int:
