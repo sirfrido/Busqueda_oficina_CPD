@@ -121,6 +121,9 @@ class Config:
     #   auto     -> el agente envía solo (requiere activarlo a conciencia)
     #   off      -> no se preparan contactos
     modo_contacto: str = "borrador"
+    # Medir la distancia real (Nominatim + OSRM). Se apaga en los tests y
+    # cuando no hay red: entonces manda la tabla de `zonas.yaml`.
+    geocodificar: bool = True
 
     @classmethod
     def cargar(cls, dir_config: Path | str = "config") -> "Config":
@@ -167,6 +170,7 @@ class Config:
             llm_activo=os.getenv("LLM_ACTIVO", "1") not in ("0", "false", "False"),
             llm_max_anuncios=int(os.getenv("LLM_MAX_ANUNCIOS", agente.get("llm_max_anuncios", 40))),
             modo_contacto=os.getenv("MODO_CONTACTO", agente.get("modo_contacto", "borrador")),
+            geocodificar=os.getenv("GEOCODIFICAR", "1") not in ("0", "false", "False"),
         )
 
     # -- atajos -------------------------------------------------------------

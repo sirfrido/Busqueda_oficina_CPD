@@ -14,12 +14,14 @@ RAIZ = Path(__file__).resolve().parents[1]
 @pytest.fixture
 def agente(tmp_path, monkeypatch):
     monkeypatch.setenv("LLM_ACTIVO", "0")
+    monkeypatch.setenv("GEOCODIFICAR", "0")   # los tests no tocan la red
     monkeypatch.setenv("DB_PATH", str(tmp_path / "test.sqlite3"))
     cfg = Config.cargar()
     cfg.db = str(tmp_path / "test.sqlite3")
     cfg.salida_dir = str(tmp_path / "out")
     cfg.cache_dir = str(tmp_path / "cache")
     cfg.llm_activo = False
+    cfg.geocodificar = False
     a = Agente(cfg)
     yield a
     a.cerrar()

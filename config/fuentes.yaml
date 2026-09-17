@@ -84,10 +84,12 @@ fuentes:
     activo: true
     # Patrón de URL con los filtros ya puestos (el mismo de las alertas):
     #   /venta/<tipo>-<municipio>/desde-130-m2/hasta-400000/
-    # Ojo: "hasta-N-m2" NO es un filtro válido y rompe la URL (302 sin resultados),
-    # y el municipio de la capital es "valencia", no "valencia_capital".
+    # Dos trampas del portal:
+    #  · "hasta-N-m2" NO es un filtro válido: rompe la URL (302 sin resultados).
+    #  · "-valencia" es la PROVINCIA entera (por ahí se colaban naves de Gandía
+    #    y de Ademuz); el término municipal es "-valencia_capital".
     urls:
-      - "https://www.pisos.com/venta/naves_industriales-valencia/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-valencia_capital/desde-130-m2/hasta-400000/"
       - "https://www.pisos.com/venta/naves_industriales-paterna/desde-130-m2/hasta-400000/"
       - "https://www.pisos.com/venta/naves_industriales-burjassot/desde-130-m2/hasta-400000/"
       - "https://www.pisos.com/venta/naves_industriales-moncada/desde-130-m2/hasta-400000/"
@@ -99,7 +101,7 @@ fuentes:
       - "https://www.pisos.com/venta/naves_industriales-alboraya/desde-130-m2/hasta-400000/"
       - "https://www.pisos.com/venta/naves_industriales-puzol/desde-130-m2/hasta-400000/"
       - "https://www.pisos.com/venta/naves_industriales-meliana/desde-130-m2/hasta-400000/"
-      - "https://www.pisos.com/venta/oficinas-valencia/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/oficinas-valencia_capital/desde-130-m2/hasta-400000/"
       - "https://www.pisos.com/venta/oficinas-paterna/desde-130-m2/hasta-400000/"
     selectores:
       item: "div.ad-preview"
@@ -109,6 +111,8 @@ fuentes:
       superficie: ".ad-preview__char--surface, .ad-preview__char"
       ubicacion: ".ad-preview__subtitle"
       descripcion: ".ad-preview__description"
+    selectores_detalle:
+      descripcion: ".js-description, .description__content"
 
   - id: yaencontre
     nombre: "yaencontre — oficinas/naves"

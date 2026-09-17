@@ -20,7 +20,13 @@ from .bandas import evaluar as evaluar_bandas, resumen_excesos
 from .config import Config
 from .fetch import Fetcher
 from .filtros import aplicar as aplicar_filtros, limites_absolutos
-from .geo import MapaZonas, estimar_minutos, distancia_km, minutos_en_coche
+from .geo import (
+    Geocodificador,
+    MapaZonas,
+    distancia_km,
+    estimar_minutos,
+    minutos_en_coche,
+)
 from .models import Anuncio, Candidato
 from .notify.email_digest import enviar_digest
 from .outreach.sender import preparar_contactos
@@ -60,6 +66,10 @@ class Agente:
     def __init__(self, cfg: Config) -> None:
         self.cfg = cfg
         self.zonas = MapaZonas(cfg.zonas)
+        self.geocodificador = Geocodificador(
+            cache=cfg.ruta(cfg.cache_dir) / "geo.json",
+            user_agent=f"BusquedaOficinaCPD/0.1 ({cfg.email_contacto or 'sin-contacto'})",
+        )
         self.almacen = Almacen(cfg.ruta(cfg.db))
         defaults = cfg.fuentes.get("defaults", {})
         self.defaults = defaults
@@ -151,12 +161,28 @@ class Agente:
         if zona.municipio:
             anuncio.municipio = anuncio.municipio or zona.municipio
 
-        # Con coordenadas, tiempo real en coche; si no, la tabla de zonas.
+        # Con coordenadas, tiempo real en coche; si no, la tabla de zonas; y
+        # si el municipio no está en la tabla, se localiza y se mide: así no
+        # se cuela una nave de Gandía o de Ademuz por no estar en la lista.
+        centro = tuple(self.cfg.criterios.get("geo", {}).get("centro_referencia", [39.4699, -0.3763]))
+        # Se mide SIEMPRE que se pueda: la tabla de `zonas.yaml` es sólo el
+        # respaldo cuando no hay red. (La tabla decía 20 min a Náquera; el
+        # cálculo real dice 31.)
         minutos = zona.minutos_coche
+        destino: tuple[float, float] | None = None
         if anuncio.lat and anuncio.lon:
-            centro = tuple(self.cfg.criterios.get("geo", {}).get("centro_referencia", [39.4699, -0.3763]))
-            real = minutos_en_coche(centro, (anuncio.lat, anuncio.lon))
-            minutos = real if real is not None else estimar_minutos(distancia_km(centro, (anuncio.lat, anuncio.lon)))
+            destino = (anuncio.lat, anuncio.lon)
+        elif self.cfg.geocodificar and (anuncio.municipio or zona.municipio):
+            destino = self.geocodificador.coordenadas(anuncio.municipio or zona.municipio)
+        if destino and self.cfg.geocodificar:
+            real = minutos_en_coche(centro, destino)
+            if real is None:
+                real = estimar_minutos(distancia_km(centro, destino))
+            if real is not None:
+                minutos = real
+                anuncio.extra["distancia_calculada"] = f"{real:.0f} min en coche (medido)"
+        elif zona.desconocido:
+            zona.motivo = f"No se ha podido localizar «{anuncio.municipio}»"
 
         # Ficha de detalle: ahí está la letra pequeña (potencia, cubierta).
         if fuente is not None and hasattr(fuente, "detalle") and zona.admitida:
@@ -182,6 +208,9 @@ class Agente:
         ev.motivo_descarte = "" if zona.admitida else zona.motivo
         ev.riesgo_inundacion = zona.riesgo_inundacion
         ev.minutos_coche = minutos
+        # Municipio desconocido y sin distancia medible: no se recomienda a
+        # ciegas, se queda en "Casi" para revisión.
+        municipio_sin_medir = zona.desconocido and minutos is None
 
         if usar_llm and zona.admitida:
             ev = self.cualificador.evaluar(anuncio, ev)
@@ -218,7 +247,7 @@ class Agente:
             puntuacion=puntuacion,
             desglose=desglose,
             descartado=not se_mantiene or puntuacion < self.cfg.umbral_descartar,
-            solo_casi=not verificacion.recomendable,
+            solo_casi=not verificacion.recomendable or municipio_sin_medir,
         )
 
     def umbral_efectivo(self) -> float:

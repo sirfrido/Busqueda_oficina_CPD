@@ -160,26 +160,48 @@ class FuenteHTML(FuenteBase):
             log.debug("[%s] sin detalle para %s: %s", self.id, anuncio.url, exc)
             return anuncio
         sopa = BeautifulSoup(resp.texto, "lxml")
-        sel = self.selectores_detalle
-        cuerpo = self._texto(sopa, sel.get("descripcion")) if sel.get("descripcion") else ""
-        if not cuerpo:
-            for candidato in sopa.select(
-                "[class*=description], [class*=descripcion], [id*=description], [itemprop=description], .detail-description"
-            ):
-                cuerpo = limpiar(candidato.get_text(" "))
-                if len(cuerpo) > 120:
-                    break
+        cuerpo = self._descripcion_real(sopa)
         if cuerpo and len(cuerpo) > len(anuncio.descripcion):
             anuncio.descripcion = cuerpo
         if anuncio.superficie_m2 is None:
             anuncio.superficie_m2 = extraer_superficie_m2(sopa.get_text(" ")[:20000])
         if anuncio.precio_eur is None:
             anuncio.precio_eur = extraer_precio_eur(sopa.get_text(" ")[:20000])
-        anuncio.imagenes = anuncio.imagenes or _imagenes(sopa)
+        anuncio.imagenes = anuncio.imagenes or _imagenes(sopa) or _imagenes_crudas(resp.texto)
         anuncio.contacto_email = anuncio.contacto_email or _primer_email(resp.texto)
         anuncio.contacto_telefono = anuncio.contacto_telefono or _primer_telefono(resp.texto)
         anuncio.extra["detalle_descargado"] = True
         return anuncio
+
+    def _descripcion_real(self, sopa: BeautifulSoup) -> str:
+        """La descripción que escribió el anunciante, no el decorado del portal.
+
+        Importa más de lo que parece: una ficha de seis palabras es la señal
+        de que puede no haber nada construido. Si aquí se cuela el texto
+        publicitario del portal ("Accede a la vista 3D..."), esa señal
+        desaparece y acabamos recomendando un solar.
+        """
+        # El meta social es la versión más limpia: sólo el texto del anunciante,
+        # sin selectores de idioma ni "Mostrar más".
+        for busqueda in ({"property": "og:description"}, {"name": "description"}):
+            meta = sopa.find("meta", attrs=busqueda)
+            if meta and _es_descripcion(limpiar(meta.get("content", ""))):
+                return limpiar(meta["content"])
+
+        sel = self.selectores_detalle.get("descripcion")
+        if sel:
+            texto = _sin_ruido(self._texto(sopa, sel))
+            if _es_descripcion(texto):
+                return texto
+
+        for candidato in sopa.select(
+            "[class*=description], [class*=descripcion], [id*=description], "
+            "[itemprop=description], .detail-description"
+        ):
+            texto = limpiar(candidato.get_text(" "))
+            if _es_descripcion(texto) and len(texto) > 120:
+                return texto
+        return ""
 
     # -- helpers ------------------------------------------------------------
     @staticmethod
@@ -246,6 +268,36 @@ def _es_numero(valor: Any) -> bool:
         return False
 
 
+# Texto que ponen los portales y que no describe el inmueble.
+DECORADO = [
+    "vista 3d", "modo satelite", "modo satélite", "puntos de interes",
+    "puntos de interés", "calcula tu hipoteca", "cookies", "crea una alerta",
+    "sé el primero", "se el primero", "guarda tu búsqueda", "guarda tu busqueda",
+    "descarga la app", "politica de privacidad", "política de privacidad",
+]
+
+
+# Muletillas del propio portal dentro del bloque de descripción.
+RUIDO = [
+    "Traducciones disponibles:", "Mostrar más", "Mostrar menos", "Ver más",
+    "Español", "Català", "English", "Deutsch", "Français",
+]
+
+
+def _sin_ruido(texto: str) -> str:
+    for marca in RUIDO:
+        texto = texto.replace(marca, " ")
+    return limpiar(texto)
+
+
+def _es_descripcion(texto: str) -> bool:
+    """¿Esto lo escribió el anunciante o es el decorado del portal?"""
+    if not texto or len(texto) < 15:
+        return False
+    minusculas = texto.lower()
+    return not any(marca in minusculas for marca in DECORADO)
+
+
 def _imagenes(sopa: BeautifulSoup, limite: int = 4) -> list[str]:
     """Fotos de la ficha, para poder mirarlas antes de recomendar nada.
 
@@ -268,6 +320,23 @@ def _imagenes(sopa: BeautifulSoup, limite: int = 4) -> list[str]:
     for u in urls:
         if u not in vistas and not any(x in u.lower() for x in ("logo", "icon", "sprite", "avatar")):
             vistas.append(u)
+        if len(vistas) >= limite:
+            break
+    return vistas
+
+
+_RE_FOTO = re.compile(r'https://[^"\'\s\\]+?\.(?:jpg|jpeg|png|webp)', re.IGNORECASE)
+
+
+def _imagenes_crudas(html_bruto: str, limite: int = 4) -> list[str]:
+    """Fotos rescatadas del HTML en bruto, para galerías cargadas por JS."""
+    vistas: list[str] = []
+    for url in _RE_FOTO.findall(html_bruto):
+        bajo = url.lower()
+        if any(x in bajo for x in ("logo", "icon", "sprite", "avatar", "placeholder", "banner")):
+            continue
+        if url not in vistas:
+            vistas.append(url)
         if len(vistas) >= limite:
             break
     return vistas

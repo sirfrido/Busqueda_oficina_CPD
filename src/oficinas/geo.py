@@ -11,9 +11,12 @@ from __future__ import annotations
 
 import json
 import math
+import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from .textutils import normalizar
@@ -25,6 +28,7 @@ OSRM_URL = "https://router.project-osrm.org/route/v1/driving/{lon1},{lat1};{lon2
 class ResultadoZona:
     admitida: bool
     municipio: str = ""
+    desconocido: bool = False        # el municipio no está en la tabla
     motivo: str = ""
     riesgo_inundacion: str = "desconocido"
     minutos_coche: float | None = None
@@ -121,9 +125,13 @@ class MapaZonas:
                 zona_prime=prime,
             )
 
+        # Municipio fuera de la tabla. No se da por bueno (así se colaban
+        # naves de Gandía o de Ademuz): queda marcado para que el pipeline
+        # calcule la distancia real antes de decidir.
         return ResultadoZona(
             admitida=True,
-            motivo="Municipio no reconocido: pendiente de verificar distancia y riesgo",
+            desconocido=True,
+            motivo="Municipio no reconocido: hay que calcular la distancia real",
             riesgo_inundacion="desconocido",
         )
 
@@ -161,6 +169,68 @@ def minutos_en_coche(origen: tuple[float, float], destino: tuple[float, float], 
         return round(float(rutas[0]["duration"]) / 60.0, 1)
     except (urllib.error.URLError, TimeoutError, ValueError, KeyError, OSError):
         return None
+
+
+class Geocodificador:
+    """Traduce nombres de municipio a coordenadas, con caché en disco.
+
+    Sirve para los municipios que no están en `zonas.yaml`: en vez de darlos
+    por buenos (que es como se colaron naves a 100 km), se localizan y se
+    mide el tiempo real en coche.
+    """
+
+    URL = "https://nominatim.openstreetmap.org/search"
+    ESPERA = 1.1     # la política de uso de Nominatim pide 1 petición/segundo
+
+    def __init__(self, cache: Path | str = "data/cache/geo.json", user_agent: str = "BusquedaOficinaCPD/0.1") -> None:
+        self.ruta = Path(cache)
+        self.user_agent = user_agent
+        self._ultimo = 0.0
+        try:
+            self._cache: dict[str, list[float] | None] = json.loads(self.ruta.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            self._cache = {}
+
+    def _guardar(self) -> None:
+        try:
+            self.ruta.parent.mkdir(parents=True, exist_ok=True)
+            self.ruta.write_text(json.dumps(self._cache, ensure_ascii=False), encoding="utf-8")
+        except OSError:
+            pass
+
+    def coordenadas(self, municipio: str) -> tuple[float, float] | None:
+        clave = normalizar(municipio)
+        if not clave:
+            return None
+        if clave in self._cache:
+            valor = self._cache[clave]
+            return (valor[0], valor[1]) if valor else None
+
+        espera = self.ESPERA - (time.monotonic() - self._ultimo)
+        if espera > 0:
+            time.sleep(espera)
+        self._ultimo = time.monotonic()
+
+        consulta = urllib.parse.urlencode(
+            {"q": f"{municipio}, Valencia, España", "format": "json", "limit": 1}
+        )
+        peticion = urllib.request.Request(
+            f"{self.URL}?{consulta}", headers={"User-Agent": self.user_agent}
+        )
+        try:
+            with urllib.request.urlopen(peticion, timeout=15) as resp:
+                datos = json.loads(resp.read().decode("utf-8"))
+        except (urllib.error.URLError, TimeoutError, ValueError, OSError):
+            return None
+
+        if not datos:
+            self._cache[clave] = None
+            self._guardar()
+            return None
+        punto = (float(datos[0]["lat"]), float(datos[0]["lon"]))
+        self._cache[clave] = [punto[0], punto[1]]
+        self._guardar()
+        return punto
 
 
 def estimar_minutos(distancia: float) -> float:

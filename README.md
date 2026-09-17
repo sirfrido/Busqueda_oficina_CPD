@@ -24,6 +24,11 @@ email diario  +  cola de contactos pendientes de tu aprobación
 Un umbral binario tira cosas buenas por 10 m² o por 20.000 € negociables. Por eso
 el cribado tiene dos niveles:
 
+**Verificación previa** — antes de que nada llegue al email:
+la distancia se **mide** (Nominatim + OSRM), no se supone; la ficha tiene que
+acreditar que hay algo construido; y las fotos se miran. Un anuncio sin fotos
+legibles o con seis palabras de descripción no se recomienda: baja a «Casi».
+
 **Vetos** (descartan, sin matices) — lo que no tiene arreglo posible:
 zona inundable o DANA · edificio de viviendas · bajo comercial o local a pie de
 calle · alquiler · tipologías que no son nave ni oficina · y los extremos

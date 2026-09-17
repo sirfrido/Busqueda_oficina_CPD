@@ -50,3 +50,37 @@ def test_deduccion_de_tipologia():
     assert deducir_tipologia("Nave industrial en polígono") == "nave"
     assert deducir_tipologia("Despacho profesional") == "oficina"
     assert deducir_tipologia("Bajo comercial") == "local"
+
+
+FICHA_CON_DECORADO = """
+<html><head>
+<meta property="og:description" content="Nave en venta en mendizabal, burjassot.">
+</head><body>
+<div class="description__content">Accede a la vista 3D, activa el modo satélite y consulta
+ puntos de interés como transporte, salud, educación u otros servicios.</div>
+<script>var fotos = ["https://fotos.imghs.net/xl-wp/1050/abc/foto1.jpg",
+ "https://cdn.portal.test/logo.png"];</script>
+</body></html>
+"""
+
+
+def test_la_descripcion_del_anunciante_gana_al_decorado_del_portal():
+    """Si se cuela el texto publicitario del portal, una ficha de seis palabras
+    parece completa y acabamos recomendando un solar. Pasó de verdad."""
+    from bs4 import BeautifulSoup
+
+    f = FuenteHTML(
+        cfg={"id": "demo", "selectores_detalle": {"descripcion": ".description__content"}},
+        fetcher=None, defaults={},
+    )
+    descripcion = f._descripcion_real(BeautifulSoup(FICHA_CON_DECORADO, "lxml"))
+    assert descripcion == "Nave en venta en mendizabal, burjassot."
+    assert "vista 3D" not in descripcion
+
+
+def test_fotos_rescatadas_del_html_en_bruto():
+    """Las galerías se cargan por JavaScript: hay que mirar el HTML crudo."""
+    from oficinas.sources.html_generico import _imagenes_crudas
+
+    fotos = _imagenes_crudas(FICHA_CON_DECORADO)
+    assert fotos == ["https://fotos.imghs.net/xl-wp/1050/abc/foto1.jpg"], fotos
