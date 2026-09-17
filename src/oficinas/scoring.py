@@ -30,6 +30,7 @@ PESOS = {
     "riesgo_desconocido": -4.0,
     "planta_alta": 8.0,
     "planta_baja_oficina": -6.0,
+    "superficie_ampliada": -8.0,   # 300-500 m²: sólo compensa si está impecable
     "precio_ok": 4.0,
     "precio_alto": -6.0,
     "precio_desconocido": -2.0,
@@ -100,6 +101,9 @@ def puntuar(
         ancho = (float(sup["max_m2"]) - float(sup["min_m2"])) / 2 or 1.0
         cercania = max(0.0, 1 - abs(anuncio.superficie_m2 - centro) / ancho)
         d[f"Superficie {anuncio.superficie_m2:g} m²"] = round(PESOS["superficie_optima"] * cercania, 2)
+        if anuncio.extra.get("superficie_ampliada"):
+            etiqueta = "Por encima del rango: sólo si está impecable"
+            d[etiqueta] = PESOS["superficie_ampliada"] / (2 if ev.poca_reforma == "si" else 1)
 
     # --- Zona ---
     if bonus_zona:

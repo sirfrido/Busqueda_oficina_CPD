@@ -84,6 +84,14 @@ BUEN_ESTADO = [
     "reformado", "recien reformado", "seminuevo", "obra nueva", "a estrenar",
     "llave en mano", "acondicionado", "equipado", "impecable", "muy cuidado",
 ]
+# Obra declarada sin ambigüedad: manda sobre cualquier "buen estado" que
+# aparezca en el mismo anuncio ("estructura en buen estado, a reformar
+# integralmente" significa que hay obra).
+REFORMA_ROTUNDA = [
+    "a reformar", "para reformar", "necesita reforma", "reforma integral",
+    "reformar integralmente", "en bruto", "sin acondicionar", "ruina",
+    "obra integral", "rehabilitar",
+]
 A_REFORMAR = [
     "a reformar", "para reformar", "necesita reforma", "reforma integral",
     "obra a realizar", "en bruto", "sin acondicionar", "estado original",
@@ -128,6 +136,9 @@ PREGUNTAS_BASE = {
     "24x7": "¿Permite el edificio acceso y funcionamiento 24x7?",
     "planta": "¿En qué planta está y cuántas tiene el edificio? Nos interesan las "
               "plantas altas, por el recorrido de tubería hasta las máquinas de la azotea.",
+    "estado_ampliado": "El inmueble supera los metros que buscábamos, así que sólo nos "
+                       "encajaría si está listo para entrar: ¿qué obra habría que hacer "
+                       "para usarlo como oficina y sala técnica?",
 }
 
 
@@ -209,7 +220,8 @@ def detectar(anuncio: Anuncio) -> Evaluacion:
     # Estado / reforma
     bueno = contiene_alguno(txt, BUEN_ESTADO)
     malo = contiene_alguno(txt, A_REFORMAR)
-    ev.poca_reforma = _veredicto(bueno, malo)
+    rotundo = contiene_alguno(txt, REFORMA_ROTUNDA)
+    ev.poca_reforma = "no" if rotundo else _veredicto(bueno, malo)
     pos += [f"Estado: «{t}»" for t in bueno]
     neg += [f"Estado: «{t}»" for t in malo]
 
@@ -247,14 +259,16 @@ def detectar(anuncio: Anuncio) -> Evaluacion:
 
     ev.senales_positivas.extend(pos)
     ev.senales_negativas.extend(neg)
-    ev.preguntas_clave = preguntas_pendientes(ev)
+    ev.preguntas_clave = preguntas_pendientes(ev, bool(anuncio.extra.get("superficie_ampliada")))
     ev.evaluado_por = "heuristica"
     return ev
 
 
-def preguntas_pendientes(ev: Evaluacion) -> list[str]:
+def preguntas_pendientes(ev: Evaluacion, superficie_ampliada: bool = False) -> list[str]:
     """Preguntas que siguen abiertas tras evaluar; van al email a la propiedad."""
     preguntas: list[str] = []
+    if superficie_ampliada:
+        preguntas.append(PREGUNTAS_BASE["estado_ampliado"])
     if ev.potencia_ampliable != "si":
         preguntas.append(PREGUNTAS_BASE["potencia"])
     if ev.cubierta_ampliable != "si":

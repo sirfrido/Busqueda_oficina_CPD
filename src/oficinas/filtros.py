@@ -58,11 +58,14 @@ def aplicar(anuncio: Anuncio, ev: Evaluacion, criterios: dict[str, Any]) -> tupl
         if anuncio.superficie_m2 > maximo:
             if anuncio.superficie_m2 > ampliado:
                 return False, f"{anuncio.superficie_m2:g} m² > máximo ampliado {ampliado:g} m²"
-            if ev.poca_reforma != "si":
+            # En el tramo 300-500 m² sólo descarta la obra demostrada. Si el
+            # anuncio no dice en qué estado está, el inmueble sigue vivo pero
+            # marcado: el estado pasa a ser la primera pregunta de la visita.
+            if ev.poca_reforma == "no":
                 return False, (
-                    f"{anuncio.superficie_m2:g} m² supera los {maximo:g} m² y el anuncio no "
-                    f"acredita que esté listo para entrar"
+                    f"{anuncio.superficie_m2:g} m² supera los {maximo:g} m² y además hay que reformar"
                 )
+            anuncio.extra["superficie_ampliada"] = True
 
     # 3 bis. Precio: tope duro.
     tope = float(duros.get("precio_max_eur", 0) or 0)

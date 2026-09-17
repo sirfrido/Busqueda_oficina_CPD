@@ -46,6 +46,17 @@ def test_entre_300_y_500_solo_si_no_hay_que_reformar(criterios):
     ok, motivo = aplicar(con_obra, detectar(con_obra), criterios)
     assert not ok and "supera" in motivo
 
+    # Estado desconocido: sigue vivo, pero marcado y penalizado.
+    sin_datos = anuncio(
+        superficie_m2=400, precio_eur=300000, tipologia="nave",
+        titulo="Nave industrial en venta en Burjassot", descripcion="Nave en venta en Mendizábal.",
+    )
+    ev = detectar(sin_datos)
+    assert aplicar(sin_datos, ev, criterios)[0] is True
+    assert sin_datos.extra.get("superficie_ampliada") is True
+    _, desglose = puntuar(sin_datos, ev, criterios)
+    assert any("impecable" in k for k in desglose)
+
     demasiado = anuncio(superficie_m2=620, precio_eur=390000, descripcion="Impecable, listo para entrar")
     assert aplicar(demasiado, detectar(demasiado), criterios)[0] is False
 
