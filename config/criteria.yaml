@@ -136,4 +136,7 @@ scoring:
 # --- Ámbito geográfico -------------------------------------------------------
 geo:
   centro_referencia: [39.4699, -0.3763]   # Plaza del Ayuntamiento, València
-  radio_max_km: 25                        # filtro barato previo al cálculo real
+  # Filtro barato en línea recta, antes de pedir ruta: descarta de un vistazo
+  # los municipios de otras provincias que los portales mezclan en sus
+  # listados (aparecieron pueblos del Penedès entre las naves de Valencia).
+  radio_max_km: 30

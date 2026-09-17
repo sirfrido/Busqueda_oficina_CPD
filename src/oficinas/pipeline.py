@@ -23,6 +23,7 @@ from .filtros import aplicar as aplicar_filtros, limites_absolutos
 from .geo import (
     Geocodificador,
     MapaZonas,
+    ResultadoZona,
     distancia_km,
     estimar_minutos,
     minutos_en_coche,
@@ -174,15 +175,34 @@ class Agente:
             destino = (anuncio.lat, anuncio.lon)
         elif self.cfg.geocodificar and (anuncio.municipio or zona.municipio):
             destino = self.geocodificador.coordenadas(anuncio.municipio or zona.municipio)
+        radio_max = float(self.cfg.criterios.get("geo", {}).get("radio_max_km", 30))
         if destino and self.cfg.geocodificar:
-            real = minutos_en_coche(centro, destino)
-            if real is None:
-                real = estimar_minutos(distancia_km(centro, destino))
-            if real is not None:
-                minutos = real
-                anuncio.extra["distancia_calculada"] = f"{real:.0f} min en coche (medido)"
-        elif zona.desconocido:
-            zona.motivo = f"No se ha podido localizar «{anuncio.municipio}»"
+            # Filtro barato antes de pedir ruta: los listados de los portales
+            # mezclan municipios de otras provincias (salieron pueblos del
+            # Penedès entre las naves de Valencia).
+            en_linea_recta = distancia_km(centro, destino)
+            if en_linea_recta > radio_max:
+                zona = ResultadoZona(
+                    admitida=False,
+                    municipio=anuncio.municipio or zona.municipio,
+                    motivo=f"A {en_linea_recta:.0f} km en línea recta: fuera del área de búsqueda",
+                )
+                minutos = None
+            else:
+                real = minutos_en_coche(centro, destino)
+                if real is None:
+                    real = estimar_minutos(en_linea_recta)
+                if real is not None:
+                    minutos = real
+                    anuncio.extra["distancia_calculada"] = f"{real:.0f} min en coche (medido)"
+        elif zona.desconocido and self.cfg.geocodificar:
+            # Municipio que no está en las listas y que ni siquiera se puede
+            # situar: no se recomienda a ciegas ni se deja en "Casi".
+            zona = ResultadoZona(
+                admitida=False,
+                municipio=anuncio.municipio,
+                motivo=f"No se ha podido situar «{anuncio.municipio or 'el municipio'}»: fuera",
+            )
 
         # Ficha de detalle: ahí está la letra pequeña (potencia, cubierta).
         if fuente is not None and hasattr(fuente, "detalle") and zona.admitida:

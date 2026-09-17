@@ -60,3 +60,13 @@ def test_distancia_y_estimacion():
     km = distancia_km((39.4699, -0.3763), (39.5027, -0.4409))
     assert 6 < km < 7
     assert estimar_minutos(km) > 0
+
+
+def test_el_radio_en_linea_recta_descarta_otras_provincias():
+    """Los listados de los portales mezclan municipios de otras provincias:
+    aparecieron pueblos del Penedès entre las naves de Valencia."""
+    from oficinas.geo import distancia_km
+
+    centro = (39.4699, -0.3763)
+    assert distancia_km(centro, (39.5060, -0.4406)) < 30      # Paterna
+    assert distancia_km(centro, (41.3833, 1.7667)) > 30       # Avinyonet del Penedès
