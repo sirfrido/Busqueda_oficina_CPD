@@ -8,6 +8,8 @@ pregunta para la propiedad.
 
 from __future__ import annotations
 
+import re
+
 from .models import Anuncio, Evaluacion
 from .textutils import (
     clasificar_terminos,
@@ -32,6 +34,22 @@ EDIFICIO_VIVIENDAS = [
 NAVE = [
     "nave industrial", "nave", "poligono industrial", "polígono industrial",
     "parcela industrial", "uso industrial", "almacen industrial",
+]
+
+# --- Altura dentro del edificio -------------------------------------------
+# En oficinas interesan las ÚLTIMAS plantas: las máquinas van a la azotea y
+# cuanto menos recorrido de tubería, mejor (y el agua nunca llega arriba).
+PLANTA_ALTA = [
+    "ultima planta", "última planta", "ultimo piso", "atico", "ático",
+    "planta alta", "plantas altas", "ultimas plantas", "últimas plantas",
+    "planta superior", "torre", "azotea propia",
+]
+# Lo que queda descartado de plano: a cota cero, con escaparate o entresuelo.
+BAJO_O_CALLE = [
+    "bajo comercial", "bajos comerciales", "local a pie de calle",
+    "a pie de calle", "pie de calle", "entresuelo", "entreplanta",
+    "semisotano", "semisótano", "sotano", "sótano", "escaparate",
+    "planta baja", "en bajo", "local comercial",
 ]
 
 # --- Cubierta / azotea para clima (y crecimiento en nº de máquinas) ---------
@@ -108,7 +126,25 @@ PREGUNTAS_BASE = {
     "acceso": "¿Hay acceso para meter equipamiento pesado (montacargas, muelle, puerta ancha) y "
               "sitio para un grupo electrógeno?",
     "24x7": "¿Permite el edificio acceso y funcionamiento 24x7?",
+    "planta": "¿En qué planta está y cuántas tiene el edificio? Nos interesan las "
+              "plantas altas, por el recorrido de tubería hasta las máquinas de la azotea.",
 }
+
+
+_RE_PLANTA = re.compile(r"\bplanta\s+(\d{1,2})\b|\b(\d{1,2})[ªº]\s*planta\b")
+
+
+def _planta_numerica(texto_normalizado: str) -> int | None:
+    """Número de planta citado en el anuncio ('planta 4', '3ª planta')."""
+    m = _RE_PLANTA.search(texto_normalizado)
+    if not m:
+        return None
+    valor = m.group(1) or m.group(2)
+    try:
+        numero = int(valor)
+    except (TypeError, ValueError):
+        return None
+    return numero if 0 <= numero <= 30 else None
 
 
 def _veredicto(positivas: list[str], negativas: list[str]) -> str:
@@ -177,6 +213,27 @@ def detectar(anuncio: Anuncio) -> Evaluacion:
     pos += [f"Estado: «{t}»" for t in bueno]
     neg += [f"Estado: «{t}»" for t in malo]
 
+    # Planta: alta (bien) frente a bajo comercial / pie de calle (descartado).
+    # En una nave esto no aplica: es su propio edificio, a cota de calle y con
+    # cubierta propia, que es justo lo que se busca.
+    if es_nave:
+        ev.planta_alta = "no"
+        ev.bajo_o_calle = "no"
+    else:
+        altas = contiene_alguno(txt, PLANTA_ALTA)
+        bajos = contiene_alguno(txt, BAJO_O_CALLE)
+        numero = _planta_numerica(txt)
+        if altas or (numero is not None and numero >= 2):
+            ev.planta_alta = "si"
+            pos.append(f"Planta alta: «{altas[0] if altas else f'planta {numero}'}»")
+        elif bajos or numero == 0:
+            ev.planta_alta = "no"
+        if bajos:
+            ev.bajo_o_calle = "si"
+            neg += [f"A pie de calle: «{t}»" for t in bajos]
+        elif altas or (numero is not None and numero >= 1):
+            ev.bajo_o_calle = "no"
+
     # Altura libre (relevante para falso suelo + clima)
     altura = extraer_altura_libre(anuncio.texto_completo)
     if altura:
@@ -206,6 +263,8 @@ def preguntas_pendientes(ev: Evaluacion) -> list[str]:
         preguntas.append(PREGUNTAS_BASE["edificio"])
     if ev.poca_reforma != "si":
         preguntas.append(PREGUNTAS_BASE["reforma"])
+    if ev.planta_alta == "verificar":
+        preguntas.append(PREGUNTAS_BASE["planta"])
     preguntas.append(PREGUNTAS_BASE["acceso"])
     preguntas.append(PREGUNTAS_BASE["24x7"])
     return preguntas

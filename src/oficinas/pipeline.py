@@ -184,8 +184,15 @@ class Agente:
         )
 
     def _prefiltro(self, anuncio: Anuncio) -> str:
-        """Descarte barato antes de gastar red o modelo. '' = sigue vivo."""
+        """Descarte barato antes de gastar red o modelo. '' = sigue vivo.
+
+        Por arriba se usa el tramo ampliado (hasta 500 m²): si el inmueble
+        está impecable puede compensar, y eso lo decide la evaluación
+        completa, no este corte previo.
+        """
         minimo, maximo = rango_superficie(self.cfg.criterios)
+        sup_cfg = self.cfg.criterios["superficie"]
+        maximo = max(maximo, float(sup_cfg.get("max_m2_si_impecable", maximo)))
         if anuncio.superficie_m2 is not None and not (minimo <= anuncio.superficie_m2 <= maximo):
             return f"{anuncio.superficie_m2:g} m² fuera de {minimo:g}-{maximo:g}"
         zona = self.zonas.resolver(

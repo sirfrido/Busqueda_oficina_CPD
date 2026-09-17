@@ -1,15 +1,5 @@
 [
   {
-    "url": "https://ejemplo.test/oficina-campanar-240",
-    "titulo": "Oficina de 240 m² en edificio exclusivo de oficinas — Campanar",
-    "descripcion": "Planta diáfana de 240 m² construidos en edificio de oficinas de Av. de las Cortes Valencianas. Buen estado, listo para entrar. El edificio dispone de centro de transformación propio y permite instalar unidades exteriores en la azotea de uso común con autorización. Fibra óptica, aire acondicionado, dos plazas de aparcamiento, seguridad 24h.",
-    "precio_eur": 595000,
-    "superficie_m2": 240,
-    "municipio": "València",
-    "zona": "Campanar",
-    "tipologia": "oficina"
-  },
-  {
     "url": "https://ejemplo.test/nave-fuente-del-jarro-280",
     "titulo": "Nave industrial de 280 m² en Fuente del Jarro, Paterna",
     "descripcion": "Nave de 280 m² en el polígono Fuente del Jarro. Altura libre 7 m, acometida trifásica con 150 kW y posibilidad de ampliación a 400 kW según la distribuidora. Cubierta propia diáfana. Oficinas en altillo reformadas en 2021, poca obra necesaria. Puerta para camión y muelle de carga.",
@@ -18,6 +8,54 @@
     "municipio": "Paterna",
     "zona": "Fuente del Jarro",
     "tipologia": "nave"
+  },
+  {
+    "url": "https://ejemplo.test/oficina-atico-campanar-240",
+    "titulo": "Oficina de 240 m² en la última planta de un edificio de oficinas — Campanar",
+    "descripcion": "Planta 7ª y última de edificio exclusivo de oficinas en Av. de las Cortes Valencianas. Buen estado, listo para entrar. El edificio tiene centro de transformación propio y permite instalar unidades exteriores en la azotea. Fibra óptica, dos plazas de aparcamiento, seguridad 24h.",
+    "precio_eur": 385000,
+    "superficie_m2": 240,
+    "municipio": "València",
+    "zona": "Campanar",
+    "tipologia": "oficina"
+  },
+  {
+    "url": "https://ejemplo.test/oficina-cara-cortes-240",
+    "titulo": "Oficina de 240 m² en edificio de oficinas, Cortes Valencianas",
+    "descripcion": "Oficina en edificio terciario, azotea de uso común, centro de transformación, 300 kW, listo para entrar.",
+    "precio_eur": 595000,
+    "superficie_m2": 240,
+    "municipio": "València",
+    "zona": "Cortes Valencianas",
+    "tipologia": "oficina"
+  },
+  {
+    "url": "https://ejemplo.test/nave-museros-450",
+    "titulo": "Nave de 450 m² en Museros, seminueva",
+    "descripcion": "Nave seminueva de 450 m² en polígono de Museros, listo para entrar, sin necesidad de reforma. Cubierta propia, centro de transformación en la parcela, altura libre 8 m.",
+    "precio_eur": 395000,
+    "superficie_m2": 450,
+    "municipio": "Museros",
+    "tipologia": "nave"
+  },
+  {
+    "url": "https://ejemplo.test/nave-albuixech-460-reformar",
+    "titulo": "Nave de 460 m² en Albuixech a reformar",
+    "descripcion": "Nave de 460 m² para reformar integralmente. Estructura en buen estado.",
+    "precio_eur": 280000,
+    "superficie_m2": 460,
+    "municipio": "Albuixech",
+    "tipologia": "nave"
+  },
+  {
+    "url": "https://ejemplo.test/bajo-comercial-benimaclet-200",
+    "titulo": "Local comercial a pie de calle de 200 m² en Benimaclet",
+    "descripcion": "Local a pie de calle con gran escaparate, diáfano, en edificio de viviendas. Buen estado.",
+    "precio_eur": 320000,
+    "superficie_m2": 200,
+    "municipio": "València",
+    "zona": "Benimaclet",
+    "tipologia": "local"
   },
   {
     "url": "https://ejemplo.test/local-paiporta-200",
@@ -40,7 +78,7 @@
   },
   {
     "url": "https://ejemplo.test/oficina-alboraya-160",
-    "titulo": "Oficina 160 m² en edificio terciario, Alboraya",
+    "titulo": "Oficina 160 m² en planta 3 de edificio terciario, Alboraya",
     "descripcion": "Oficina en edificio de oficinas junto a Av. Mediterráneo. Seminueva. No se especifica potencia eléctrica ni acceso a cubierta.",
     "precio_eur": 280000,
     "superficie_m2": 160,
@@ -48,18 +86,9 @@
     "tipologia": "oficina"
   },
   {
-    "url": "https://ejemplo.test/nave-riba-roja-260",
-    "titulo": "Nave de 260 m² en Riba-roja de Túria",
-    "descripcion": "Nave en polígono con buena acometida eléctrica y cubierta propia. 260 m².",
-    "precio_eur": 250000,
-    "superficie_m2": 260,
-    "municipio": "Riba-roja de Túria",
-    "tipologia": "nave"
-  },
-  {
     "url": "https://ejemplo.test/oficina-120-colon",
     "titulo": "Oficina de 120 m² en calle Colón",
-    "descripcion": "Oficina reformada en edificio de oficinas.",
+    "descripcion": "Oficina reformada en edificio de oficinas, planta 2.",
     "precio_eur": 390000,
     "superficie_m2": 120,
     "municipio": "València",

@@ -69,6 +69,11 @@ class Evaluacion:
     potencia_ampliable: Veredicto = "verificar"
     poca_reforma: Veredicto = "verificar"
     en_edificio_viviendas: Veredicto = "verificar"
+    # Oficina en planta alta / última planta: menos tubería hasta las máquinas
+    # de la azotea y menos exposición al agua.
+    planta_alta: Veredicto = "verificar"
+    # Bajo comercial, local a pie de calle o entresuelo: descartado.
+    bajo_o_calle: Veredicto = "verificar"
     zona_admitida: bool = True
     minutos_coche: float | None = None
     riesgo_inundacion: str = "desconocido"     # alto | medio | bajo | desconocido

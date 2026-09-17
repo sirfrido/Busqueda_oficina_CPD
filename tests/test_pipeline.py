@@ -28,10 +28,11 @@ def agente(tmp_path, monkeypatch):
 def test_pasada_completa_clasifica_como_se_espera(agente):
     resumen = agente.ejecutar(solo_fuentes=["demo"], enviar=False)
 
-    assert resumen.analizados == 7
-    assert resumen.nuevos == 7
-    # Paiporta (DANA), Riba-roja (DANA), 120 m² y el entresuelo residencial.
-    assert resumen.descartados == 4
+    assert resumen.analizados == 10
+    assert resumen.nuevos == 10
+    # Descartados: Paiporta (DANA), 120 m² (por debajo del mínimo), oficina de
+    # 595.000 € (precio), nave de 460 m² a reformar, bajo comercial y entresuelo.
+    assert resumen.descartados == 6
     assert resumen.candidatos >= 2
     assert resumen.fuentes_error == 0
     assert "Informe guardado" in resumen.mensaje_email
@@ -75,6 +76,9 @@ def test_informe_html_incluye_enlaces_y_semaforo(agente):
     informes = list(Path(agente.cfg.salida_dir).glob("informe-*.html"))
     assert informes
     html = informes[0].read_text(encoding="utf-8")
-    assert "https://ejemplo.test/oficina-campanar-240" in html
+    assert "https://ejemplo.test/nave-fuente-del-jarro-280" in html
     assert "Potencia 200-300 kW" in html
-    assert "Para vigilar" in html
+    # Nada de lo descartado puede aparecer en el email.
+    assert "bajo-comercial-benimaclet" not in html
+    assert "oficina-cara-cortes-240" not in html
+    assert "local-paiporta-200" not in html

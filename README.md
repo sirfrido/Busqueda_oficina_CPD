@@ -21,14 +21,18 @@ email diario  +  cola de contactos pendientes de tu aprobación
 
 | Requisito | Cómo se aplica |
 |---|---|
-| **150-300 m²** | Filtro duro, con ±10 % de tolerancia (los anuncios mienten con los metros) |
+| **130-300 m²** | Mínimo estricto; por arriba, ±10 % de tolerancia |
+| **Hasta 500 m²** | Sólo si el anuncio acredita que está listo para entrar (sin reforma) |
+| **Máximo 400.000 €** | Filtro duro: por encima, fuera |
 | **València capital o ≤ 20 min en coche** | Tabla de municipios + routing real (OSRM) cuando hay coordenadas |
 | **Fuera de l'Horta Sud y zona DANA** | Veto por municipio (45 municipios), por barrio de València (La Torre, Castellar, Pinedo…) y por texto del anuncio |
 | **Edificio de oficinas, no de viviendas** | Señales de texto + criterio del modelo; una nave en polígono cumple por naturaleza |
 | **Azotea/cubierta para clima, ampliable** | Señales + pregunta obligatoria a la propiedad si no consta |
 | **200-300 kW o más de potencia** | Detecta kW/kVA declarados, centro de transformación, media tensión, acometida industrial |
 | **Poca reforma** | Penaliza "a reformar" / "en bruto"; premia "listo para entrar" |
-| **Naves industriales pequeñas** | Tratadas como candidatas de primera, con sus propios extras (muelle, altura libre, puerta de camión) |
+| **Naves industriales pequeñas** | Opción preferida (azotea propia, sin vecinos): suman bonus y tienen sus propios extras |
+| **Oficinas en plantas altas** | Bonus por última planta o planta alta: menos tubería hasta la azotea y lejos del agua |
+| **Nada a pie de calle** | Bajo comercial, local de calle y entresuelo se descartan siempre |
 
 Todo esto vive en [`config/criteria.yaml`](config/criteria.yaml) y
 [`config/zonas.yaml`](config/zonas.yaml): se cambia sin tocar código.
@@ -165,6 +169,7 @@ para poder ajustar los pesos viendo resultados reales).
 | Tramo | Significado |
 |---|---|
 | ≥ 72 | Encaja en todo: el agente prepara el contacto con la propiedad |
+
 | ≥ 55 | Entra en el email diario |
 | 38-55 | "Para vigilar": cumple lo básico pero el anuncio calla lo importante |
 | < 38 | Descartado |

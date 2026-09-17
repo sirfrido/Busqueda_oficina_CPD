@@ -6,17 +6,19 @@
 operacion: venta          # venta | alquiler | ambos
 
 superficie:
-  min_m2: 150
+  min_m2: 130
   max_m2: 300
+  # Por encima de max_m2 sólo se acepta si el inmueble está muy bien:
+  # hasta `max_m2_si_impecable` cuando no requiere apenas reforma.
+  max_m2_si_impecable: 500
   # Tolerancia para no descartar anuncios con superficie mal declarada
-  # (p.ej. 145 m2 "ampliables" o 310 m2 con planta divisible).
+  # (p.ej. 128 m2 "ampliables" o 310 m2 con planta divisible).
   tolerancia_pct: 10
 
 tipologias:
   incluir:
-    - oficina
-    - nave                 # naves industriales pequeñas, poca reforma
-    - local                # sólo si está en edificio de oficinas (ver requisitos)
+    - nave                 # PREFERIDA: azotea propia y sin vecinos
+    - oficina              # sólo en edificio de oficinas, mejor en plantas altas
   excluir:
     - vivienda
     - garaje
@@ -24,12 +26,21 @@ tipologias:
     - terreno
     - hotel
     - local_hosteleria
+    - bajo_comercial       # descartado expresamente
+    - local_calle          # local a pie de calle: descartado
+    - entresuelo
 
 # --- Requisitos duros: si fallan de forma demostrable, se descarta -----------
 requisitos_duros:
   # Nada en edificio residencial: el CPD necesita acometida propia,
   # horario 24x7 y no depender de una comunidad de vecinos.
   no_edificio_viviendas: true
+  # Nada a pie de calle: un bajo comercial o local de calle queda descartado
+  # aunque los metros y la zona encajen (escaparate, ruido, y sobre todo
+  # riesgo de agua a cota cero).
+  no_bajo_comercial: true
+  # Tope de precio: por encima, fuera.
+  precio_max_eur: 400000
   # Debe poder ubicarse maquinaria de clima en cubierta/azotea o patio propio,
   # con espacio para ESCALAR el número de máquinas.
   cubierta_o_azotea_ampliable: true
@@ -49,8 +60,9 @@ preferencias:
     preferido: [buen_estado, reformado, seminuevo, obra_nueva]
     penalizado: [a_reformar, ruina]           # "poca reforma" pide el usuario
   plantas:
-    # Planta baja / primera facilita la entrada de equipos y grupo electrógeno.
-    bonus_planta_baja: true
+    # En oficinas se prefieren las ÚLTIMAS plantas: menos metros de tubería
+    # hasta las máquinas de la azotea y menos exposición al agua.
+    bonus_ultima_planta: true
   extras_valorados:
     - montacargas
     - acceso_camion
@@ -62,8 +74,14 @@ preferencias:
     - aparcamiento
     - seguridad_24h
   precio:
-    max_eur: 900000              # tope orientativo; sólo penaliza, no descarta
-    max_eur_m2: 3000
+    # El tope duro está en requisitos_duros.precio_max_eur (400.000 €).
+    # Este es el precio por m² a partir del cual se penaliza.
+    max_eur_m2: 2600
+  # La nave pequeña con azotea propia y sin vecinos es el escenario ideal;
+  # la oficina en altura es la alternativa por el miedo al agua.
+  tipologia_preferida: nave
+  bonus_nave: 8
+  bonus_oficina_planta_alta: 8
 
 # --- Umbrales de decisión ----------------------------------------------------
 scoring:

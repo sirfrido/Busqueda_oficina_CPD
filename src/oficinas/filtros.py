@@ -15,9 +15,14 @@ from .textutils import normalizar
 
 
 def rango_superficie(criterios: dict[str, Any]) -> tuple[float, float]:
+    """Rango habitual. El tramo ampliado (hasta 500 m²) se trata aparte.
+
+    La tolerancia sólo se aplica por arriba: 130 m² es un mínimo real de
+    trabajo, mientras que un anuncio de 310 m² puede ser en realidad de 295.
+    """
     sup = criterios["superficie"]
     tol = float(sup.get("tolerancia_pct", 0)) / 100.0
-    return float(sup["min_m2"]) * (1 - tol), float(sup["max_m2"]) * (1 + tol)
+    return float(sup["min_m2"]), float(sup["max_m2"]) * (1 + tol)
 
 
 def aplicar(anuncio: Anuncio, ev: Evaluacion, criterios: dict[str, Any]) -> tuple[bool, str]:
@@ -41,13 +46,28 @@ def aplicar(anuncio: Anuncio, ev: Evaluacion, criterios: dict[str, Any]) -> tupl
             if not any(ok in texto for ok in ("oficina", "nave", "local", "edificio")):
                 return False, f"Tipología excluida: {excluida}"
 
-    # 3. Superficie
+    # 3. Superficie. Por encima del máximo sólo pasa lo que está impecable:
+    #    hasta 500 m² se acepta si el anuncio deja claro que no hay que
+    #    reformar. Si hay que meter obra, no compensa el sobrecoste.
+    sup_cfg = criterios["superficie"]
     minimo, maximo = rango_superficie(criterios)
+    ampliado = float(sup_cfg.get("max_m2_si_impecable", sup_cfg["max_m2"]))
     if anuncio.superficie_m2 is not None:
         if anuncio.superficie_m2 < minimo:
             return False, f"{anuncio.superficie_m2:g} m² < mínimo {minimo:g} m²"
         if anuncio.superficie_m2 > maximo:
-            return False, f"{anuncio.superficie_m2:g} m² > máximo {maximo:g} m²"
+            if anuncio.superficie_m2 > ampliado:
+                return False, f"{anuncio.superficie_m2:g} m² > máximo ampliado {ampliado:g} m²"
+            if ev.poca_reforma != "si":
+                return False, (
+                    f"{anuncio.superficie_m2:g} m² supera los {maximo:g} m² y el anuncio no "
+                    f"acredita que esté listo para entrar"
+                )
+
+    # 3 bis. Precio: tope duro.
+    tope = float(duros.get("precio_max_eur", 0) or 0)
+    if tope and anuncio.precio_eur and anuncio.precio_eur > tope:
+        return False, f"{anuncio.precio_eur:,.0f} € > tope {tope:,.0f} €".replace(",", ".")
 
     # 4. Zona (l'Horta Sud / DANA / distancia)
     if duros.get("excluir_zonas_inundables", True) and not ev.zona_admitida:
@@ -59,6 +79,10 @@ def aplicar(anuncio: Anuncio, ev: Evaluacion, criterios: dict[str, Any]) -> tupl
     # 5. Edificio de viviendas demostrado
     if duros.get("no_edificio_viviendas", True) and ev.en_edificio_viviendas == "si":
         return False, "En edificio de viviendas (el CPD necesita edificio terciario)"
+
+    # 5 bis. Bajo comercial, local a pie de calle o entresuelo: fuera.
+    if duros.get("no_bajo_comercial", True) and ev.bajo_o_calle == "si":
+        return False, "Bajo comercial / local a pie de calle (descartado: agua y vecinos)"
 
     # 6. Cubierta explícitamente vetada
     if duros.get("cubierta_o_azotea_ampliable", True) and ev.cubierta_ampliable == "no":

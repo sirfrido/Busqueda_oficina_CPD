@@ -26,8 +26,10 @@ PESOS = {
     "poca_reforma_no": -10.0,
     "superficie_optima": 6.0,
     "superficie_desconocida": -4.0,
-    "riesgo_medio": -6.0,
-    "riesgo_desconocido": -3.0,
+    "riesgo_medio": -10.0,        # el agua es el miedo número uno
+    "riesgo_desconocido": -4.0,
+    "planta_alta": 8.0,
+    "planta_baja_oficina": -6.0,
     "precio_ok": 4.0,
     "precio_alto": -6.0,
     "precio_desconocido": -2.0,
@@ -72,6 +74,16 @@ def puntuar(
             d[f"Potencia declarada {kw:g} kW ≥ objetivo"] = PESOS["potencia_kw_suficiente"]
         elif kw >= float(duros.get("potencia", {}).get("minimo_aceptable_kw", 200)):
             d[f"Potencia declarada {kw:g} kW"] = PESOS["potencia_kw_suficiente"] / 2
+
+    # --- Tipología preferida y altura ---
+    es_nave = normalizar(anuncio.tipologia).startswith("nave") or "nave" in normalizar(anuncio.titulo)
+    if es_nave:
+        d["Nave: azotea propia y sin vecinos"] = float(prefs.get("bonus_nave", 8))
+    else:
+        if ev.planta_alta == "si":
+            d["Oficina en planta alta"] = float(prefs.get("bonus_oficina_planta_alta", 8))
+        elif ev.planta_alta == "no":
+            d["Oficina en planta baja o sin altura"] = PESOS["planta_baja_oficina"]
 
     # --- Estado ---
     if ev.poca_reforma == "si":
