@@ -50,6 +50,8 @@ def cmd_buscar(args: argparse.Namespace) -> int:
     print(f"  Descartados         : {resumen.descartados}")
     print(f"  Candidatos al email : {resumen.candidatos}")
     print(f"  En vigilancia       : {resumen.en_vigilancia}")
+    if resumen.desmentidos_por_las_fotos:
+        print(f"  Caídos por las fotos: {resumen.desmentidos_por_las_fotos}")
     print(f"  Contactos redactados: {resumen.contactos_preparados}")
     print(f"  Fuentes OK / error  : {resumen.fuentes_ok} / {resumen.fuentes_error}")
     if resumen.por_fuente:

@@ -175,6 +175,7 @@ class FuenteHTML(FuenteBase):
             anuncio.superficie_m2 = extraer_superficie_m2(sopa.get_text(" ")[:20000])
         if anuncio.precio_eur is None:
             anuncio.precio_eur = extraer_precio_eur(sopa.get_text(" ")[:20000])
+        anuncio.imagenes = anuncio.imagenes or _imagenes(sopa)
         anuncio.contacto_email = anuncio.contacto_email or _primer_email(resp.texto)
         anuncio.contacto_telefono = anuncio.contacto_telefono or _primer_telefono(resp.texto)
         anuncio.extra["detalle_descargado"] = True
@@ -243,6 +244,33 @@ def _es_numero(valor: Any) -> bool:
         return True
     except (TypeError, ValueError):
         return False
+
+
+def _imagenes(sopa: BeautifulSoup, limite: int = 4) -> list[str]:
+    """Fotos de la ficha, para poder mirarlas antes de recomendar nada.
+
+    Prioriza la imagen social (og:image), que siempre es la principal, y
+    completa con las de la galería.
+    """
+    urls: list[str] = []
+    for meta in sopa.find_all("meta", property="og:image"):
+        if meta.get("content", "").startswith("http"):
+            urls.append(meta["content"])
+    for img in sopa.find_all("img"):
+        for attr in ("src", "data-src", "data-lazy", "data-original"):
+            valor = img.get(attr, "")
+            if valor.startswith("http") and any(
+                ext in valor.lower() for ext in (".jpg", ".jpeg", ".png", ".webp")
+            ):
+                urls.append(valor)
+                break
+    vistas: list[str] = []
+    for u in urls:
+        if u not in vistas and not any(x in u.lower() for x in ("logo", "icon", "sprite", "avatar")):
+            vistas.append(u)
+        if len(vistas) >= limite:
+            break
+    return vistas
 
 
 _RE_EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")

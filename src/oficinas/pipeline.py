@@ -28,6 +28,7 @@ from .qualifier import Cualificador
 from .scoring import puntuar
 from .senales import detectar
 from .verificacion import pregunta_prioritaria, verificar
+from .vision import OjoCritico
 from .sources import crear_fuente
 from .storage import Almacen
 from .textutils import normalizar
@@ -43,6 +44,7 @@ class Resumen:
     candidatos: int = 0
     en_vigilancia: int = 0
     umbral_aplicado: float = 0.0
+    desmentidos_por_las_fotos: int = 0
     fuentes_ok: int = 0
     fuentes_error: int = 0
     por_fuente: dict[str, int] = field(default_factory=dict)
@@ -71,6 +73,7 @@ class Agente:
             reintentos=int(defaults.get("reintentos", 3)),
             respetar_robots=bool(defaults.get("respetar_robots", True)),
         )
+        self.ojo = OjoCritico(modelo=cfg.modelo_llm, activo=cfg.llm_activo)
         self.cualificador = Cualificador(
             modelo=cfg.modelo_llm,
             effort=cfg.llm_effort,
@@ -310,6 +313,13 @@ class Agente:
         resumen.candidatos = len(para_email)
         resumen.en_vigilancia = len(vigilar)
 
+        # Último control antes de recomendar: mirar las fotos. Un solar
+        # publicado como nave se cae aquí aunque el texto fuese impecable.
+        para_email, desmentidos = self._revisar_fotos(para_email)
+        resumen.desmentidos_por_las_fotos = len(desmentidos)
+        vigilar = desmentidos + vigilar
+        resumen.candidatos = len(para_email)
+
         contactos_preparados = preparar_contactos(para_email, self.almacen, self.cfg, self.plantillas)
         resumen.contactos_preparados = len(contactos_preparados)
         contactos = {c["id_anuncio"]: c for c in contactos_preparados}
@@ -331,6 +341,42 @@ class Agente:
             for cand in para_email:
                 self.almacen.marcar_enviado(cand.id, "digest")
         return resumen
+
+    def _revisar_fotos(self, candidatos: list[Candidato], maximo: int = 6) -> tuple[list[Candidato], list[Candidato]]:
+        """Devuelve (los que las fotos confirman, los que las fotos desmienten)."""
+        if not self.ojo.activo:
+            return candidatos, []
+        confirmados: list[Candidato] = []
+        desmentidos: list[Candidato] = []
+        for cand in candidatos:
+            if len(confirmados) + len(desmentidos) >= maximo:
+                confirmados.append(cand)
+                continue
+            vistazo = self.ojo.mirar(cand.anuncio)
+            if vistazo is None:
+                confirmados.append(cand)
+                continue
+            cand.anuncio.extra["vistazo"] = {
+                "tipo": vistazo.tipo,
+                "estado": vistazo.estado_aparente,
+                "cubierta_visible": vistazo.cubierta_visible,
+                "descripcion": vistazo.descripcion,
+                "fotos": vistazo.fotos_vistas,
+            }
+            if vistazo.desmiente_el_anuncio:
+                cand.descartado = True
+                cand.solo_casi = True
+                cand.evaluacion.motivo_descarte = (
+                    f"Las fotos desmienten el anuncio: se ve {vistazo.tipo}. {vistazo.descripcion}"
+                )
+                cand.anuncio.extra["verificar_ficha"] = cand.evaluacion.motivo_descarte
+                desmentidos.append(cand)
+                log.info("[fotos] descartado %s: %s", cand.anuncio.url, vistazo.tipo)
+            else:
+                if vistazo.cubierta_visible == "si" and cand.evaluacion.cubierta_ampliable == "verificar":
+                    cand.evaluacion.senales_positivas.append("En las fotos se ve la cubierta")
+                confirmados.append(cand)
+        return confirmados, desmentidos
 
     def cerrar(self) -> None:
         self.almacen.cerrar()

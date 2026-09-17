@@ -82,10 +82,25 @@ fuentes:
     nombre: "pisos.com — oficinas/naves"
     adapter: html
     activo: true
+    # Patrón de URL con los filtros ya puestos (el mismo de las alertas):
+    #   /venta/<tipo>-<municipio>/desde-130-m2/hasta-400000/
+    # Ojo: "hasta-N-m2" NO es un filtro válido y rompe la URL (302 sin resultados),
+    # y el municipio de la capital es "valencia", no "valencia_capital".
     urls:
-      - "https://www.pisos.com/venta/oficinas-valencia_capital/"
-      - "https://www.pisos.com/venta/naves-valencia_capital/"
-      - "https://www.pisos.com/venta/oficinas-paterna/"
+      - "https://www.pisos.com/venta/naves_industriales-valencia/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-paterna/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-burjassot/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-moncada/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-museros/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-massalfassar/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-albuixech/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-godella/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-betera/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-alboraya/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-puzol/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-meliana/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/oficinas-valencia/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/oficinas-paterna/desde-130-m2/hasta-400000/"
     selectores:
       item: "div.ad-preview"
       url: "a.ad-preview__title"

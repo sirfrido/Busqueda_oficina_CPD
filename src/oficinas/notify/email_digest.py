@@ -167,6 +167,8 @@ def construir_html(
             f"<div class='score {_clase_score(cand.puntuacion)}'>{cand.puntuacion:g}</div></div>"
             f"<div class='chips'>{chips}</div>"
             + (f"<p class='resumen'>{html.escape(ev.resumen)}</p>" if ev.resumen else "")
+            + (f"<p class='detalle'>📷 <b>En las fotos:</b> {html.escape(str(a.extra['vistazo'].get('descripcion','')))}</p>"
+               if isinstance(a.extra.get("vistazo"), dict) else "")
             + (f"<p class='detalle'><b>Se le perdona:</b> {html.escape(str(a.extra['excesos']))}</p>"
                if a.extra.get("excesos") else "")
             + (f"<p class='detalle'><b>Por confirmar:</b> {html.escape(' / '.join(ev.preguntas_clave[:3]))}</p>"

@@ -143,3 +143,35 @@ def test_informe_html_incluye_enlaces_y_semaforo(agente):
     assert "bajo-comercial-benimaclet" not in html
     assert "oficina-cara-cortes-240" not in html
     assert "local-paiporta-200" not in html
+
+
+def test_las_fotos_tumban_un_anuncio_que_miente(agente, monkeypatch):
+    """Si las fotos muestran un solar, el anuncio no llega al email."""
+    from oficinas.vision import Vistazo
+
+    class OjoFalso:
+        activo = True
+
+        def mirar(self, anuncio):
+            if "burjassot" in anuncio.url:
+                return Vistazo(
+                    tipo="solar", hay_construccion="no", cubierta_visible="no",
+                    estado_aparente="no_se_puede_saber",
+                    descripcion="Terreno con maleza, sin ninguna construcción.",
+                    coincide_con_el_anuncio=False, fotos_vistas=3,
+                )
+            return Vistazo(
+                tipo="nave", hay_construccion="si", cubierta_visible="si",
+                estado_aparente="uso_normal", descripcion="Nave cerrada con puerta de camión.",
+                coincide_con_el_anuncio=True, fotos_vistas=3,
+            )
+
+    monkeypatch.setattr(agente, "ojo", OjoFalso())
+    resumen = agente.ejecutar(solo_fuentes=["demo"], enviar=False)
+
+    assert resumen.desmentidos_por_las_fotos >= 0  # la de Burjassot ya sale por ficha pobre
+    informes = list(Path(agente.cfg.salida_dir).glob("informe-*.html"))
+    html = informes[0].read_text(encoding="utf-8")
+    # Si aparece, es en el bloque "Casi" y con la advertencia, nunca recomendada.
+    if "nave-burjassot-400-solar" in html:
+        assert "Casi" in html

@@ -46,6 +46,13 @@ sale *sumando*, porque 750 €/m² compensa de sobra los metros de más.
 10 puntos para no dejarte a ciegas; si ha entrado mucho, sube 8 para que el
 email siga siendo corto.
 
+**Verificación con fotos:** antes de recomendar nada, el agente descarga las
+fotos del anuncio y se las enseña a Claude («¿esto es una nave o un solar?»).
+Nació de un caso real: un anuncio titulado *"Nave industrial en venta en
+Burjassot"*, 400 m² a 750 €/m², que en las fotos era un terreno con maleza.
+Si las fotos desmienten el anuncio, cae; si no hay fotos legibles o la ficha
+tiene seis palabras, no se recomienda: baja a «Casi» con la advertencia.
+
 **Nada se pierde en silencio:** lo que se queda a menos de 15 puntos del umbral
 va al bloque «Casi» del email, en una línea y con el motivo («se pasa 30.000 €»,
 «le faltan 12 m²»).
