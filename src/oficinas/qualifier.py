@@ -44,6 +44,14 @@ pequeñas contra estos requisitos:
 4. REFORMA: se busca poca obra; se penaliza "a reformar" o estado en bruto.
 5. SUPERFICIE: entre 150 y 300 m².
 
+Regla previa a todo lo demás: los portales clasifican mal. Un SOLAR o una
+parcela se publican a menudo como "nave industrial en venta", con una foto del
+terreno y una línea de descripción. Antes de valorar nada, decide si el anuncio
+acredita que existe un inmueble construido: si habla de parcela, solar, suelo
+urbanizable o edificable, es "no"; si la ficha es tan escueta que no menciona
+ni un elemento constructivo (altura libre, puertas, oficinas, aseos, año de
+construcción, metros construidos), es "verificar", nunca "si".
+
 Reglas de juicio:
 - Responde "si" o "no" SÓLO con evidencia razonable en el texto.
 - Si el anuncio no lo dice, responde "verificar". No inventes.
@@ -62,6 +70,13 @@ ESQUEMA: dict[str, Any] = {
         "cubierta_ampliable": {"type": "string", "enum": ["si", "no", "verificar"]},
         "potencia_ampliable": {"type": "string", "enum": ["si", "no", "verificar"]},
         "poca_reforma": {"type": "string", "enum": ["si", "no", "verificar"]},
+        "es_construido": {
+            "type": "string",
+            "enum": ["si", "no", "verificar"],
+            "description": "¿El anuncio acredita que hay un inmueble CONSTRUIDO? "
+                           "'no' si describe suelo, solar o parcela; 'verificar' si la "
+                           "ficha es tan pobre que no permite afirmarlo",
+        },
         "resumen": {"type": "string", "description": "2-3 frases en español sobre el encaje para un CPD"},
         "senales_positivas": {"type": "array", "items": {"type": "string"}},
         "senales_negativas": {"type": "array", "items": {"type": "string"}},
@@ -70,8 +85,8 @@ ESQUEMA: dict[str, Any] = {
     },
     "required": [
         "edificio_oficinas", "en_edificio_viviendas", "cubierta_ampliable",
-        "potencia_ampliable", "poca_reforma", "resumen", "senales_positivas",
-        "senales_negativas", "preguntas_clave", "confianza",
+        "potencia_ampliable", "poca_reforma", "es_construido", "resumen",
+        "senales_positivas", "senales_negativas", "preguntas_clave", "confianza",
     ],
     "additionalProperties": False,
 }
@@ -141,7 +156,7 @@ class Cualificador:
         ev = Evaluacion(**previa.to_dict())
         for campo in (
             "edificio_oficinas", "en_edificio_viviendas", "cubierta_ampliable",
-            "potencia_ampliable", "poca_reforma",
+            "potencia_ampliable", "poca_reforma", "es_construido",
         ):
             valor = datos.get(campo)
             if valor in ("si", "no", "verificar"):

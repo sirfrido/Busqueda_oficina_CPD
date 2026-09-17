@@ -223,4 +223,5 @@ def rehidratar(datos: dict[str, Any]) -> Candidato:
         puntuacion=datos.get("puntuacion", 0.0),
         desglose=datos.get("desglose", {}),
         descartado=datos.get("descartado", False),
+        solo_casi=datos.get("solo_casi", False),
     )

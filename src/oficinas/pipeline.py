@@ -27,6 +27,7 @@ from .outreach.sender import preparar_contactos
 from .qualifier import Cualificador
 from .scoring import puntuar
 from .senales import detectar
+from .verificacion import pregunta_prioritaria, verificar
 from .sources import crear_fuente
 from .storage import Almacen
 from .textutils import normalizar
@@ -162,6 +163,18 @@ class Agente:
                 log.debug("detalle no disponible para %s: %s", anuncio.url, exc)
 
         ev = detectar(anuncio)
+
+        # ¿Hay realmente algo construido? Una ficha de seis palabras sin un
+        # solo elemento constructivo no acredita nada.
+        verificacion = verificar(anuncio)
+        ev.es_construido = verificacion.es_construido
+        ev.avisos_ficha = verificacion.avisos
+        primera = pregunta_prioritaria(verificacion, anuncio)
+        if primera:
+            ev.preguntas_clave.insert(0, primera)
+        if verificacion.sospecha_solar or verificacion.ficha_pobre:
+            anuncio.extra["verificar_ficha"] = "; ".join(verificacion.avisos[:2])
+
         ev.zona_admitida = zona.admitida
         ev.motivo_descarte = "" if zona.admitida else zona.motivo
         ev.riesgo_inundacion = zona.riesgo_inundacion
@@ -202,6 +215,7 @@ class Agente:
             puntuacion=puntuacion,
             desglose=desglose,
             descartado=not se_mantiene or puntuacion < self.cfg.umbral_descartar,
+            solo_casi=not verificacion.recomendable,
         )
 
     def umbral_efectivo(self) -> float:
@@ -282,7 +296,7 @@ class Agente:
         candidatos.sort(key=lambda c: c.puntuacion, reverse=True)
         umbral = self.umbral_efectivo()
         resumen.umbral_aplicado = umbral
-        para_email = [c for c in candidatos if c.puntuacion >= umbral]
+        para_email = [c for c in candidatos if c.puntuacion >= umbral and not c.solo_casi]
         # Cumplen los filtros duros pero el anuncio calla lo importante: se
         # listan aparte en vez de tirarlos, que es donde está media Valencia.
         # "Casi": los que se quedan a tiro del umbral. No se tiran nunca en
@@ -291,7 +305,7 @@ class Agente:
         ids_email = {c.id for c in para_email}
         vigilar = [
             c for c in candidatos
-            if c.id not in ids_email and c.puntuacion >= umbral - margen
+            if c.id not in ids_email and (c.solo_casi or c.puntuacion >= umbral - margen)
         ]
         resumen.candidatos = len(para_email)
         resumen.en_vigilancia = len(vigilar)

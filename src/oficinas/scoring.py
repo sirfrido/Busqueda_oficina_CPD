@@ -33,6 +33,7 @@ PESOS = {
     "planta_alta": 8.0,
     "planta_baja_oficina": -6.0,
     "superficie_ampliada": -8.0,   # 300-500 m²: sólo compensa si está impecable
+    "ficha_sin_datos": -12.0,      # el anuncio no acredita que haya nada construido
     "precio_ok": 4.0,
     "precio_alto": -6.0,
     "precio_desconocido": -2.0,
@@ -129,6 +130,12 @@ def puntuar(
         d[f"Extras ({', '.join(encontrados[:4])})"] = min(
             PESOS["extras_tope"], PESOS["extra"] * len(encontrados)
         )
+
+    # --- ¿Acredita el anuncio que hay algo construido? ---
+    if ev.es_construido == "si":
+        d["Construcción acreditada en el anuncio"] = 5.0
+    elif anuncio.extra.get("verificar_ficha"):
+        d["Ficha sin datos: puede no haber nada construido"] = PESOS["ficha_sin_datos"]
 
     # --- Confianza del cualificador LLM ---
     if ev.evaluado_por != "heuristica" and ev.confianza:

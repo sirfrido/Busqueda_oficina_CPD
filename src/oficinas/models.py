@@ -74,6 +74,10 @@ class Evaluacion:
     planta_alta: Veredicto = "verificar"
     # Bajo comercial, local a pie de calle o entresuelo: descartado.
     bajo_o_calle: Veredicto = "verificar"
+    # ¿El anuncio acredita que hay algo CONSTRUIDO? Un solar publicado como
+    # "nave industrial" pasa metros, precio y zona sin despeinarse.
+    es_construido: Veredicto = "verificar"
+    avisos_ficha: list[str] = field(default_factory=list)
     zona_admitida: bool = True
     minutos_coche: float | None = None
     riesgo_inundacion: str = "desconocido"     # alto | medio | bajo | desconocido
@@ -96,6 +100,9 @@ class Candidato:
     puntuacion: float = 0.0
     desglose: dict[str, float] = field(default_factory=dict)
     descartado: bool = False
+    # Pasa los filtros pero el anuncio no da para recomendarlo: va al bloque
+    # "Casi" con la advertencia, nunca como candidato de primera.
+    solo_casi: bool = False
 
     @property
     def id(self) -> str:
@@ -106,6 +113,7 @@ class Candidato:
             "id": self.id,
             "puntuacion": self.puntuacion,
             "descartado": self.descartado,
+            "solo_casi": self.solo_casi,
             "desglose": self.desglose,
             "anuncio": self.anuncio.to_dict(),
             "evaluacion": self.evaluacion.to_dict(),

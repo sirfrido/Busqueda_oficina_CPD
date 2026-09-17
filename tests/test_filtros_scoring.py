@@ -180,3 +180,63 @@ def test_regla_de_compensacion(criterios):
     # Ninguno de los dos está vetado: la decisión es de puntuación, no de corte.
     assert aplicar(un_exceso, ev, criterios)[0] is True
     assert aplicar(dos_excesos, ev, criterios)[0] is True
+
+
+# --- Verificación de la ficha: solares disfrazados de nave -----------------
+
+def test_un_solar_publicado_como_nave_no_pasa(criterios):
+    """Caso real: 'Nave industrial en venta en Burjassot' que era un solar."""
+    from oficinas.verificacion import verificar
+
+    a = anuncio(
+        superficie_m2=400, precio_eur=300000, tipologia="nave",
+        titulo="Nave industrial en venta en Burjassot",
+        descripcion="Nave en venta en Mendizabal, burjassot.",
+    )
+    v = verificar(a)
+    assert v.ficha_pobre, "seis palabras de descripción no acreditan nada"
+    assert not v.recomendable, "no puede recomendarse como candidato"
+    assert v.es_construido == "verificar"
+
+
+def test_parcela_declarada_es_veto(criterios):
+    from oficinas.verificacion import verificar
+
+    a = anuncio(
+        superficie_m2=350, precio_eur=210000, tipologia="nave",
+        titulo="Nave industrial en venta en Moncada",
+        descripcion="Parcela industrial edificable en suelo urbano, lista para construir la nave.",
+    )
+    ev = detectar(a)
+    ev.es_construido = verificar(a).es_construido
+    ok, motivo = aplicar(a, ev, criterios)
+    assert not ok and "suelo sin edificar" in motivo
+
+
+def test_una_nave_descrita_de_verdad_se_acredita():
+    from oficinas.verificacion import verificar
+
+    a = anuncio(
+        superficie_m2=280, precio_eur=390000, tipologia="nave",
+        titulo="Nave industrial de 280 m²",
+        descripcion=(
+            "Nave de 280 m2 construidos, altura libre de 7 m, puerta de camión, "
+            "oficinas en altillo reformadas, aseos y vestuarios."
+        ),
+    )
+    v = verificar(a)
+    assert v.es_construido == "si" and v.recomendable
+
+
+def test_placas_solares_no_convierten_una_nave_en_solar():
+    from oficinas.verificacion import verificar
+
+    a = anuncio(
+        superficie_m2=280, precio_eur=350000, tipologia="nave",
+        titulo="Nave con placas solares",
+        descripcion=(
+            "Nave de 280 m2 construidos con altura libre de 8 m, puerta seccional, "
+            "oficinas, aseos y placas solares en cubierta."
+        ),
+    )
+    assert verificar(a).sospecha_solar is False

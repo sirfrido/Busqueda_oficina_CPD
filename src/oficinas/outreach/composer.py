@@ -51,7 +51,10 @@ def componer_contacto(
 
     preguntas: list[str] = []
     temas_cubiertos: set[str] = set()
-    for pregunta in imprescindibles + list(ev.preguntas_clave):
+    # Si no está claro que haya algo construido, eso se pregunta lo primero:
+    # lo demás no tiene sentido hasta saberlo.
+    prioritarias = [p for p in ev.preguntas_clave if "solar" in p.lower() or "construida" in p.lower()]
+    for pregunta in prioritarias + imprescindibles + list(ev.preguntas_clave):
         pregunta = pregunta.strip()
         if not pregunta:
             continue

@@ -68,6 +68,8 @@ def _fila_vigilar(cand: Candidato) -> str:
     """Una línea por inmueble que se queda a las puertas, diciendo por qué."""
     a, ev = cand.anuncio, cand.evaluacion
     motivos: list[str] = []
+    if a.extra.get("verificar_ficha"):
+        motivos.append("⚠️ ficha sin datos: confirmar que hay nave construida y no un solar")
     if a.extra.get("excesos"):
         motivos.append(str(a.extra["excesos"]))
     faltan = [
@@ -132,6 +134,9 @@ def construir_html(
             _chip("Potencia 200-300 kW", ev.potencia_ampliable),
             _chip("Poca reforma", ev.poca_reforma),
         ])
+        if a.extra.get("verificar_ficha"):
+            chips += ('<span class="chip" style="color:#c62828">⚠️ Ficha sin datos: '
+                      'confirmar que hay algo construido</span>')
         if a.extra.get("es_subasta"):
             chips += '<span class="chip" style="color:#b26a00">⚖️ Subasta: revisar cargas y ocupación</span>'
         if ev.riesgo_inundacion in ("medio", "desconocido"):

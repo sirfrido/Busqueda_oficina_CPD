@@ -10,6 +10,15 @@
     "tipologia": "nave"
   },
   {
+    "url": "https://ejemplo.test/nave-burjassot-400-solar",
+    "titulo": "Nave industrial en venta en Burjassot",
+    "descripcion": "Nave en venta en Mendizabal, burjassot.",
+    "precio_eur": 300000,
+    "superficie_m2": 400,
+    "municipio": "Burjassot",
+    "tipologia": "nave"
+  },
+  {
     "url": "https://ejemplo.test/oficina-atico-campanar-240",
     "titulo": "Oficina de 240 m² en la última planta de un edificio de oficinas — Campanar",
     "descripcion": "Planta 7ª y última de edificio exclusivo de oficinas en Av. de las Cortes Valencianas. Buen estado, listo para entrar. El edificio tiene centro de transformación propio y permite instalar unidades exteriores en la azotea. Fibra óptica, dos plazas de aparcamiento, seguridad 24h.",
@@ -94,5 +103,14 @@
     "municipio": "València",
     "zona": "Colón",
     "tipologia": "oficina"
+  },
+  {
+    "url": "https://ejemplo.test/parcela-moncada-350",
+    "titulo": "Nave industrial en venta en Moncada",
+    "descripcion": "Parcela industrial edificable de 350 m2 en suelo urbano, lista para construir la nave que necesite su empresa.",
+    "precio_eur": 210000,
+    "superficie_m2": 350,
+    "municipio": "Moncada",
+    "tipologia": "nave"
   }
 ]

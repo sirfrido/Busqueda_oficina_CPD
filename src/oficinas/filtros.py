@@ -7,6 +7,7 @@ inmuebles buenos por 10 m² o por 20.000 € negociables. Eso ahora vive en
 
 Aquí sólo queda lo que no tiene arreglo posible:
 
+  · un solar vendido como nave                   (no hay nada que comprar)
   · zona inundable o afectada por la DANA        (no se negocia con el agua)
   · edificio de viviendas / comunidad de vecinos (no hay CPD posible)
   · bajo comercial o local a pie de calle        (agua, ruido y escaparate)
@@ -88,11 +89,15 @@ def aplicar(anuncio: Anuncio, ev: Evaluacion, criterios: dict[str, Any]) -> tupl
     if duros.get("no_bajo_comercial", True) and ev.bajo_o_calle == "si":
         return False, "Bajo comercial / local a pie de calle (descartado: agua y vecinos)"
 
-    # 8. Cubierta explícitamente vetada
+    # 8. Suelo sin edificar disfrazado de nave
+    if ev.es_construido == "no":
+        return False, "Es suelo sin edificar (solar/parcela), no un inmueble construido"
+
+    # 9. Cubierta explícitamente vetada
     if duros.get("cubierta_o_azotea_ampliable", True) and ev.cubierta_ampliable == "no":
         return False, "Sin posibilidad de instalar/ampliar máquinas en cubierta"
 
-    # 9. Suministro eléctrico insuficiente y sin margen
+    # 10. Suministro eléctrico insuficiente y sin margen
     if ev.potencia_ampliable == "no":
         return False, "Suministro eléctrico insuficiente y sin margen de ampliación"
 

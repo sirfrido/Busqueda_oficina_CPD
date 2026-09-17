@@ -38,8 +38,8 @@ def _clasificacion(agente):
 
 def test_pasada_completa_clasifica_como_se_espera(agente):
     resumen = agente.ejecutar(solo_fuentes=["demo"], enviar=False)
-    assert resumen.analizados == 10
-    assert resumen.nuevos == 10
+    assert resumen.analizados == 12
+    assert resumen.nuevos == 12
     assert resumen.fuentes_error == 0
     assert "Informe guardado" in resumen.mensaje_email
 
@@ -55,6 +55,7 @@ def test_pasada_completa_clasifica_como_se_espera(agente):
 
     # Lo que tiene que caer, y por el motivo correcto.
     vetados = {
+        "https://ejemplo.test/parcela-moncada-350": "suelo sin edificar",
         "https://ejemplo.test/oficina-cara-cortes-240": "negociación",
         "https://ejemplo.test/bajo-comercial-benimaclet-200": "viviendas",
         "https://ejemplo.test/entresuelo-ruzafa-180": "viviendas",
