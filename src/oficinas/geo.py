@@ -58,6 +58,14 @@ class MapaZonas:
         self.alrededores: dict[str, dict] = {
             normalizar(m["nombre"]): m for m in zonas.get("alrededores", [])
         }
+        # Municipios que no son zona inundable, simplemente quedan lejos para
+        # el día a día. Se rechazan con su tiempo medido, para poder decir en
+        # el email por qué no aparecen.
+        lejos = zonas.get("lejos", {})
+        self.motivo_lejos = lejos.get("motivo_por_defecto", "Demasiado lejos")
+        self.municipios_lejos: dict[str, dict] = {
+            normalizar(m["nombre"]): m for m in lejos.get("municipios", [])
+        }
 
     # -- consulta principal -------------------------------------------------
     def resolver(self, texto_ubicacion: str, max_minutos: float = 20.0) -> ResultadoZona:
@@ -81,6 +89,17 @@ class MapaZonas:
                     municipio=muni["nombre"],
                     motivo=muni.get("motivo") or self.motivo_exclusion,
                     riesgo_inundacion=muni.get("riesgo_inundacion", "alto"),
+                )
+
+        for clave, muni in self.municipios_lejos.items():
+            if _menciona(txt, clave):
+                minutos = float(muni.get("minutos_coche", 0) or 0)
+                detalle = f" ({minutos:.0f} min en coche)" if minutos else ""
+                return ResultadoZona(
+                    admitida=False,
+                    municipio=muni["nombre"],
+                    motivo=f"{muni.get('nota') or self.motivo_lejos}{detalle}",
+                    minutos_coche=minutos or None,
                 )
 
         for clave, muni in self.alrededores.items():

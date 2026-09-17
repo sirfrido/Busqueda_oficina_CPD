@@ -67,10 +67,13 @@ requisitos_duros:
     objetivo_kw: 250          # el usuario habla de 200-300 kW (o más)
     minimo_aceptable_kw: 200
     deseable_kw: 400          # margen de crecimiento
-  # Desplazamiento en coche desde el centro de Valencia: 20 min es el
-  # objetivo, no un muro. A partir de ahí resta; a partir de veto, fuera.
-  max_minutos_coche: 20
-  veto_minutos_coche: 30
+  # Desplazamiento en coche desde el centro de Valencia. Hasta 15 minutos no
+  # resta nada; de 15 a 22 resta cada vez más; por encima de 22, fuera.
+  # Medido con OSRM, no estimado: el Camp de Túria interior (Llíria, Bétera,
+  # La Pobla de Vallbona, Benaguasil) cae aquí, a 23-27 minutos.
+  max_minutos_coche: 15        # hasta aquí no resta nada
+  minutos_exceso: 20           # a partir de aquí cuenta como "se pasa"
+  veto_minutos_coche: 22       # por encima, fuera
   # Riesgo de inundación (DANA): se descartan municipios y zonas marcadas.
   excluir_zonas_inundables: true
 

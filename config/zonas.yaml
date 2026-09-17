@@ -116,36 +116,58 @@ valencia_capital:
     - {nombre: "Moreras", bonus: 6, riesgo_inundacion: bajo}
     - {nombre: "Zona Franca / Puerto", bonus: 4, riesgo_inundacion: medio}
 
-# === ALREDEDORES ADMITIDOS (norte y oeste alto, ≤20 min) ===================
-# Nota: el norte (l'Horta Nord / Camp de Túria) es la zona natural de
-# expansión sin el riesgo hidrológico del sur.
+# === ALREDEDORES ADMITIDOS ==================================================
+# Minutos MEDIDOS en coche (OSRM) desde Pl. del Ayuntamiento, no estimados.
+# El criterio es "llegar rápido y fácil": entra la primera corona
+# metropolitana y el corredor norte de la V-21, que es autovía directa.
+# Queda fuera el Camp de Túria interior (Llíria, Bétera, La Pobla de
+# Vallbona, Benaguasil, L'Eliana, Náquera): a 23-31 minutos, ya es otro viaje.
 alrededores:
-  - {nombre: "Paterna", minutos_coche: 15, riesgo_inundacion: bajo, bonus: 12,
-     nota: "Parque Tecnológico, Fuente del Jarro, Táctica: el mejor caladero de naves y oficinas técnicas"}
-  - {nombre: "Burjassot", minutos_coche: 13, riesgo_inundacion: bajo, bonus: 6}
-  - {nombre: "Godella", minutos_coche: 15, riesgo_inundacion: bajo, bonus: 5}
-  - {nombre: "Rocafort", minutos_coche: 16, riesgo_inundacion: bajo, bonus: 4}
-  - {nombre: "Moncada", minutos_coche: 18, riesgo_inundacion: bajo, bonus: 5}
-  - {nombre: "Alfara del Patriarca", minutos_coche: 18, riesgo_inundacion: bajo, bonus: 4}
-  - {nombre: "Bétera", minutos_coche: 20, riesgo_inundacion: bajo, bonus: 4}
-  - {nombre: "San Antonio de Benagéber", minutos_coche: 18, riesgo_inundacion: bajo, bonus: 4}
-  - {nombre: "L'Eliana", minutos_coche: 20, riesgo_inundacion: bajo, bonus: 3}
-  - {nombre: "Alboraya", minutos_coche: 12, riesgo_inundacion: medio, bonus: 6}
-  - {nombre: "Tavernes Blanques", minutos_coche: 12, riesgo_inundacion: medio, bonus: 4}
-  - {nombre: "Almàssera", minutos_coche: 13, riesgo_inundacion: medio, bonus: 3}
-  - {nombre: "Meliana", minutos_coche: 15, riesgo_inundacion: medio, bonus: 3}
-  - {nombre: "Foios", minutos_coche: 16, riesgo_inundacion: medio, bonus: 3}
+  - {nombre: "Alboraya", minutos_coche: 10, riesgo_inundacion: medio, bonus: 8}
+  - {nombre: "Tavernes Blanques", minutos_coche: 11, riesgo_inundacion: medio, bonus: 6}
+  - {nombre: "Burjassot", minutos_coche: 12, riesgo_inundacion: bajo, bonus: 10}
+  - {nombre: "Bonrepòs i Mirambell", minutos_coche: 12, riesgo_inundacion: medio, bonus: 5}
+  - {nombre: "Almàssera", minutos_coche: 13, riesgo_inundacion: medio, bonus: 5}
+  - {nombre: "Godella", minutos_coche: 15, riesgo_inundacion: bajo, bonus: 8}
+  - {nombre: "Meliana", minutos_coche: 15, riesgo_inundacion: medio, bonus: 4}
+  - {nombre: "Rocafort", minutos_coche: 15, riesgo_inundacion: bajo, bonus: 6}
+  - {nombre: "Vinalesa", minutos_coche: 17, riesgo_inundacion: bajo, bonus: 4}
   - {nombre: "Albalat dels Sorells", minutos_coche: 17, riesgo_inundacion: medio, bonus: 3}
-  - {nombre: "Museros", minutos_coche: 18, riesgo_inundacion: bajo, bonus: 5}
-  - {nombre: "Massalfassar", minutos_coche: 18, riesgo_inundacion: medio, bonus: 5,
+  - {nombre: "Alfara del Patriarca", minutos_coche: 17, riesgo_inundacion: bajo, bonus: 4}
+  - {nombre: "Foios", minutos_coche: 17, riesgo_inundacion: medio, bonus: 3}
+  - {nombre: "Museros", minutos_coche: 18, riesgo_inundacion: bajo, bonus: 5,
+     nota: "Polígono bien conectado con la V-21"}
+  - {nombre: "Massalfassar", minutos_coche: 19, riesgo_inundacion: medio, bonus: 5,
      nota: "Polígono con naves modernas y buena acometida"}
-  - {nombre: "Albuixech", minutos_coche: 17, riesgo_inundacion: medio, bonus: 5}
+  - {nombre: "Massamagrell", minutos_coche: 19, riesgo_inundacion: medio, bonus: 3}
+  - {nombre: "Moncada", minutos_coche: 19, riesgo_inundacion: bajo, bonus: 5}
+  - {nombre: "Paterna", minutos_coche: 19, riesgo_inundacion: bajo, bonus: 12,
+     nota: "Fuente del Jarro, Táctica y Parque Tecnológico: el mejor caladero"}
   - {nombre: "La Pobla de Farnals", minutos_coche: 19, riesgo_inundacion: medio, bonus: 3}
-  - {nombre: "Rafelbunyol", minutos_coche: 20, riesgo_inundacion: bajo, bonus: 3}
-  - {nombre: "Puçol", minutos_coche: 20, riesgo_inundacion: bajo, bonus: 4}
-  - {nombre: "El Puig", minutos_coche: 20, riesgo_inundacion: bajo, bonus: 3}
-  - {nombre: "Náquera", minutos_coche: 20, riesgo_inundacion: bajo, bonus: 2}
-  - {nombre: "Vinalesa", minutos_coche: 16, riesgo_inundacion: bajo, bonus: 2}
-  - {nombre: "Bonrepòs i Mirambell", minutos_coche: 15, riesgo_inundacion: medio, bonus: 2}
-  - {nombre: "Emperador", minutos_coche: 19, riesgo_inundacion: medio, bonus: 1}
-  - {nombre: "Massamagrell", minutos_coche: 18, riesgo_inundacion: medio, bonus: 3}
+  - {nombre: "El Puig de Santa Maria", minutos_coche: 20, riesgo_inundacion: bajo, bonus: 3}
+  - {nombre: "Albuixech", minutos_coche: 21, riesgo_inundacion: medio, bonus: 4,
+     nota: "Al límite: entra penalizado"}
+  - {nombre: "Puçol", minutos_coche: 21, riesgo_inundacion: bajo, bonus: 3,
+     nota: "Al límite: entra penalizado"}
+  - {nombre: "Rafelbunyol", minutos_coche: 21, riesgo_inundacion: bajo, bonus: 2,
+     nota: "Al límite: entra penalizado"}
+
+# === FUERA POR DISTANCIA ====================================================
+# No son zona inundable: simplemente están lejos para el día a día. Se anotan
+# con su tiempo medido para poder explicarlo en el email y para no volver a
+# proponerlos.
+lejos:
+  motivo_por_defecto: "Demasiado lejos para el día a día"
+  municipios:
+    - {nombre: "L'Eliana", minutos_coche: 21}
+    - {nombre: "Bétera", minutos_coche: 23}
+    - {nombre: "La Pobla de Vallbona", minutos_coche: 23}
+    - {nombre: "Llíria", minutos_coche: 26}
+    - {nombre: "Benaguasil", minutos_coche: 27}
+    - {nombre: "San Antonio de Benagéber", minutos_coche: 18, nota: "Corredor CV-35 interior"}
+    - {nombre: "Sagunto", minutos_coche: 29}
+    - {nombre: "Vilamarxant", minutos_coche: 31}
+    - {nombre: "Náquera", minutos_coche: 31}
+    - {nombre: "Serra", minutos_coche: 35}
+    - {nombre: "Casinos", minutos_coche: 40}
+    - {nombre: "Pedralba", minutos_coche: 40}

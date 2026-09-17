@@ -115,19 +115,19 @@ def evaluar(anuncio: Anuncio, ev: Evaluacion, criterios: dict[str, Any]) -> Band
             )
 
     # --- Distancia ----------------------------------------------------------
+    # Distancia. Ojo a la distinción: a partir de `comodo` ya resta puntos,
+    # pero sólo se anota como "exceso" (y cuenta para la regla de
+    # compensación) cuando pasa de `minutos_exceso`. Si no, cualquier sitio a
+    # 18 minutos arrastraría un exceso y bastaría un metro de más para caer.
     minutos = ev.minutos_coche
-    objetivo_min = float(duros.get("max_minutos_coche", 20))
-    veto_min = float(duros.get("veto_minutos_coche", objetivo_min + 10))
-    if minutos is not None:
-        comodo = min(15.0, objetivo_min)
-        if minutos > objetivo_min:
-            b.penalizaciones[f"A {minutos:g} min en coche"] = -4.0 + _rampa(
-                minutos, objetivo_min, veto_min, 12
-            )
+    comodo = float(duros.get("max_minutos_coche", 15))
+    umbral_exceso = float(duros.get("minutos_exceso", comodo + 5))
+    veto_min = float(duros.get("veto_minutos_coche", umbral_exceso + 2))
+    if minutos is not None and minutos > comodo:
+        b.penalizaciones[f"A {minutos:g} min en coche"] = _rampa(minutos, comodo, veto_min, 14)
+        if minutos > umbral_exceso:
             b.excesos.append(f"a {minutos:.0f} min en coche")
             b.ejes_excedidos.append("distancia")
-        elif minutos > comodo:
-            b.penalizaciones[f"A {minutos:g} min en coche"] = _rampa(minutos, comodo, objetivo_min, 4)
 
     return b
 

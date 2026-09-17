@@ -188,7 +188,15 @@ class Config:
 
     @property
     def max_minutos(self) -> float:
-        return float(self.criterios.get("requisitos_duros", {}).get("max_minutos_coche", 20))
+        """Minutos a partir de los cuales empieza a restar puntos."""
+        return float(self.criterios.get("requisitos_duros", {}).get("max_minutos_coche", 15))
+
+    @property
+    def veto_minutos(self) -> float:
+        """Minutos a partir de los cuales el inmueble queda descartado."""
+        return float(
+            self.criterios.get("requisitos_duros", {}).get("veto_minutos_coche", self.max_minutos + 7)
+        )
 
     def ruta(self, relativa: str) -> Path:
         p = Path(relativa)

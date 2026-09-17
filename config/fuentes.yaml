@@ -88,19 +88,25 @@ fuentes:
     #  · "hasta-N-m2" NO es un filtro válido: rompe la URL (302 sin resultados).
     #  · "-valencia" es la PROVINCIA entera (por ahí se colaban naves de Gandía
     #    y de Ademuz); el término municipal es "-valencia_capital".
+    # Sólo la primera corona y el corredor norte: nada del Camp de Túria interior.
     urls:
       - "https://www.pisos.com/venta/naves_industriales-valencia_capital/desde-130-m2/hasta-400000/"
       - "https://www.pisos.com/venta/naves_industriales-paterna/desde-130-m2/hasta-400000/"
       - "https://www.pisos.com/venta/naves_industriales-burjassot/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-godella/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-rocafort/desde-130-m2/hasta-400000/"
       - "https://www.pisos.com/venta/naves_industriales-moncada/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-alboraya/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-tavernes_blanques/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-almassera/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-meliana/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-foios/desde-130-m2/hasta-400000/"
       - "https://www.pisos.com/venta/naves_industriales-museros/desde-130-m2/hasta-400000/"
       - "https://www.pisos.com/venta/naves_industriales-massalfassar/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-massamagrell/desde-130-m2/hasta-400000/"
       - "https://www.pisos.com/venta/naves_industriales-albuixech/desde-130-m2/hasta-400000/"
-      - "https://www.pisos.com/venta/naves_industriales-godella/desde-130-m2/hasta-400000/"
-      - "https://www.pisos.com/venta/naves_industriales-betera/desde-130-m2/hasta-400000/"
-      - "https://www.pisos.com/venta/naves_industriales-alboraya/desde-130-m2/hasta-400000/"
       - "https://www.pisos.com/venta/naves_industriales-puzol/desde-130-m2/hasta-400000/"
-      - "https://www.pisos.com/venta/naves_industriales-meliana/desde-130-m2/hasta-400000/"
+      - "https://www.pisos.com/venta/naves_industriales-el_puig/desde-130-m2/hasta-400000/"
       - "https://www.pisos.com/venta/oficinas-valencia_capital/desde-130-m2/hasta-400000/"
       - "https://www.pisos.com/venta/oficinas-paterna/desde-130-m2/hasta-400000/"
     selectores:

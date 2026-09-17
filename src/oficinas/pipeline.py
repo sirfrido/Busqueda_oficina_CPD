@@ -156,7 +156,7 @@ class Agente:
     def evaluar(self, anuncio: Anuncio, fuente: Any | None, usar_llm: bool) -> Candidato:
         zona = self.zonas.resolver(
             " ".join(x for x in (anuncio.municipio, anuncio.zona, anuncio.direccion, anuncio.titulo) if x),
-            max_minutos=self.cfg.max_minutos,
+            max_minutos=self.cfg.veto_minutos,
         )
         if zona.municipio:
             anuncio.municipio = anuncio.municipio or zona.municipio
@@ -279,7 +279,7 @@ class Agente:
             return f"{anuncio.superficie_m2:g} m² fuera de {minimo:g}-{maximo:g}"
         zona = self.zonas.resolver(
             " ".join(x for x in (anuncio.municipio, anuncio.zona, anuncio.direccion, anuncio.titulo) if x),
-            max_minutos=self.cfg.max_minutos,
+            max_minutos=self.cfg.veto_minutos,
         )
         return "" if zona.admitida else zona.motivo
 
