@@ -50,7 +50,7 @@ h1, h2, h3 { margin: 0; font-family: var(--display); font-weight: 600; line-heig
 .salto { position: absolute; left: -9999px; top: 0; z-index: 100; background: var(--tinta); color: #fff; padding: .8rem 1.2rem; }
 .salto:focus { left: 0; }
 
-.aviso-js { padding: 3rem var(--gutter); text-align: center; color: var(--gris); }
+.aviso { padding: 4rem var(--gutter); text-align: center; color: var(--gris); max-width: 60ch; margin: 0 auto; }
 
 /* Etiquetas en versalitas: el recurso tipográfico de toda la web */
 .etiqueta {
@@ -239,7 +239,6 @@ body.sin-scroll { overflow: hidden; }
   padding-inline: var(--gutter);
   border-top: 1px solid var(--linea);
 }
-#videos { border-top: 0; }
 
 .seccion__titulo {
   font-size: clamp(1.6rem, 4vw, 2.3rem);
@@ -277,16 +276,6 @@ body.sin-scroll { overflow: hidden; }
   transition: transform .3s;
 }
 .video__portada:hover .video__play { transform: scale(1.08); }
-
-.video__aviso {
-  position: absolute; inset: 0; display: grid; place-content: center;
-  gap: .5rem; text-align: center; padding: 1.5rem;
-  color: var(--gris); font-size: .85rem;
-}
-.video__aviso code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: .8rem; color: var(--tinta);
-}
 
 .video__titulo {
   font-size: .82rem; font-weight: 600;

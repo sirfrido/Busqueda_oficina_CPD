@@ -1,0 +1,83 @@
+# Publica la web en GitHub Pages cada vez que se guarda algo desde el panel.
+#
+# Las fotos se optimizan aquí, al publicar, no en el repositorio: así se puede
+# subir la foto tal cual sale de la cámara y la web sirve una ligera, sin que
+# nadie tenga que acordarse de redimensionar nada.
+
+name: Publicar la web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+
+      - run: pip install --quiet Pillow
+
+      - name: Optimizar las fotos
+        run: |
+          python3 - <<'PY'
+          from PIL import Image, ImageOps
+          import pathlib
+
+          LADO_MAX = 2560          # más que esto no lo aprovecha ninguna pantalla
+          PESO_MAX = 450 * 1024    # a partir de aquí, se vuelve a comprimir
+          CALIDAD  = 82
+
+          for f in sorted(pathlib.Path("assets/img").rglob("*")):
+              if f.suffix.lower() not in (".jpg", ".jpeg", ".png", ".webp"):
+                  continue
+              peso = f.stat().st_size
+              try:
+                  original = Image.open(f)
+                  formato = original.format          # se pierde al rotar: se lee antes
+                  im = ImageOps.exif_transpose(original)
+              except Exception as e:
+                  print(f"  ! {f.name}: no se ha podido abrir ({e})")
+                  continue
+
+              grande = max(im.size) > LADO_MAX
+              if not grande and peso <= PESO_MAX:
+                  continue
+
+              # Ojo: se conserva el nombre y el formato. Cambiar la extensión
+              # dejaría a contenido.json apuntando a un archivo que ya no existe.
+              if grande:
+                  im.thumbnail((LADO_MAX, LADO_MAX), Image.LANCZOS)
+              if formato == "JPEG":
+                  im.convert("RGB").save(f, "JPEG", quality=CALIDAD, optimize=True, progressive=True)
+              elif formato == "WEBP":
+                  im.save(f, "WEBP", quality=CALIDAD, method=6)
+              else:
+                  im.save(f, formato, optimize=True)
+              print(f"  · {f.name}: {peso//1024} KB → {f.stat().st_size//1024} KB  {im.size}")
+          PY
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: . }
+
+      - id: despliegue
+        uses: actions/deploy-pages@v4

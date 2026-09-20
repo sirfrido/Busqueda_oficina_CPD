@@ -1,14 +1,14 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   Book de Leia Cervantes — lógica de la web.
-   No hace falta tocar este archivo: todo el contenido está en datos.js.
+   Book de Leia Cervantes — motor de la web.
+
+   Todo el contenido vive en contenido.json, que es lo que edita el panel.
+   Este archivo solo lo pinta: normalmente no hay que tocarlo.
    ═══════════════════════════════════════════════════════════════════════ */
 
 (function () {
   "use strict";
 
-  var D = window.DATOS || {};
-  var $  = function (sel) { return document.querySelector(sel); };
-  var $$ = function (sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); };
+  var $ = function (sel) { return document.querySelector(sel); };
 
   function crear(etiqueta, clase, texto) {
     var el = document.createElement(etiqueta);
@@ -17,130 +17,126 @@
     return el;
   }
 
-  var nombreCompleto = [D.nombre, D.apellidos].filter(Boolean).join(" ");
+  /* El panel guarda las rutas con barra inicial; la web las quiere sin ella */
+  function ruta(v) { return String(v || "").replace(/^\//, ""); }
 
-  /* ── Textos sueltos (nombre, marca, titular…) ───────────────────────── */
+  function vacio(v) { return v == null || v === "" || (Array.isArray(v) && !v.length); }
 
-  function pintarTextos() {
-    $$("[data-campo]").forEach(function (el) {
-      var valor = D[el.dataset.campo];
-      if (valor) el.textContent = valor;
-      else el.remove();
-    });
-
-    if (nombreCompleto) document.title = nombreCompleto + " — Actriz";
-
-    var foto = $("#foto-principal"), ancha = $("#portada-ancha");
-    if (D.foto_principal) foto.src = D.foto_principal;
-    foto.alt = nombreCompleto ? nombreCompleto + ", retrato" : "";
-    if (D.portada_encuadre) foto.style.objectPosition = D.portada_encuadre;
-    if (D.foto_principal_ancha) ancha.srcset = D.foto_principal_ancha;
-    else ancha.remove();
-
-    $("#anio").textContent = new Date().getFullYear();
+  /* Un título como "Teatro y danza" se convierte en el ancla #teatro-y-danza */
+  function anclaDe(texto, respaldo) {
+    var a = String(texto || "").toLowerCase()
+      .normalize("NFD").replace(/[̀-ͯ]/g, "")
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    return a || respaldo;
   }
 
-  /* ── Ficha, idiomas y habilidades ───────────────────────────────────── */
+  /* ── Portada ────────────────────────────────────────────────────────── */
 
-  function pintarFicha() {
-    var dl = $("#ficha-datos");
-    Object.keys(D.ficha || {}).forEach(function (clave) {
-      if (!D.ficha[clave]) return;
-      dl.appendChild(crear("dt", null, clave));
-      dl.appendChild(crear("dd", null, D.ficha[clave]));
-    });
+  function pintarPortada(id) {
+    var sec = crear("section", "hero");
+    sec.id = "inicio";
 
-    if ((D.idiomas || []).length) {
-      var dlIdiomas = $("#ficha-idiomas");
-      D.idiomas.forEach(function (i) {
-        dlIdiomas.appendChild(crear("dt", null, i.nombre));
-        dlIdiomas.appendChild(crear("dd", null, i.nivel));
-      });
-      $("#bloque-idiomas").hidden = false;
+    var picture = crear("picture", "hero__imagen");
+    if (id.portada_ancha) {
+      var fuente = document.createElement("source");
+      fuente.media = "(min-aspect-ratio: 4/5)";
+      fuente.srcset = ruta(id.portada_ancha);
+      picture.appendChild(fuente);
     }
+    var img = crear("img", "hero__fondo");
+    img.src = ruta(id.portada || id.portada_ancha);
+    img.alt = [id.nombre, id.apellidos].filter(Boolean).join(" ") + ", retrato";
+    img.setAttribute("fetchpriority", "high");
+    if (id.portada_encuadre) img.style.objectPosition = id.portada_encuadre;
+    picture.appendChild(img);
+    sec.appendChild(picture);
 
-    if ((D.habilidades || []).length) {
-      var ul = $("#ficha-habilidades");
-      D.habilidades.forEach(function (h) { ul.appendChild(crear("li", null, h)); });
-      $("#bloque-habilidades").hidden = false;
-    }
+    var centro = crear("div", "hero__centro");
+    centro.appendChild(crear("h1", "hero__nombre", id.nombre));
+    if (id.apellidos) centro.appendChild(crear("p", "hero__apellidos", id.apellidos));
+
+    var primera = $("#contenido").querySelector("section[id]");
+    var boton = crear("a", "boton boton--claro", id.boton || "Ver foto book");
+    boton.href = "#" + (primera ? primera.id : "contenido");
+    centro.appendChild(boton);
+
+    sec.appendChild(centro);
+    $("#portada").appendChild(sec);
   }
 
-  /* ── Créditos ───────────────────────────────────────────────────────── */
+  /* ── Barra superior ─────────────────────────────────────────────────── */
 
-  function pintarCreditos() {
-    var cont = $("#creditos");
+  function pintarBarra(id) {
+    var barra = $("#barra");
 
-    (D.creditos || []).forEach(function (grupo) {
-      if (!grupo.trabajos || !grupo.trabajos.length) return;
+    var marca = crear("div", "barra__marca");
+    var enlace = crear("a", null, id.marca || id.nombre);
+    enlace.href = "#inicio";
+    marca.appendChild(enlace);
+    if (id.titular) marca.appendChild(crear("span", null, id.titular));
+    barra.appendChild(marca);
 
-      var bloque = crear("div", "creditos__grupo");
-      bloque.appendChild(crear("h3", "creditos__categoria", grupo.categoria));
-
-      var ul = crear("ul", "creditos__lista");
-      grupo.trabajos.forEach(function (t) {
-        var li = document.createElement("li");
-        li.appendChild(crear("span", "creditos__anio", t.anio || ""));
-
-        var datos = document.createElement("div");
-        var linea = crear("p", "creditos__trabajo");
-        linea.textContent = t.titulo || "";
-        if (t.personaje) {
-          linea.appendChild(document.createTextNode(" — "));
-          linea.appendChild(crear("span", "creditos__personaje", t.personaje));
-        }
-        datos.appendChild(linea);
-
-        var meta = [];
-        if (t.direccion)  meta.push("Dir. " + t.direccion);
-        if (t.productora) meta.push(t.productora);
-        if (t.nota)       meta.push(t.nota);
-        if (meta.length) datos.appendChild(crear("p", "creditos__meta", meta.join(" · ")));
-
-        li.appendChild(datos);
-        ul.appendChild(li);
-      });
-
-      bloque.appendChild(ul);
-      cont.appendChild(bloque);
+    var nav = crear("nav", "barra__menu");
+    nav.setAttribute("aria-label", "Navegación principal");
+    [].forEach.call($("#contenido").querySelectorAll("section[id]"), function (sec) {
+      var a = crear("a", null, sec.dataset.menu || sec.id);
+      a.href = "#" + sec.id;
+      nav.appendChild(a);
     });
+    barra.appendChild(nav);
+    barra.hidden = false;
   }
 
-  /* ── Foto book ──────────────────────────────────────────────────────── */
+  /* ── Armazón de sección ─────────────────────────────────────────────── */
 
-  var fotos = (D.fotos || []).filter(function (f) { return f && f.archivo; });
+  function seccion(id, titulo, conTitulo) {
+    var sec = crear("section", conTitulo === false ? null : "seccion");
+    sec.id = id;
+    sec.dataset.menu = titulo;
+    if (conTitulo !== false && titulo) sec.appendChild(crear("h2", "seccion__titulo", titulo));
+    else if (titulo) sec.setAttribute("aria-label", titulo);
+    $("#contenido").appendChild(sec);
+    return sec;
+  }
 
-  function pintarGaleria() {
-    if (!fotos.length) { $("#fotos").remove(); return; }
-    var galeria = $("#galeria");
+  /* ── Galerías ───────────────────────────────────────────────────────── */
 
-    fotos.forEach(function (foto, i) {
+  function pintarGaleria(destino, fotos) {
+    var lista = (fotos || []).filter(function (f) { return f && f.archivo; });
+    if (!lista.length) return false;
+
+    var rejilla = crear("div", "galeria");
+    lista.forEach(function (foto, i) {
       var fig = document.createElement("figure");
 
       var btn = document.createElement("button");
       btn.type = "button";
       btn.setAttribute("aria-label", "Ampliar: " + (foto.alt || "foto " + (i + 1)));
-      btn.addEventListener("click", function () { abrirVisor(i); });
+      btn.addEventListener("click", function () { abrirVisor(lista, i); });
 
       var img = document.createElement("img");
-      img.src = foto.archivo;
+      img.src = ruta(foto.archivo);
       img.alt = foto.alt || "";
-      img.loading = i < 5 ? "eager" : "lazy";
+      img.loading = i < 4 ? "eager" : "lazy";
       img.decoding = "async";
       if (foto.encuadre) img.style.objectPosition = foto.encuadre;
 
       btn.appendChild(img);
       fig.appendChild(btn);
-      galeria.appendChild(fig);
+      rejilla.appendChild(fig);
     });
+
+    destino.appendChild(rejilla);
+    return true;
   }
 
   /* ── Visor ──────────────────────────────────────────────────────────── */
 
   var visor = $("#visor"), visorImg = $("#visor-img"), visorPie = $("#visor-pie");
-  var indice = 0, focoPrevio = null;
+  var album = [], indice = 0, focoPrevio = null;
 
-  function abrirVisor(i) {
+  function abrirVisor(fotos, i) {
+    album = fotos;
     focoPrevio = document.activeElement;
     visor.hidden = false;
     document.body.classList.add("sin-scroll");
@@ -155,17 +151,17 @@
   }
 
   function mostrar(i) {
-    if (!fotos.length) return;
-    indice = (i + fotos.length) % fotos.length;
-    var foto = fotos[indice];
-    visorImg.src = foto.archivo;
+    if (!album.length) return;
+    indice = (i + album.length) % album.length;
+    var foto = album[indice];
+    visorImg.src = ruta(foto.archivo);
     visorImg.alt = foto.alt || "";
-    visorPie.textContent = (indice + 1) + " / " + fotos.length;
+    visorPie.textContent = (indice + 1) + " / " + album.length;
 
     // Precarga la anterior y la siguiente: el salto sale instantáneo
     [1, -1].forEach(function (paso) {
-      var vecina = fotos[(indice + paso + fotos.length) % fotos.length];
-      if (vecina) new Image().src = vecina.archivo;
+      var vecina = album[(indice + paso + album.length) % album.length];
+      if (vecina) new Image().src = ruta(vecina.archivo);
     });
   }
 
@@ -181,7 +177,7 @@
       if (e.key === "ArrowLeft")  mostrar(indice - 1);
       if (e.key === "ArrowRight") mostrar(indice + 1);
       if (e.key === "Tab") {                  // el foco no se escapa del visor
-        var focos = $$("#visor button");
+        var focos = [].slice.call(visor.querySelectorAll("button"));
         var pos = focos.indexOf(document.activeElement);
         e.preventDefault();
         focos[(pos + (e.shiftKey ? -1 : 1) + focos.length) % focos.length].focus();
@@ -198,11 +194,11 @@
     }, { passive: true });
   }
 
-  /* ── Video book ─────────────────────────────────────────────────────── */
+  /* ── Vídeos ─────────────────────────────────────────────────────────── */
 
   /* Acepta tanto el ID como la URL entera pegada del navegador */
   function idYoutube(v) {
-    var m = String(v).match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{6,})/);
+    var m = String(v).match(/(?:youtu\.be\/|v=|embed\/|shorts\/|live\/)([\w-]{6,})/);
     return m ? m[1] : String(v).trim();
   }
   function idVimeo(v) {
@@ -210,46 +206,40 @@
     return m ? m[1] : String(v).trim();
   }
 
+  function fuenteDe(v) {
+    if (v.youtube) return { tipo: "youtube", id: idYoutube(v.youtube) };
+    if (v.vimeo)   return { tipo: "vimeo",   id: idVimeo(v.vimeo) };
+    if (v.archivo) return { tipo: "archivo", id: ruta(v.archivo) };
+    return null;
+  }
+
   function crearVideo(v) {
+    var fuente = fuenteDe(v);
+    if (!fuente) return null;                  // vídeo sin rellenar: no se pinta
+
     var art = crear("article", "video");
     var marco = crear("div", "video__marco");
 
-    var fuente = null;
-    if (v.youtube)      fuente = { tipo: "youtube", id: idYoutube(v.youtube) };
-    else if (v.vimeo)   fuente = { tipo: "vimeo",   id: idVimeo(v.vimeo) };
-    else if (v.archivo) fuente = { tipo: "archivo", id: v.archivo };
+    /* El reproductor no se carga hasta que se pulsa play: la página entra
+       rápida y no arrastra cookies de terceros de entrada. */
+    var portada = document.createElement("button");
+    portada.type = "button";
+    portada.className = "video__portada";
+    portada.setAttribute("aria-label", "Reproducir: " + (v.titulo || "vídeo"));
 
-    if (!fuente) {
-      /* Sin vídeo todavía: se explica qué hay que rellenar */
-      var aviso = crear("div", "video__aviso");
-      aviso.appendChild(crear("p", null, "Aquí irá el vídeo."));
-      var p = crear("p", null, "En datos.js: ");
-      ["youtube", "vimeo", "archivo"].forEach(function (campo, i) {
-        if (i) p.appendChild(document.createTextNode(i === 2 ? " o " : ", "));
-        p.appendChild(crear("code", null, campo));
-      });
-      p.style.margin = "0";
-      aviso.appendChild(p);
-      marco.appendChild(aviso);
-    } else {
-      /* El reproductor no se carga hasta que se pulsa play: la página entra
-         rápida y no arrastra cookies de terceros de entrada. */
-      var portada = document.createElement("button");
-      portada.type = "button";
-      portada.className = "video__portada";
-      portada.setAttribute("aria-label", "Reproducir: " + (v.titulo || "vídeo"));
-
-      if (v.portada || fuente.tipo === "youtube") {
-        var img = document.createElement("img");
-        img.src = v.portada || "https://i.ytimg.com/vi/" + fuente.id + "/hqdefault.jpg";
-        img.alt = ""; img.loading = "lazy";
-        portada.appendChild(img);
-      }
-
-      portada.appendChild(crear("span", "video__play", "▶"));
-      portada.addEventListener("click", function () { reproducir(marco, fuente, v); });
-      marco.appendChild(portada);
+    if (v.portada || fuente.tipo === "youtube") {
+      var img = document.createElement("img");
+      img.src = v.portada ? ruta(v.portada)
+                          : "https://i.ytimg.com/vi/" + fuente.id + "/hqdefault.jpg";
+      img.alt = ""; img.loading = "lazy";
+      // Si la miniatura no carga, mejor el fondo liso que un icono roto
+      img.addEventListener("error", function () { img.remove(); });
+      portada.appendChild(img);
     }
+
+    portada.appendChild(crear("span", "video__play", "▶"));
+    portada.addEventListener("click", function () { reproducir(marco, fuente, v); });
+    marco.appendChild(portada);
 
     art.appendChild(marco);
     if (v.titulo)      art.appendChild(crear("h3", "video__titulo", v.titulo));
@@ -264,7 +254,7 @@
       var video = document.createElement("video");
       video.src = fuente.id;
       video.controls = true; video.autoplay = true; video.playsInline = true;
-      if (v.portada) video.poster = v.portada;
+      if (v.portada) video.poster = ruta(v.portada);
       marco.appendChild(video);
       return;
     }
@@ -279,31 +269,117 @@
     marco.appendChild(iframe);
   }
 
-  function pintarVideos() {
-    var v = D.videos || {};
+  function pintarVideos(destino, destacado, otros) {
     var hay = false;
 
-    if (v.destacado) { $("#video-destacado").appendChild(crearVideo(v.destacado)); hay = true; }
-    (v.otros || []).forEach(function (uno) { $("#videos-lista").appendChild(crearVideo(uno)); hay = true; });
+    if (destacado) {
+      var uno = crearVideo(destacado);
+      if (uno) { destino.appendChild(uno); hay = true; }
+    }
 
-    if (!hay) $("#videos").remove();
+    var rejilla = crear("div", "videos");
+    (otros || []).forEach(function (v) {
+      var art = crearVideo(v);
+      if (art) { rejilla.appendChild(art); hay = true; }
+    });
+    if (rejilla.children.length) destino.appendChild(rejilla);
+
+    return hay;
+  }
+
+  /* ── Experiencia ────────────────────────────────────────────────────── */
+
+  function pintarExperiencia(e) {
+    if (vacio(e.ficha) && vacio(e.creditos) && vacio(e.intro)) return;
+    var sec = seccion("experiencia", e.titulo || "Experiencia");
+
+    if (e.intro) sec.appendChild(crear("p", "seccion__lead", e.intro));
+
+    var caja = crear("div", "experiencia");
+    var lado = crear("aside", "ficha");
+    lado.setAttribute("aria-label", "Ficha de la actriz");
+
+    function bloque(titulo, pares, clave, valor) {
+      if (vacio(pares)) return;
+      var div = crear("div");
+      div.appendChild(crear("h3", "etiqueta", titulo));
+      var dl = document.createElement("dl");
+      pares.forEach(function (p) {
+        if (!p[clave]) return;
+        dl.appendChild(crear("dt", null, p[clave]));
+        dl.appendChild(crear("dd", null, p[valor]));
+      });
+      div.appendChild(dl);
+      lado.appendChild(div);
+    }
+
+    bloque("Ficha", e.ficha, "campo", "valor");
+    bloque("Idiomas", e.idiomas, "idioma", "nivel");
+
+    if (!vacio(e.habilidades)) {
+      var div = crear("div");
+      div.appendChild(crear("h3", "etiqueta", "Habilidades"));
+      var ul = crear("ul", "habilidades");
+      e.habilidades.forEach(function (h) { if (h) ul.appendChild(crear("li", null, h)); });
+      div.appendChild(ul);
+      lado.appendChild(div);
+    }
+
+    if (lado.children.length) caja.appendChild(lado);
+
+    var creditos = crear("div", "creditos");
+    (e.creditos || []).forEach(function (grupo) {
+      if (vacio(grupo.trabajos)) return;
+      var bloq = crear("div", "creditos__grupo");
+      bloq.appendChild(crear("h3", "creditos__categoria", grupo.categoria));
+
+      var ul = crear("ul", "creditos__lista");
+      grupo.trabajos.forEach(function (t) {
+        if (!t.titulo && !t.anio) return;
+        var li = document.createElement("li");
+        li.appendChild(crear("span", "creditos__anio", t.anio || ""));
+
+        var datos = document.createElement("div");
+        var linea = crear("p", "creditos__trabajo", t.titulo || "");
+        if (t.personaje) {
+          linea.appendChild(document.createTextNode(" — "));
+          linea.appendChild(crear("span", "creditos__personaje", t.personaje));
+        }
+        datos.appendChild(linea);
+
+        var meta = [];
+        if (t.direccion)  meta.push("Dir. " + t.direccion);
+        if (t.productora) meta.push(t.productora);
+        if (t.nota)       meta.push(t.nota);
+        if (meta.length) datos.appendChild(crear("p", "creditos__meta", meta.join(" · ")));
+
+        li.appendChild(datos);
+        ul.appendChild(li);
+      });
+
+      bloq.appendChild(ul);
+      creditos.appendChild(bloq);
+    });
+
+    if (creditos.children.length) caja.appendChild(creditos);
+    if (caja.children.length) sec.appendChild(caja);
   }
 
   /* ── Contacto ───────────────────────────────────────────────────────── */
 
-  function pintarContacto() {
-    var c = D.contacto || {};
-    var cont = $("#contacto-datos");
+  function pintarContacto(c, nombre) {
+    if (vacio(c.email) && vacio(c.telefono) && vacio(c.persona)) return;
+    var sec = seccion("contacto", c.titulo || "Contacto");
+    var caja = crear("div", "contacto");
 
-    if (c.titulo)  cont.appendChild(crear("h3", "etiqueta", c.titulo));
-    if (c.persona) cont.appendChild(crear("p", "contacto__persona", c.persona));
-    if (c.nota)    cont.appendChild(crear("p", "contacto__nota", c.nota));
+    if (c.etiqueta) caja.appendChild(crear("h3", "etiqueta", c.etiqueta));
+    if (c.persona)  caja.appendChild(crear("p", "contacto__persona", c.persona));
+    if (c.nota)     caja.appendChild(crear("p", "contacto__nota", c.nota));
 
     var enlaces = crear("div", "contacto__enlaces");
     if (c.email) {
       var mail = crear("a", "boton boton--oscuro", c.email);
-      mail.href = "mailto:" + c.email + "?subject=" +
-        encodeURIComponent("Casting para " + (D.nombre || ""));
+      mail.href = "mailto:" + c.email + "?subject=" + encodeURIComponent("Casting para " + (nombre || ""));
       enlaces.appendChild(mail);
     }
     if (c.telefono) {
@@ -311,17 +387,31 @@
       tel.href = "tel:" + c.telefono.replace(/\s/g, "");
       enlaces.appendChild(tel);
     }
-    if (enlaces.children.length) cont.appendChild(enlaces);
+    if (enlaces.children.length) caja.appendChild(enlaces);
 
-    if ((c.redes || []).length) {
+    if (!vacio(c.redes)) {
       var redes = crear("div", "contacto__redes");
       c.redes.forEach(function (r) {
-        var a = crear("a", null, r.nombre);
+        if (!r.url) return;
+        var a = crear("a", null, r.nombre || r.url);
         a.href = r.url; a.target = "_blank"; a.rel = "noopener";
         redes.appendChild(a);
       });
-      cont.appendChild(redes);
+      if (redes.children.length) caja.appendChild(redes);
     }
+
+    sec.appendChild(caja);
+  }
+
+  /* ── Pie ────────────────────────────────────────────────────────────── */
+
+  function pintarPie(id) {
+    var pie = $("#pie");
+    pie.appendChild(crear("p", null,
+      (id.marca || id.nombre) + " · © " + new Date().getFullYear()));
+    pie.appendChild(crear("p", null,
+      "Las imágenes y los vídeos de esta web no pueden reproducirse sin autorización."));
+    pie.hidden = false;
   }
 
   /* ── Marca en el menú la sección que se está viendo ─────────────────── */
@@ -332,23 +422,77 @@
     var espia = new IntersectionObserver(function (entradas) {
       entradas.forEach(function (e) {
         if (!e.isIntersecting) return;
-        $$(".barra__menu a").forEach(function (a) {
+        [].forEach.call(document.querySelectorAll(".barra__menu a"), function (a) {
           a.classList.toggle("activo", a.getAttribute("href") === "#" + e.target.id);
         });
       });
     }, { rootMargin: "-45% 0px -50% 0px" });
 
-    $$("main section[id]").forEach(function (s) { espia.observe(s); });
+    [].forEach.call($("#contenido").querySelectorAll("section[id]"), function (s) { espia.observe(s); });
   }
 
-  /* ── Arranque ───────────────────────────────────────────────────────── */
+  /* ── Montaje ────────────────────────────────────────────────────────── */
 
-  pintarTextos();
-  pintarFicha();
-  pintarCreditos();
-  pintarGaleria();
-  pintarVideos();
-  pintarContacto();
-  conectarVisor();
-  conectarMenu();
+  function pintar(D) {
+    var id = D.identidad || {};
+
+    // 1. Foto book
+    var fb = D.foto_book || {};
+    if (!vacio(fb.fotos)) {
+      var sFotos = seccion("fotos", fb.titulo || "Foto book", false);
+      pintarGaleria(sFotos, fb.fotos);
+    }
+
+    // 2. Video book
+    var vb = D.video_book || {};
+    var sVideos = seccion("videos", vb.titulo || "Video book");
+    if (!pintarVideos(sVideos, vb.destacado, vb.videos)) sVideos.remove();
+
+    // 3. Secciones añadidas desde el panel (teatro, danza, lo que haga falta)
+    (D.secciones || []).forEach(function (s, i) {
+      if (!s.titulo) return;
+      var sec = seccion(anclaDe(s.titulo, "seccion-" + (i + 1)), s.titulo);
+      var algo = false;
+      if (s.texto) { sec.appendChild(crear("p", "seccion__lead", s.texto)); algo = true; }
+      if (pintarGaleria(sec, s.fotos)) algo = true;
+      if (pintarVideos(sec, null, s.videos)) algo = true;
+      if (!algo) sec.remove();
+    });
+
+    // 4. Experiencia y contacto
+    if (D.experiencia) pintarExperiencia(D.experiencia);
+    if (D.contacto)    pintarContacto(D.contacto, id.nombre);
+
+    // 5. Marco: portada, barra y pie
+    if (id.portada || id.portada_ancha) pintarPortada(id);
+    pintarBarra(id);
+    pintarPie(id);
+
+    var nombre = [id.nombre, id.apellidos].filter(Boolean).join(" ");
+    if (nombre) document.title = nombre + " — " + (id.titular || "Actriz");
+
+    conectarVisor();
+    conectarMenu();
+  }
+
+  function error(mensaje) {
+    var p = crear("p", "aviso", mensaje);
+    $("#contenido").appendChild(p);
+  }
+
+  fetch("contenido.json", { cache: "no-cache" })
+    .then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    })
+    .then(pintar)
+    .catch(function (e) {
+      if (location.protocol === "file:") {
+        error("Para ver la web en tu ordenador hace falta un servidor local; " +
+              "abierta con doble clic, el navegador no deja leer contenido.json. " +
+              "Lo más fácil es mirarla directamente en la web publicada.");
+      } else {
+        error("No se ha podido cargar el contenido (" + e.message + ").");
+      }
+    });
 })();

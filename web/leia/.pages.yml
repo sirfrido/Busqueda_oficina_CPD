@@ -1,0 +1,192 @@
+# Configuración del panel de control (Pages CMS).
+# Define los formularios que ve Alex al entrar en app.pagescms.org.
+
+media:
+  input: assets/img
+  output: assets/img
+  categories: [image]
+
+content:
+  - name: contenido
+    label: La web de Leia
+    type: file
+    path: contenido.json
+    fields:
+
+      # ── Portada ──────────────────────────────────────────────────────
+      - name: identidad
+        label: Portada
+        type: object
+        fields:
+          - { name: nombre, label: Nombre, type: string, description: "Lo que sale enorme en la portada" }
+          - { name: apellidos, label: Apellidos, type: string }
+          - { name: marca, label: Nombre en la barra de arriba, type: string }
+          - { name: titular, label: Debajo del nombre, en la barra, type: string, description: "Actriz" }
+          - name: portada
+            label: Foto de portada (vertical, para el móvil)
+            type: image
+            description: "Vertical. La que se ve en el móvil."
+          - name: portada_ancha
+            label: Foto de portada (apaisada, para ordenador)
+            type: image
+            description: "Apaisada 16:9, con aire alrededor. Una foto vertical aquí sale demasiado cerrada."
+          - name: portada_encuadre
+            label: Encuadre de la portada
+            type: string
+            description: "center = centrada. center 20% sube el recorte, center 80% lo baja."
+          - { name: boton, label: Texto del botón, type: string }
+
+      # ── Foto book ────────────────────────────────────────────────────
+      - name: foto_book
+        label: Foto book
+        type: object
+        fields:
+          - { name: titulo, label: Título de la sección, type: string }
+          - name: fotos
+            label: Fotos
+            type: object
+            list:
+              collapsible: { summary: "{fields.alt}" }
+            fields:
+              - { name: archivo, label: Foto, type: image, required: true }
+              - name: alt
+                label: Descripción
+                type: string
+                description: "Para quien no ve la imagen y para Google. Ej: Leia, primer plano de frente."
+              - name: encuadre
+                label: Encuadre
+                type: string
+                description: "Déjalo vacío salvo que el recorte le corte la cabeza. Entonces: center 20%."
+
+      # ── Video book ───────────────────────────────────────────────────
+      - name: video_book
+        label: Video book
+        type: object
+        fields:
+          - { name: titulo, label: Título de la sección, type: string }
+          - name: destacado
+            label: Reel (el vídeo grande)
+            type: object
+            fields:
+              - { name: titulo, label: Título, type: string }
+              - { name: descripcion, label: Descripción, type: string }
+              - name: youtube
+                label: YouTube
+                type: string
+                description: "Pega la dirección entera del vídeo. Súbelo como «oculto» en YouTube."
+              - { name: vimeo, label: Vimeo, type: string, description: "O la dirección de Vimeo. Rellena solo una de las tres." }
+              - { name: archivo, label: Archivo de vídeo, type: file }
+              - { name: portada, label: Imagen antes de darle al play, type: image }
+          - name: videos
+            label: Más vídeos
+            type: object
+            list:
+              collapsible: { summary: "{fields.titulo}" }
+            fields:
+              - { name: titulo, label: Título, type: string }
+              - { name: descripcion, label: Descripción, type: string }
+              - { name: youtube, label: YouTube, type: string }
+              - { name: vimeo, label: Vimeo, type: string }
+              - { name: archivo, label: Archivo de vídeo, type: file }
+              - { name: portada, label: Imagen antes de darle al play, type: image }
+
+      # ── Secciones nuevas ─────────────────────────────────────────────
+      - name: secciones
+        label: Secciones nuevas
+        type: object
+        description: "Añade las que quieras: Teatro, Danza, Publicidad… Aparecen solas en el menú."
+        list:
+          collapsible: { summary: "{fields.titulo}" }
+        fields:
+          - { name: titulo, label: Título de la sección, type: string, required: true }
+          - { name: texto, label: Texto de entrada, type: text }
+          - name: fotos
+            label: Fotos
+            type: object
+            list:
+              collapsible: { summary: "{fields.alt}" }
+            fields:
+              - { name: archivo, label: Foto, type: image, required: true }
+              - { name: alt, label: Descripción, type: string }
+              - { name: encuadre, label: Encuadre, type: string }
+          - name: videos
+            label: Vídeos
+            type: object
+            list:
+              collapsible: { summary: "{fields.titulo}" }
+            fields:
+              - { name: titulo, label: Título, type: string }
+              - { name: descripcion, label: Descripción, type: string }
+              - { name: youtube, label: YouTube, type: string }
+              - { name: vimeo, label: Vimeo, type: string }
+              - { name: archivo, label: Archivo de vídeo, type: file }
+              - { name: portada, label: Imagen antes de darle al play, type: image }
+
+      # ── Experiencia ──────────────────────────────────────────────────
+      - name: experiencia
+        label: Experiencia
+        type: object
+        fields:
+          - { name: titulo, label: Título de la sección, type: string }
+          - { name: intro, label: Presentación, type: text }
+          - name: ficha
+            label: Ficha (edad, altura, medidas…)
+            type: object
+            list:
+              collapsible: { summary: "{fields.campo}: {fields.valor}" }
+            fields:
+              - { name: campo, label: Dato, type: string, description: "Altura, Talla, Ojos…" }
+              - { name: valor, label: Valor, type: string }
+          - name: idiomas
+            label: Idiomas
+            type: object
+            list:
+              collapsible: { summary: "{fields.idioma}" }
+            fields:
+              - { name: idioma, label: Idioma, type: string }
+              - { name: nivel, label: Nivel, type: string }
+          - name: habilidades
+            label: Habilidades
+            type: string
+            list: true
+            description: "Danza, canto, patinaje… Lo que pueda hacer delante de una cámara mañana."
+          - name: creditos
+            label: Trabajos
+            type: object
+            list:
+              collapsible: { summary: "{fields.categoria}" }
+            fields:
+              - { name: categoria, label: Categoría, type: string, description: "Cine, Televisión, Teatro, Publicidad, Formación" }
+              - name: trabajos
+                label: Trabajos de esta categoría
+                type: object
+                list:
+                  collapsible: { summary: "{fields.anio} · {fields.titulo}" }
+                fields:
+                  - { name: anio, label: Año, type: string }
+                  - { name: titulo, label: Título, type: string }
+                  - { name: personaje, label: Personaje, type: string }
+                  - { name: direccion, label: Dirección, type: string }
+                  - { name: productora, label: Productora o compañía, type: string }
+                  - { name: nota, label: Nota, type: string }
+
+      # ── Contacto ─────────────────────────────────────────────────────
+      - name: contacto
+        label: Contacto
+        type: object
+        description: "Leia es menor: aquí van siempre los datos de quien la representa."
+        fields:
+          - { name: titulo, label: Título de la sección, type: string }
+          - { name: etiqueta, label: Etiqueta pequeña, type: string, description: "Representación" }
+          - { name: persona, label: Persona de contacto, type: string }
+          - { name: email, label: Correo, type: string }
+          - { name: telefono, label: Teléfono, type: string, description: "Vacío = no se muestra" }
+          - { name: nota, label: Nota, type: text }
+          - name: redes
+            label: Redes
+            type: object
+            list:
+              collapsible: { summary: "{fields.nombre}" }
+            fields:
+              - { name: nombre, label: Nombre, type: string }
+              - { name: url, label: Dirección, type: string }
