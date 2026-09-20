@@ -336,7 +336,16 @@ class Agente:
         candidatos: list[Candidato] = []
         for anuncio in vivos:
             usar_llm = presupuesto_llm > 0
-            cand = self.evaluar(anuncio, fuentes.get(anuncio.fuente), usar_llm=usar_llm)
+            try:
+                cand = self.evaluar(anuncio, fuentes.get(anuncio.fuente), usar_llm=usar_llm)
+            except Exception as exc:
+                # Un anuncio real con datos raros no puede tirar la pasada entera:
+                # se descarta ese y se sigue con el resto (visto en producción,
+                # donde los datos en bruto de los portales no son los de los tests).
+                resumen.errores.append(f"evaluar {anuncio.url}: {exc}")
+                log.error("fallo evaluando %s: %s", anuncio.url, exc, exc_info=True)
+                resumen.descartados += 1
+                continue
             if usar_llm and cand.evaluacion.evaluado_por != "heuristica":
                 presupuesto_llm -= 1
             self.almacen.guardar_evaluacion(cand)
