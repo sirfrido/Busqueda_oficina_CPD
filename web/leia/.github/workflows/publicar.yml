@@ -74,7 +74,10 @@ jobs:
               print(f"  · {f.name}: {peso//1024} KB → {f.stat().st_size//1024} KB  {im.size}")
           PY
 
+      # enablement: activa GitHub Pages solo la primera vez, sin tener que
+      # entrar en los ajustes del repositorio a mano.
       - uses: actions/configure-pages@v5
+        with: { enablement: true }
 
       - uses: actions/upload-pages-artifact@v3
         with: { path: . }
