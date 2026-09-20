@@ -154,10 +154,10 @@ class OjoCritico:
             return None
         try:
             datos = self._preguntar(anuncio, fotos)
+            vistazo = Vistazo(**datos, fotos_vistas=len(fotos))
         except Exception as exc:
             log.warning("No se pudieron analizar las fotos de %s: %s", anuncio.url, exc)
             return None
-        vistazo = Vistazo(**datos, fotos_vistas=len(fotos))
         if vistazo.desmiente_el_anuncio:
             vistazo.avisos.append(
                 f"Las fotos no cuadran con el anuncio: se ve {vistazo.tipo}. {vistazo.descripcion}"
