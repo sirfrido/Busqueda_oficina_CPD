@@ -19,6 +19,8 @@ jobs:
   buscar:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -71,3 +73,27 @@ jobs:
             data/out/borradores/*.eml
           if-no-files-found: ignore
           retention-days: 30
+
+      # Sin SMTP configurado, esto es lo que permite que el informe llegue a
+      # alguna parte sin depender de una contraseña de correo: se publica el
+      # último informe en el propio repositorio, en una ruta fija, para que
+      # otro proceso (el agente que sí tiene acceso al correo) lo lea y lo
+      # reenvíe.
+      - name: Publicar el último informe en el repositorio
+        if: always()
+        run: |
+          ULTIMO=$(ls -t data/out/informe-*.html 2>/dev/null | head -1)
+          if [ -z "$ULTIMO" ]; then
+            echo "No hay informe que publicar hoy."
+            exit 0
+          fi
+          cp "$ULTIMO" data/out/ultimo-informe.html
+          git config user.name "Agente CPD"
+          git config user.email "actions@users.noreply.github.com"
+          git add -f data/out/ultimo-informe.html
+          if git diff --cached --quiet; then
+            echo "El informe no ha cambiado desde la última vez."
+          else
+            git commit -m "Informe del $(date -u +%F)"
+            git push
+          fi
