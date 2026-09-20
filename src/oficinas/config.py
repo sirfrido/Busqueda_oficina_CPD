@@ -145,7 +145,7 @@ class Config:
             remitente=os.getenv("EMAIL_REMITENTE", local.get("email", {}).get("remitente", "")),
             destinatarios=destinatarios,
             smtp_host=os.getenv("SMTP_HOST", local.get("email", {}).get("smtp_host", "")),
-            smtp_puerto=int(os.getenv("SMTP_PUERTO", local.get("email", {}).get("smtp_puerto", 587))),
+            smtp_puerto=int(os.getenv("SMTP_PUERTO") or local.get("email", {}).get("smtp_puerto", 587)),
             smtp_usuario=os.getenv("SMTP_USUARIO", local.get("email", {}).get("smtp_usuario", "")),
             smtp_password=os.getenv("SMTP_PASSWORD", ""),
             smtp_tls=os.getenv("SMTP_TLS", "1") not in ("0", "false", "False"),
@@ -168,7 +168,7 @@ class Config:
             modelo_llm=os.getenv("MODELO_LLM", agente.get("modelo_llm", "claude-opus-5")),
             llm_effort=os.getenv("LLM_EFFORT", agente.get("llm_effort", "medium")),
             llm_activo=os.getenv("LLM_ACTIVO", "1") not in ("0", "false", "False"),
-            llm_max_anuncios=int(os.getenv("LLM_MAX_ANUNCIOS", agente.get("llm_max_anuncios", 40))),
+            llm_max_anuncios=int(os.getenv("LLM_MAX_ANUNCIOS") or agente.get("llm_max_anuncios", 40)),
             modo_contacto=os.getenv("MODO_CONTACTO", agente.get("modo_contacto", "borrador")),
             geocodificar=os.getenv("GEOCODIFICAR", "1") not in ("0", "false", "False"),
         )
