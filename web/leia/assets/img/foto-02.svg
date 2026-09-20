@@ -1,15 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1125" width="900" height="1125" role="img" aria-label="Primer plano">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="0.4" y2="1">
-      <stop offset="0" stop-color="#dfd6cd"/>
-      <stop offset="1" stop-color="#b9a795"/>
-    </linearGradient>
-  </defs>
-  <rect width="900" height="1125" fill="url(#g)"/>
-  <g fill="#ffffff" opacity="0.42">
-    <circle cx="450" cy="450" r="117"/>
-    <path d="M 234 631 a 216 216 0 0 1 433 0 Z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200" width="900" height="1200" role="img" aria-label="Foto de ejemplo">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="0.3" y2="1">
+    <stop offset="0" stop-color="#e4e4e4"/><stop offset="1" stop-color="#d2d2d2"/>
+  </linearGradient></defs>
+  <rect width="900" height="1200" fill="url(#g)"/>
+  <g fill="#ffffff" opacity="0.55">
+    <circle cx="450" cy="504" r="112"/>
+    <path d="M 248 673 a 202 202 0 0 1 405 0 Z"/>
   </g>
-  <text x="50%" y="990" text-anchor="middle" font-family="Georgia, serif" font-size="52" fill="#4a4038" opacity="0.72">Primer plano</text>
-  <text x="50%" y="1046" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="25" letter-spacing="2" fill="#4a4038" opacity="0.45">FOTO DE EJEMPLO</text>
+  <text x="50%" y="1116" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="31" letter-spacing="5" fill="#9a9a9a">FOTO 02</text>
 </svg>

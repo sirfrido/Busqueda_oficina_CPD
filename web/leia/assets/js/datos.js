@@ -10,33 +10,30 @@
 
 window.DATOS = {
 
-  /* ── Portada ─────────────────────────────────────────────────────────── */
-  nombre:    "Leia",
-  apellidos: "Apellido Apellido",        // "" si prefieres solo el nombre
-  marca:     "Leia",                     // lo que aparece arriba a la izquierda
+  /* ── Identidad ───────────────────────────────────────────────────────── */
+  nombre:    "Leia",                    // lo que sale enorme en la portada
+  apellidos: "Cervantes Hernández",
+  marca:     "Leia Cervantes",          // el nombre de la barra superior
   titular:   "Actriz",
+
+  foto_principal: "assets/img/foto-01.svg",   // la foto de portada, a pantalla completa
+
   presentacion:
-    "Aquí van dos o tres líneas contando quién es Leia: su energía, lo que " +
-    "mejor se le da en escena y qué tipo de proyectos busca. Breve y directo: " +
-    "quien lo lee está decidiendo en diez segundos si sigue mirando.",
+    "Dos o tres líneas contando quién es Leia: su energía, lo que mejor se le " +
+    "da en escena y qué tipo de proyectos busca. Breve y directo: quien lo lee " +
+    "está decidiendo en diez segundos si sigue mirando.",
 
-  foto_principal: "assets/img/foto-01.svg",   // la foto grande de la portada
-  cv_pdf: "",                                 // ej: "assets/cv-leia.pdf" ("" = sin botón)
-
-  /* Los 4 datos que se ven en la portada, debajo de la presentación */
-  chips: ["10 años", "1,40 m", "Valencia", "Español · Valenciano · Inglés"],
-
-  /* ── Ficha técnica (columna izquierda de Experiencia) ────────────────── */
+  /* ── Ficha técnica ───────────────────────────────────────────────────── */
   ficha: {
-    "Edad":            "10 años",
-    "Edad que aparenta": "9 - 12",
-    "Altura":          "1,40 m",
-    "Talla":           "10 años",
-    "Calzado":         "35",
-    "Ojos":            "Marrones",
-    "Pelo":            "Castaño largo",
-    "Residencia":      "Valencia",
-    "Disponibilidad":  "Viajar dentro de España"
+    "Edad":              "15 años",
+    "Edad que aparenta": "14 - 17",
+    "Altura":            "1,54 m",
+    "Talla":             "S",            // ←
+    "Calzado":           "38",           // ← estos cuatro los he puesto a ojo:
+    "Ojos":              "Marrones",     // ←   revísalos antes de publicar
+    "Pelo":              "Castaño largo",// ←
+    "Residencia":        "Valencia",
+    "Disponibilidad":    "Viajar dentro de España"
   },
 
   idiomas: [
@@ -46,12 +43,11 @@ window.DATOS = {
   ],
 
   habilidades: [
-    "Danza clásica", "Canto", "Natación", "Patinaje",
-    "Bicicleta", "Piano", "Improvisación"
+    "Danza", "Canto", "Natación", "Patinaje", "Bicicleta", "Improvisación"
   ],
 
   /* ── Créditos ────────────────────────────────────────────────────────── */
-  /* Quita los bloques que no tenga todavía y añade los que vengan.        */
+  /* Quita los bloques que todavía no tenga y añade los que vayan llegando. */
   creditos: [
     {
       categoria: "Cine",
@@ -86,36 +82,40 @@ window.DATOS = {
       trabajos: [
         { anio: "2024 - actualidad", titulo: "Interpretación ante la cámara",
           personaje: "", direccion: "Profesor/a", productora: "Escuela" },
-        { anio: "2023", titulo: "Danza clásica",
+        { anio: "2023", titulo: "Danza",
           personaje: "", direccion: "", productora: "Conservatorio / Escuela" }
       ]
     }
   ],
 
   /* ── Foto book ───────────────────────────────────────────────────────── */
-  /* Copia las fotos en assets/img/ y añade una línea por foto.            */
-  /* "tipo" crea los filtros de arriba. Usa siempre los mismos nombres.    */
+  /* Copia las fotos en assets/img/ y pon una línea por foto. El orden de    */
+  /* esta lista es el orden en que se ven. Empieza por las mejores.          */
+  /* En la rejilla la foto se recorta al centro; entera se ve al ampliarla.  */
+  /* Si a alguna el recorte le sienta mal, añádele:  encuadre: "center 20%"  */
+  /* (0% = pegado arriba, 100% = pegado abajo).                              */
   fotos: [
-    { archivo: "assets/img/foto-01.svg", tipo: "Primer plano",  alt: "Leia, primer plano en exterior" },
-    { archivo: "assets/img/foto-02.svg", tipo: "Primer plano",  alt: "Leia, primer plano sonriendo" },
-    { archivo: "assets/img/foto-03.svg", tipo: "Plano medio",   alt: "Leia, plano medio con fondo neutro" },
-    { archivo: "assets/img/foto-04.svg", tipo: "Plano medio",   alt: "Leia, plano medio de perfil" },
-    { archivo: "assets/img/foto-05.svg", tipo: "Plano entero",  alt: "Leia, plano entero de cuerpo completo" },
-    { archivo: "assets/img/foto-06.svg", tipo: "Plano entero",  alt: "Leia, plano entero en movimiento" },
-    { archivo: "assets/img/foto-07.svg", tipo: "Personaje",     alt: "Leia caracterizada como personaje" },
-    { archivo: "assets/img/foto-08.svg", tipo: "Personaje",     alt: "Leia en una escena" },
-    { archivo: "assets/img/foto-09.svg", tipo: "Personaje",     alt: "Leia con vestuario de época" }
+    { archivo: "assets/img/foto-01.svg", alt: "Leia, primer plano" },
+    { archivo: "assets/img/foto-02.svg", alt: "Leia, primer plano en blanco y negro" },
+    { archivo: "assets/img/foto-03.svg", alt: "Leia, plano medio" },
+    { archivo: "assets/img/foto-04.svg", alt: "Leia, plano medio de perfil" },
+    { archivo: "assets/img/foto-05.svg", alt: "Leia, plano entero" },
+    { archivo: "assets/img/foto-06.svg", alt: "Leia, plano entero de espaldas" },
+    { archivo: "assets/img/foto-07.svg", alt: "Leia sentada, plano americano" },
+    { archivo: "assets/img/foto-08.svg", alt: "Leia, retrato de tres cuartos" },
+    { archivo: "assets/img/foto-09.svg", alt: "Leia sonriendo, primer plano" },
+    { archivo: "assets/img/foto-10.svg", alt: "Leia en movimiento" }
   ],
 
   /* ── Video book ──────────────────────────────────────────────────────── */
-  /* Para cada vídeo rellena SOLO una de estas tres opciones:              */
-  /*   youtube: "ID"   → de https://youtu.be/ID  o  ?v=ID                  */
-  /*   vimeo:   "ID"   → de https://vimeo.com/ID                           */
-  /*   archivo: "assets/video/reel.mp4"  (vídeo subido a la propia web)    */
-  /* "portada" es la imagen que se ve antes de darle al play (opcional).   */
+  /* Para cada vídeo rellena SOLO una de estas tres opciones:               */
+  /*   youtube: "ID"   → de https://youtu.be/ID  o  ?v=ID                   */
+  /*   vimeo:   "ID"   → de https://vimeo.com/ID                            */
+  /*   archivo: "assets/video/reel.mp4"  (vídeo subido a la propia web)     */
+  /* "portada" es la imagen que se ve antes de darle al play (opcional).    */
   videos: {
     destacado: {
-      titulo: "Reel 2026",
+      titulo: "Reel",
       descripcion: "Montaje de escenas. Minuto y medio.",
       youtube: "",
       vimeo: "",
@@ -133,15 +133,14 @@ window.DATOS = {
   },
 
   /* ── Contacto ────────────────────────────────────────────────────────── */
-  /* Leia es menor: aquí van SIEMPRE los datos de quien la representa,     */
-  /* nunca los suyos ni la dirección de casa.                              */
+  /* Leia es menor: aquí van siempre los datos de quien la representa,      */
+  /* nunca los suyos ni la dirección de casa.                               */
   contacto: {
     titulo: "Representación",
-    persona: "Alex (padre)",
+    persona: "Alex Cervantes (padre)",
     email: "alex@hampastudio.com",
     telefono: "",                        // ej: "+34 600 000 000" ("" = no se muestra)
-    nota: "Para castings, pruebas y disponibilidad, escribid al correo. " +
-          "Respondo el mismo día.",
+    nota: "Para castings, pruebas y disponibilidad, escribid al correo.",
     redes: [
       // { nombre: "Instagram", url: "https://instagram.com/usuario" }
     ]

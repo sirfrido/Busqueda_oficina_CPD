@@ -1,4 +1,4 @@
-# Book de Leia
+# Book de Leia Cervantes
 
 Web de book para actriz: **experiencia**, **foto book** y **video book** en una
 sola página. Son archivos estáticos (HTML, CSS y JS): no hay base de datos, no
@@ -32,11 +32,14 @@ de la web.
 2. Añade una línea en el apartado `fotos` de `datos.js`:
 
 ```js
-{ archivo: "assets/img/leia-05.jpg", tipo: "Primer plano", alt: "Leia, primer plano" },
+{ archivo: "assets/img/leia-05.jpg", alt: "Leia, primer plano" },
 ```
 
-- `tipo` es lo que genera los botones de filtro. Usa siempre los mismos nombres.
+- El orden de la lista es el orden en que se ven. Empieza por las mejores.
 - `alt` es la descripción para quien no ve la imagen (y para Google). Escríbela.
+- En la rejilla las fotos se **recortan al centro** para que todas las filas
+  queden alineadas; enteras se ven al ampliarlas. Si a alguna el recorte le
+  sienta mal, añádele `encuadre: "center 20%"` (0% pegado arriba, 100% abajo).
 - Tamaño recomendado: **1600 px por el lado largo** y **menos de 400 KB** por
   foto (JPG calidad 80). Fotos de 5 MB recién salidas de la cámara hacen que la
   web tarde en cargar y ese es el momento en que la gente se va.
@@ -61,11 +64,15 @@ YouTube y no pones ninguna, se coge la miniatura automáticamente.
 El reproductor **no se carga hasta que alguien pulsa play**: la página va rápida
 y no se cargan cookies de terceros de entrada.
 
-### Cambiar los colores o las tipografías
+### Cambiar los colores, las tipografías o el número de columnas
 
 Todo está en las primeras líneas de `assets/css/estilos.css`, en el bloque
-`:root`. Cambias ahí un color y cambia toda la web. El modo oscuro está justo
-debajo y se adapta solo al ajuste del móvil o el ordenador de quien mire.
+`:root`: los colores, las dos tipografías y `--hueco`, la separación entre
+fotos. El número de columnas de la galería está unas líneas más abajo, en
+`.galeria` (5 en pantalla grande, 4, 3 y 2 según se estrecha).
+
+La web es blanca a propósito, como la referencia: sin modo oscuro, para que
+las fotos manden y se vean igual en cualquier pantalla.
 
 ## Cómo publicarla en internet
 
@@ -85,13 +92,13 @@ Cuando tengas la URL definitiva, ponla en `index.html` en la etiqueta
 
 Unas cuantas cosas que se dan por sabidas en casting y conviene respetar:
 
-**Fotos.** Entre 8 y 12, no más. Quien hace el casting mira treinta books en una
-tarde: veinte fotos parecidas cansan, ocho buenas se recuerdan. Lo que no puede
+**Fotos.** Entre 10 y 20, no más. Quien hace el casting mira treinta books en una
+tarde: treinta fotos parecidas cansan, doce buenas se recuerdan. Lo que no puede
 faltar: un **primer plano limpio**, de frente, luz natural, fondo neutro, sin
 maquillaje ni disfraz (es la foto por la que la van a reconocer el día de la
 prueba); un **plano medio**; y un **plano entero** que deje ver cómo se mueve y
-cuál es su complexión real. El resto, personaje o escena. Fotos actuales: en
-niños, una foto de hace dos años ya no sirve.
+cuál es su complexión real. El resto, personaje o escena. Fotos actuales: a los
+quince, una foto de hace dos años ya no sirve.
 
 **Vídeo.** El reel, **90 segundos como mucho**, y lo mejor en los primeros diez.
 Si todavía no hay material profesional, vale perfectamente una escena grabada con
