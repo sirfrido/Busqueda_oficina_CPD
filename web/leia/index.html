@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leia — Book de actriz</title>
+<meta name="description" content="Book profesional de Leia: experiencia, foto book y video book.">
+<meta name="theme-color" content="#fbf8f4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141311" media="(prefers-color-scheme: dark)">
+
+<!-- Redes sociales / WhatsApp: cambia la URL por la de tu web cuando la publiques -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Leia — Book de actriz">
+<meta property="og:description" content="Experiencia, foto book y video book.">
+<meta property="og:image" content="assets/img/foto-01.svg">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' font-family='Georgia,serif'>L</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/estilos.css">
+</head>
+
+<body>
+<a class="salto" href="#contenido">Saltar al contenido</a>
+
+<header class="cabecera" id="cabecera">
+  <div class="cabecera__interior">
+    <a class="marca" href="#inicio" data-campo="marca">Leia</a>
+
+    <button class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="menu" aria-label="Abrir menú">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="menu" id="menu" aria-label="Navegación principal">
+      <a href="#inicio">Inicio</a>
+      <a href="#experiencia">Experiencia</a>
+      <a href="#fotos">Foto book</a>
+      <a href="#videos">Video book</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+  </div>
+</header>
+
+<main id="contenido">
+
+  <!-- ══ INICIO ══ -->
+  <section class="hero" id="inicio">
+    <div class="hero__texto">
+      <p class="hero__titular" data-campo="titular">Actriz</p>
+      <h1 class="hero__nombre"><span data-campo="nombre">Leia</span> <span class="hero__apellidos" data-campo="apellidos"></span></h1>
+      <p class="hero__presentacion" data-campo="presentacion"></p>
+
+      <ul class="chips" id="chips-hero"></ul>
+
+      <div class="hero__acciones">
+        <a class="boton boton--solido" href="#videos">Ver video book</a>
+        <a class="boton" href="#fotos">Ver foto book</a>
+        <a class="boton boton--plano" id="boton-cv" href="#" hidden>Descargar CV (PDF)</a>
+      </div>
+    </div>
+
+    <figure class="hero__foto">
+      <img id="foto-principal" src="assets/img/foto-01.svg" alt="" width="900" height="1200" fetchpriority="high">
+    </figure>
+  </section>
+
+  <!-- ══ EXPERIENCIA ══ -->
+  <section class="seccion" id="experiencia">
+    <header class="seccion__cabecera">
+      <p class="seccion__eyebrow">01</p>
+      <h2>Experiencia</h2>
+      <p class="seccion__intro">Formación, trabajos y habilidades.</p>
+    </header>
+
+    <div class="experiencia">
+      <aside class="ficha" aria-label="Datos de la actriz">
+        <h3 class="ficha__titulo">Ficha</h3>
+        <dl id="ficha-datos"></dl>
+
+        <div id="bloque-idiomas" hidden>
+          <h3 class="ficha__titulo">Idiomas</h3>
+          <dl id="ficha-idiomas"></dl>
+        </div>
+
+        <div id="bloque-habilidades" hidden>
+          <h3 class="ficha__titulo">Habilidades</h3>
+          <ul class="etiquetas" id="ficha-habilidades"></ul>
+        </div>
+      </aside>
+
+      <div class="creditos" id="creditos"></div>
+    </div>
+  </section>
+
+  <!-- ══ FOTO BOOK ══ -->
+  <section class="seccion" id="fotos">
+    <header class="seccion__cabecera">
+      <p class="seccion__eyebrow">02</p>
+      <h2>Foto book</h2>
+      <p class="seccion__intro">Pulsa una foto para verla a pantalla completa.</p>
+    </header>
+
+    <div class="filtros" id="filtros-fotos" role="tablist" aria-label="Filtrar fotos"></div>
+    <div class="galeria" id="galeria"></div>
+  </section>
+
+  <!-- ══ VIDEO BOOK ══ -->
+  <section class="seccion" id="videos">
+    <header class="seccion__cabecera">
+      <p class="seccion__eyebrow">03</p>
+      <h2>Video book</h2>
+      <p class="seccion__intro">Reel y escenas.</p>
+    </header>
+
+    <div id="video-destacado"></div>
+    <div class="videos" id="videos-lista"></div>
+  </section>
+
+  <!-- ══ CONTACTO ══ -->
+  <section class="seccion seccion--contacto" id="contacto">
+    <header class="seccion__cabecera">
+      <p class="seccion__eyebrow">04</p>
+      <h2>Contacto</h2>
+    </header>
+    <div class="contacto" id="contacto-datos"></div>
+  </section>
+
+</main>
+
+<footer class="pie">
+  <p>© <span id="anio"></span> <span data-campo="nombre">Leia</span>. Todos los derechos reservados.</p>
+  <p class="pie__nota">Las imágenes y vídeos de esta web no pueden reproducirse sin autorización.</p>
+</footer>
+
+<!-- Visor de fotos a pantalla completa -->
+<div class="visor" id="visor" role="dialog" aria-modal="true" aria-label="Foto ampliada" hidden>
+  <button class="visor__cerrar" id="visor-cerrar" aria-label="Cerrar">&times;</button>
+  <button class="visor__nav visor__nav--prev" id="visor-prev" aria-label="Foto anterior">&#8249;</button>
+  <figure class="visor__figura">
+    <img id="visor-img" alt="">
+    <figcaption id="visor-pie"></figcaption>
+  </figure>
+  <button class="visor__nav visor__nav--next" id="visor-next" aria-label="Foto siguiente">&#8250;</button>
+</div>
+
+<noscript>
+  <p style="padding:2rem;text-align:center">Esta web necesita JavaScript para mostrar el book completo.</p>
+</noscript>
+
+<script src="assets/js/datos.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

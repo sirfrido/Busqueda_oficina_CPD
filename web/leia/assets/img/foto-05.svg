@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1350" width="900" height="1350" role="img" aria-label="Plano entero">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#ded9d0"/>
+      <stop offset="1" stop-color="#a89c8b"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="1350" fill="url(#g)"/>
+  <g fill="#ffffff" opacity="0.42">
+    <circle cx="450" cy="540" r="117"/>
+    <path d="M 234 721 a 216 216 0 0 1 433 0 Z"/>
+  </g>
+  <text x="50%" y="1188" text-anchor="middle" font-family="Georgia, serif" font-size="52" fill="#4a4038" opacity="0.72">Plano entero</text>
+  <text x="50%" y="1256" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="25" letter-spacing="2" fill="#4a4038" opacity="0.45">FOTO DE EJEMPLO</text>
+</svg>

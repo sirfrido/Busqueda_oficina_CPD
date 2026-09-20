@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200" width="900" height="1200" role="img" aria-label="Primer plano">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#e7d8c9"/>
+      <stop offset="1" stop-color="#c9ae95"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="1200" fill="url(#g)"/>
+  <g fill="#ffffff" opacity="0.42">
+    <circle cx="450" cy="480" r="117"/>
+    <path d="M 234 661 a 216 216 0 0 1 433 0 Z"/>
+  </g>
+  <text x="50%" y="1056" text-anchor="middle" font-family="Georgia, serif" font-size="52" fill="#4a4038" opacity="0.72">Primer plano</text>
+  <text x="50%" y="1116" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="25" letter-spacing="2" fill="#4a4038" opacity="0.45">FOTO DE EJEMPLO</text>
+</svg>
