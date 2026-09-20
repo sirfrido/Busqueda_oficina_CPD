@@ -1,0 +1,9 @@
+{
+  // Configuración para Cloudflare. La web son archivos estáticos: no hay
+  // código de servidor, solo la carpeta que se publica tal cual.
+  "name": "leia-cervantes",
+  "compatibility_date": "2026-09-20",
+  "assets": {
+    "directory": "."
+  }
+}

@@ -1,0 +1,5 @@
+# Archivos del repositorio que no forman parte de la web publicada.
+.github
+.pages.yml
+wrangler.jsonc
+README.md
