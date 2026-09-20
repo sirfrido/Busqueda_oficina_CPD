@@ -30,11 +30,12 @@
 
     if (nombreCompleto) document.title = nombreCompleto + " — Actriz";
 
-    if (D.foto_principal) {
-      var foto = $("#foto-principal");
-      foto.src = D.foto_principal;
-      foto.alt = nombreCompleto ? nombreCompleto + ", retrato" : "";
-    }
+    var foto = $("#foto-principal"), ancha = $("#portada-ancha");
+    if (D.foto_principal) foto.src = D.foto_principal;
+    foto.alt = nombreCompleto ? nombreCompleto + ", retrato" : "";
+    if (D.portada_encuadre) foto.style.objectPosition = D.portada_encuadre;
+    if (D.foto_principal_ancha) ancha.srcset = D.foto_principal_ancha;
+    else ancha.remove();
 
     $("#anio").textContent = new Date().getFullYear();
   }

@@ -44,8 +44,23 @@ de la web.
   foto (JPG calidad 80). Fotos de 5 MB recién salidas de la cámara hacen que la
   web tarde en cargar y ese es el momento en que la gente se va.
 
-Las `foto-01.svg`… que vienen ahora son de ejemplo: bórralas cuando pongas las
-de verdad.
+Las 12 fotos que hay ahora (`leia-01.jpg` … `leia-12.jpg`) salen de la sesión
+de Manuel Orts, elegidas una por toma: cada foto estaba en color y en blanco y
+negro, y poner las dos versiones de la misma toma no aporta nada en un book.
+
+### Cambiar la foto de portada
+
+La portada ocupa toda la pantalla, así que lleva **dos versiones**, porque una
+foto vertical metida en una pantalla apaisada se queda en un primer plano de la
+nariz:
+
+- `portada.jpg` — vertical, la que se ve en el móvil.
+- `portada-ancha.jpg` — apaisada, la que se ve en ordenador.
+
+Las dos están en `datos.js` (`foto_principal` y `foto_principal_ancha`). La
+apaisada de ahora está hecha ensanchando el fondo gris del estudio a los lados,
+que por ser un ciclorama liso se estira sin que se note. Si pones otra, que sea
+16:9 y con aire alrededor.
 
 ### Añadir vídeos
 

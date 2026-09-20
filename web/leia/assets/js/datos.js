@@ -16,7 +16,12 @@ window.DATOS = {
   marca:     "Leia Cervantes",          // el nombre de la barra superior
   titular:   "Actriz",
 
-  foto_principal: "assets/img/foto-01.svg",   // la foto de portada, a pantalla completa
+  /* La portada va a pantalla completa, así que lleva dos versiones: una
+     apaisada para ordenador y una vertical para el móvil. Si solo pones una,
+     se usa esa en todas partes. */
+  foto_principal:       "assets/img/portada.jpg",         // vertical (móvil)
+  foto_principal_ancha: "assets/img/portada-ancha.jpg",   // apaisada (ordenador)
+  portada_encuadre:     "center",             // qué parte se ve: "center 20%" sube el recorte
 
   presentacion:
     "Dos o tres líneas contando quién es Leia: su energía, lo que mejor se le " +
@@ -95,16 +100,18 @@ window.DATOS = {
   /* Si a alguna el recorte le sienta mal, añádele:  encuadre: "center 20%"  */
   /* (0% = pegado arriba, 100% = pegado abajo).                              */
   fotos: [
-    { archivo: "assets/img/foto-01.svg", alt: "Leia, primer plano" },
-    { archivo: "assets/img/foto-02.svg", alt: "Leia, primer plano en blanco y negro" },
-    { archivo: "assets/img/foto-03.svg", alt: "Leia, plano medio" },
-    { archivo: "assets/img/foto-04.svg", alt: "Leia, plano medio de perfil" },
-    { archivo: "assets/img/foto-05.svg", alt: "Leia, plano entero" },
-    { archivo: "assets/img/foto-06.svg", alt: "Leia, plano entero de espaldas" },
-    { archivo: "assets/img/foto-07.svg", alt: "Leia sentada, plano americano" },
-    { archivo: "assets/img/foto-08.svg", alt: "Leia, retrato de tres cuartos" },
-    { archivo: "assets/img/foto-09.svg", alt: "Leia sonriendo, primer plano" },
-    { archivo: "assets/img/foto-10.svg", alt: "Leia en movimiento" }
+    { archivo: "assets/img/leia-01.jpg", alt: "Leia, primer plano de frente" },
+    { archivo: "assets/img/leia-02.jpg", alt: "Leia sonriendo, primer plano con el pelo suelto" },
+    { archivo: "assets/img/leia-03.jpg", alt: "Leia, primer plano con coleta" },
+    { archivo: "assets/img/leia-04.jpg", alt: "Leia, plano medio de tres cuartos" },
+    { archivo: "assets/img/leia-05.jpg", alt: "Leia apoyada en un taburete, blanco y negro" },
+    { archivo: "assets/img/leia-06.jpg", alt: "Leia sentada en un taburete, sonriendo" },
+    { archivo: "assets/img/leia-07.jpg", alt: "Leia, plano medio corto mirando a cámara" },
+    { archivo: "assets/img/leia-08.jpg", alt: "Leia de perfil con el pelo suelto, blanco y negro" },
+    { archivo: "assets/img/leia-09.jpg", alt: "Leia, plano medio largo" },
+    { archivo: "assets/img/leia-10.jpg", alt: "Leia, plano medio con coleta, blanco y negro" },
+    { archivo: "assets/img/leia-11.jpg", alt: "Leia, plano entero" },
+    { archivo: "assets/img/leia-12.jpg", alt: "Leia, plano entero con las manos en los bolsillos" }
   ],
 
   /* ── Video book ──────────────────────────────────────────────────────── */
