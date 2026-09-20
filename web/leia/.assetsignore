@@ -1,5 +1,15 @@
-# Archivos del repositorio que no forman parte de la web publicada.
+# Lo que NO forma parte de la web publicada.
+#
+# Ojo con las dos primeras: .git es el historial completo del repositorio y
+# .wrangler son archivos temporales del despliegue. Si no se excluyen aquí,
+# Cloudflare los sirve como si fueran páginas y cualquiera puede descargarse
+# el repositorio entero desde la web.
+.git
+.wrangler
+
+# Y esto es del repositorio, no de la web.
 .github
 .pages.yml
+.assetsignore
 wrangler.jsonc
 README.md
