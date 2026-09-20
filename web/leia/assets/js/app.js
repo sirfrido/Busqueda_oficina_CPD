@@ -25,7 +25,7 @@
   /* Un título como "Teatro y danza" se convierte en el ancla #teatro-y-danza */
   function anclaDe(texto, respaldo) {
     var a = String(texto || "").toLowerCase()
-      .normalize("NFD").replace(/[̀-ͯ]/g, "")
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     return a || respaldo;
   }
@@ -478,6 +478,14 @@
   function error(mensaje) {
     var p = crear("p", "aviso", mensaje);
     $("#contenido").appendChild(p);
+  }
+
+  /* Si la página trae el contenido incrustado (vistas previas, copias para
+     abrir con doble clic), se usa ese y no se pide nada al servidor. */
+  var incrustado = document.getElementById("contenido-json");
+  if (incrustado) {
+    try { return pintar(JSON.parse(incrustado.textContent)); }
+    catch (e) { error("El contenido incrustado no es válido (" + e.message + ")."); return; }
   }
 
   fetch("contenido.json", { cache: "no-cache" })
