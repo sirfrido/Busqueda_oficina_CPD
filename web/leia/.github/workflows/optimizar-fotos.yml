@@ -1,31 +1,24 @@
-# Publica la web en GitHub Pages cada vez que se guarda algo desde el panel.
+# Optimiza las fotos que se suben desde el panel.
 #
-# Las fotos se optimizan aquí, al publicar, no en el repositorio: así se puede
-# subir la foto tal cual sale de la cámara y la web sirve una ligera, sin que
-# nadie tenga que acordarse de redimensionar nada.
+# Publicar la web lo hace Cloudflare Pages solo, con cada cambio. Lo único
+# que hace falta por aquí es que una foto de 3 MB recién salida de la cámara
+# no acabe tal cual en la web: este proceso la reduce y la vuelve a guardar
+# en el repositorio, y Cloudflare publica ya la versión ligera.
 
-name: Publicar la web
+name: Optimizar las fotos
 
 on:
   push:
     branches: [main]
+    paths: ['assets/img/**']
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
+  contents: write
 
 jobs:
-  publicar:
+  optimizar:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.despliegue.outputs.page_url }}
 
     steps:
       - uses: actions/checkout@v4
@@ -35,7 +28,7 @@ jobs:
 
       - run: pip install --quiet Pillow
 
-      - name: Optimizar las fotos
+      - name: Reducir las que vengan grandes
         run: |
           python3 - <<'PY'
           from PIL import Image, ImageOps
@@ -74,13 +67,14 @@ jobs:
               print(f"  · {f.name}: {peso//1024} KB → {f.stat().st_size//1024} KB  {im.size}")
           PY
 
-      # enablement: activa GitHub Pages solo la primera vez, sin tener que
-      # entrar en los ajustes del repositorio a mano.
-      - uses: actions/configure-pages@v5
-        with: { enablement: true }
-
-      - uses: actions/upload-pages-artifact@v3
-        with: { path: . }
-
-      - id: despliegue
-        uses: actions/deploy-pages@v4
+      - name: Guardar los cambios
+        run: |
+          if git diff --quiet; then
+            echo "Nada que optimizar."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/img
+          git commit -m "Optimiza las fotos subidas desde el panel"
+          git push

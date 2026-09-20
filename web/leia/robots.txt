@@ -1,0 +1,6 @@
+# La web no debe salir en Google. Se permite el rastreo a propósito: la
+# instrucción de no indexar viaja en las cabeceras (ver el archivo _headers),
+# y para obedecerla el buscador tiene que poder leer la página. Bloquear el
+# rastreo aquí conseguiría lo contrario: que no la lea y la indexe a ciegas.
+User-agent: *
+Allow: /

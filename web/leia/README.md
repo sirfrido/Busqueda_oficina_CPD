@@ -13,8 +13,9 @@ sin servidor y sin cuota mensual.
 │   ├── css/estilos.css           colores, tipografías y diseño
 │   ├── js/app.js                 el motor que pinta la web
 │   └── img/                      las fotos
+├── robots.txt, _headers          quién puede ver la web y cómo se cachea
 └── .github/workflows/
-    └── publicar.yml              publica sola y optimiza las fotos
+    └── optimizar-fotos.yml       encoge las fotos pesadas que se suban
 ```
 
 ## El panel de control
@@ -76,26 +77,48 @@ lados; por ser un ciclorama de degradado liso, el estirado no se nota.
 
 ## Cómo se publica
 
-`.github/workflows/publicar.yml` se dispara con cada cambio en `main`,
-optimiza las fotos y publica en GitHub Pages. No hay que hacer nada a mano.
+La web está en **Cloudflare Pages**, conectado a este repositorio: cada vez
+que se guarda algo desde el panel, Cloudflare la publica sola en menos de un
+minuto. No hay que hacer nada a mano.
 
-**Puesta en marcha, una sola vez:** en el repositorio, *Settings → Pages →
-Build and deployment → Source: **GitHub Actions***.
+Ajustes del proyecto en Cloudflare, por si hay que rehacerlo algún día:
 
-**Dominio propio:** en *Settings → Pages → Custom domain* escribes el dominio,
-y en el panel de quien te vendió el dominio añades estos registros DNS:
+| Ajuste | Valor |
+|---|---|
+| Framework preset | None |
+| Build command | *(vacío)* |
+| Build output directory | `/` |
+| Production branch | `main` |
 
-| Tipo | Nombre | Valor |
-|---|---|---|
-| A | @ | 185.199.108.153 |
-| A | @ | 185.199.109.153 |
-| A | @ | 185.199.110.153 |
-| A | @ | 185.199.111.153 |
-| CNAME | www | sirfrido.github.io |
+El único proceso automático que queda en GitHub es
+`.github/workflows/optimizar-fotos.yml`: cuando se sube una foto pesada desde
+el panel, la reduce y la vuelve a guardar aquí, y Cloudflare publica ya la
+versión ligera. Por eso se pueden subir las fotos tal cual salen de la cámara.
 
-(Si es un subdominio tipo `leia.hampastudio.com`, basta el CNAME apuntando a
-`sirfrido.github.io`.) Deja marcado *Enforce HTTPS* cuando se active: el
-certificado lo pone GitHub gratis y tarda unos minutos en emitirse.
+**Dominio propio:** en Cloudflare, *Workers & Pages → el proyecto → Custom
+domains → Set up a domain*. Si el dominio está comprado en Cloudflare, no hay
+que tocar el DNS: se configura solo. Si está en otro sitio, Cloudflare te dice
+qué registro añadir (un CNAME apuntando al dominio `.pages.dev` del proyecto).
+El certificado HTTPS lo pone Cloudflare gratis.
+
+## Quién puede ver la web
+
+Ahora mismo: **cualquiera con el enlace, pero fuera de Google**. La web se abre
+sin registrarse —para que una directora de casting entre al instante— pero
+lleva instrucción de no indexar, así que no aparece en búsquedas ni en el
+buscador de imágenes. La instrucción está en dos sitios, y hay que quitarla de
+los dos para que sí aparezca: la etiqueta `robots` de `index.html` y las líneas
+`X-Robots-Tag` de `_headers`.
+
+**Para cerrarla del todo** (que haya que poner un correo y un código para
+entrar, como la galería del fotógrafo): en Cloudflare, *Zero Trust → Access →
+Applications → Add an application → Self-hosted*, se apunta al dominio de la
+web y se añaden los correos que pueden entrar. Es gratis hasta 50 personas y se
+desactiva igual de rápido. Ten en cuenta que añade fricción: quien reciba el
+enlace tendrá que registrarse para ver el book.
+
+**El repositorio es privado**, así que las fotos y el código no se pueden
+curiosear desde GitHub aunque se conozca la dirección.
 
 ## Tocar el diseño
 

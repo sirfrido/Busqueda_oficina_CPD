@@ -1,0 +1,16 @@
+# Cabeceras que aplica Cloudflare Pages.
+
+/*
+  # Fuera de Google. Esto cubre también las fotos, que una etiqueta dentro
+  # del HTML no puede proteger. Para que la web sí aparezca en búsquedas,
+  # borra estas dos líneas y la etiqueta "robots" de index.html.
+  X-Robots-Tag: noindex, nofollow
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+/contenido.json
+  # Cambia cada vez que se guarda algo en el panel: caché corta.
+  Cache-Control: public, max-age=60
+
+/assets/img/*
+  Cache-Control: public, max-age=86400
