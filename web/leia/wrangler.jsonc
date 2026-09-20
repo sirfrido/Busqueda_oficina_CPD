@@ -12,5 +12,11 @@
 
   // Sin direcciones de vista previa: cada versión antigua tendría su propia
   // URL pública, y ahí seguiría viva la que subió el historial por error.
-  "preview_urls": false
+  "preview_urls": false,
+
+  // El dominio propio. Se conecta solo en cada despliegue.
+  "routes": [
+    { "pattern": "leiacervantes.com", "custom_domain": true },
+    { "pattern": "www.leiacervantes.com", "custom_domain": true }
+  ]
 }
