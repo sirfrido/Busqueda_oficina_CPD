@@ -1,23 +1,30 @@
-# Optimiza las fotos que se suben desde el panel.
+# Lo que pasa cada vez que se guarda algo desde el panel.
 #
-# Publicar la web lo hace Cloudflare Pages solo, con cada cambio. Lo único
-# que hace falta por aquí es que una foto de 3 MB recién salida de la cámara
-# no acabe tal cual en la web: este proceso la reduce y la vuelve a guardar
-# en el repositorio, y Cloudflare publica ya la versión ligera.
+# Publicar la web lo hace Cloudflare solo. Aquí se preparan las fotos:
+#   1. Se encogen las que vengan pesadas de la cámara.
+#   2. Se construye la portada apaisada a partir de la vertical, porque una
+#      foto vertical a pantalla completa en un ordenador se queda en un primer
+#      plano de la nariz. Así solo hay que subir una foto, no dos.
 
-name: Optimizar las fotos
+name: Preparar las fotos
 
 on:
   push:
     branches: [main]
-    paths: ['assets/img/**']
+    paths:
+      - 'assets/img/**'
+      - 'contenido.json'
   workflow_dispatch:
 
 permissions:
   contents: write
 
+concurrency:
+  group: preparar-fotos          # si se guarda dos veces seguidas, que no se pisen
+  cancel-in-progress: false
+
 jobs:
-  optimizar:
+  preparar:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,53 +35,33 @@ jobs:
 
       - run: pip install --quiet Pillow
 
-      - name: Reducir las que vengan grandes
-        run: |
-          python3 - <<'PY'
-          from PIL import Image, ImageOps
-          import pathlib
+      - name: Encoger las fotos pesadas
+        run: python3 herramientas/optimizar.py
 
-          LADO_MAX = 2560          # más que esto no lo aprovecha ninguna pantalla
-          PESO_MAX = 450 * 1024    # a partir de aquí, se vuelve a comprimir
-          CALIDAD  = 82
-
-          for f in sorted(pathlib.Path("assets/img").rglob("*")):
-              if f.suffix.lower() not in (".jpg", ".jpeg", ".png", ".webp"):
-                  continue
-              peso = f.stat().st_size
-              try:
-                  original = Image.open(f)
-                  formato = original.format          # se pierde al rotar: se lee antes
-                  im = ImageOps.exif_transpose(original)
-              except Exception as e:
-                  print(f"  ! {f.name}: no se ha podido abrir ({e})")
-                  continue
-
-              grande = max(im.size) > LADO_MAX
-              if not grande and peso <= PESO_MAX:
-                  continue
-
-              # Ojo: se conserva el nombre y el formato. Cambiar la extensión
-              # dejaría a contenido.json apuntando a un archivo que ya no existe.
-              if grande:
-                  im.thumbnail((LADO_MAX, LADO_MAX), Image.LANCZOS)
-              if formato == "JPEG":
-                  im.convert("RGB").save(f, "JPEG", quality=CALIDAD, optimize=True, progressive=True)
-              elif formato == "WEBP":
-                  im.save(f, "WEBP", quality=CALIDAD, method=6)
-              else:
-                  im.save(f, formato, optimize=True)
-              print(f"  · {f.name}: {peso//1024} KB → {f.stat().st_size//1024} KB  {im.size}")
-          PY
+      - name: Construir la portada apaisada
+        run: python3 herramientas/portada.py
 
       - name: Guardar los cambios
         run: |
           if git diff --quiet; then
-            echo "Nada que optimizar."
+            echo "Nada que preparar."
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add assets/img
-          git commit -m "Optimiza las fotos subidas desde el panel"
-          git push
+          git commit -m "Prepara las fotos subidas desde el panel"
+
+          # Si mientras tanto se ha guardado otra cosa desde el panel, el push
+          # se rechaza. Se reintenta reordenando encima de lo que haya llegado.
+          for intento in 1 2 3 4 5; do
+            if git push; then
+              echo "Guardado en el intento $intento."
+              exit 0
+            fi
+            echo "Rechazado (alguien guardó antes). Reintento $intento…"
+            sleep $((intento * 5))
+            git pull --rebase --autostash origin main || exit 1
+          done
+          echo "No se ha podido guardar después de 5 intentos."
+          exit 1

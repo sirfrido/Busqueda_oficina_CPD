@@ -4,108 +4,220 @@
     "apellidos": "Cervantes Hernández",
     "marca": "Leia Cervantes",
     "titular": "Actriz",
-    "portada": "assets/img/portada.jpg",
+    "portada": "assets/img/Leia_018.jpg",
     "portada_ancha": "assets/img/portada-ancha.jpg",
     "portada_encuadre": "center",
     "boton": "Ver foto book"
   },
-
   "foto_book": {
     "titulo": "Foto book",
     "fotos": [
-      { "archivo": "assets/img/leia-01.jpg", "alt": "Leia, primer plano de frente", "encuadre": "" },
-      { "archivo": "assets/img/leia-02.jpg", "alt": "Leia sonriendo, primer plano con el pelo suelto", "encuadre": "" },
-      { "archivo": "assets/img/leia-03.jpg", "alt": "Leia, primer plano con coleta", "encuadre": "" },
-      { "archivo": "assets/img/leia-04.jpg", "alt": "Leia, plano medio de tres cuartos", "encuadre": "" },
-      { "archivo": "assets/img/leia-05.jpg", "alt": "Leia apoyada en un taburete, blanco y negro", "encuadre": "" },
-      { "archivo": "assets/img/leia-06.jpg", "alt": "Leia sentada en un taburete, sonriendo", "encuadre": "" },
-      { "archivo": "assets/img/leia-07.jpg", "alt": "Leia, plano medio corto mirando a cámara", "encuadre": "" },
-      { "archivo": "assets/img/leia-08.jpg", "alt": "Leia de perfil con el pelo suelto, blanco y negro", "encuadre": "" },
-      { "archivo": "assets/img/leia-09.jpg", "alt": "Leia, plano medio largo", "encuadre": "" },
-      { "archivo": "assets/img/leia-10.jpg", "alt": "Leia, plano medio con coleta, blanco y negro", "encuadre": "" },
-      { "archivo": "assets/img/leia-11.jpg", "alt": "Leia, plano entero", "encuadre": "" },
-      { "archivo": "assets/img/leia-12.jpg", "alt": "Leia, plano entero con las manos en los bolsillos", "encuadre": "" }
+      {
+        "archivo": "assets/img/leia-01.jpg",
+        "alt": "Leia, primer plano de frente"
+      },
+      {
+        "archivo": "assets/img/leia-02.jpg",
+        "alt": "Leia sonriendo, primer plano con el pelo suelto"
+      },
+      {
+        "archivo": "assets/img/leia-03.jpg",
+        "alt": "Leia, primer plano con coleta"
+      },
+      {
+        "archivo": "assets/img/leia-04.jpg",
+        "alt": "Leia, plano medio de tres cuartos"
+      },
+      {
+        "archivo": "assets/img/leia-05.jpg",
+        "alt": "Leia apoyada en un taburete, blanco y negro"
+      },
+      {
+        "archivo": "assets/img/leia-06.jpg",
+        "alt": "Leia sentada en un taburete, sonriendo"
+      },
+      {
+        "archivo": "assets/img/leia-07.jpg",
+        "alt": "Leia, plano medio corto mirando a cámara"
+      },
+      {
+        "archivo": "assets/img/leia-08.jpg",
+        "alt": "Leia de perfil con el pelo suelto, blanco y negro"
+      },
+      {
+        "archivo": "assets/img/leia-09.jpg",
+        "alt": "Leia, plano medio largo"
+      },
+      {
+        "archivo": "assets/img/leia-10.jpg",
+        "alt": "Leia, plano medio con coleta, blanco y negro"
+      },
+      {
+        "archivo": "assets/img/leia-11.jpg",
+        "alt": "Leia, plano entero"
+      },
+      {
+        "archivo": "assets/img/leia-12.jpg",
+        "alt": "Leia, plano entero con las manos en los bolsillos"
+      }
     ]
   },
-
   "video_book": {
     "titulo": "Video book",
     "destacado": {
       "titulo": "Reel",
-      "descripcion": "Montaje de escenas. Minuto y medio.",
-      "youtube": "", "vimeo": "", "archivo": "", "portada": ""
+      "descripcion": "Montaje de escenas. Minuto y medio."
     },
     "videos": [
-      { "titulo": "Escena dramática", "descripcion": "Fragmento de «Título» (2026)", "youtube": "", "vimeo": "", "archivo": "", "portada": "" },
-      { "titulo": "Escena de comedia", "descripcion": "Self-tape", "youtube": "", "vimeo": "", "archivo": "", "portada": "" },
-      { "titulo": "Presentación a cámara", "descripcion": "30 segundos", "youtube": "", "vimeo": "", "archivo": "", "portada": "" }
+      {
+        "titulo": "Escena dramática",
+        "descripcion": "Fragmento de «Título» (2026)"
+      },
+      {
+        "titulo": "Escena de comedia",
+        "descripcion": "Self-tape"
+      },
+      {
+        "titulo": "Presentación a cámara",
+        "descripcion": "30 segundos"
+      }
     ]
   },
-
-  "secciones": [],
-
   "experiencia": {
     "titulo": "Experiencia",
     "intro": "Dos o tres líneas contando quién es Leia: su energía, lo que mejor se le da en escena y qué tipo de proyectos busca. Breve y directo: quien lo lee está decidiendo en diez segundos si sigue mirando.",
     "ficha": [
-      { "campo": "Edad", "valor": "15 años" },
-      { "campo": "Edad que aparenta", "valor": "14 - 17" },
-      { "campo": "Altura", "valor": "1,54 m" },
-      { "campo": "Talla", "valor": "S" },
-      { "campo": "Calzado", "valor": "38" },
-      { "campo": "Ojos", "valor": "Marrones" },
-      { "campo": "Pelo", "valor": "Castaño largo" },
-      { "campo": "Residencia", "valor": "Valencia" },
-      { "campo": "Disponibilidad", "valor": "Viajar dentro de España" }
+      {
+        "campo": "Edad",
+        "valor": "15 años"
+      },
+      {
+        "campo": "Edad que aparenta",
+        "valor": "14 - 17"
+      },
+      {
+        "campo": "Altura",
+        "valor": "1,54 m"
+      },
+      {
+        "campo": "Talla",
+        "valor": "S"
+      },
+      {
+        "campo": "Calzado",
+        "valor": "38"
+      },
+      {
+        "campo": "Ojos",
+        "valor": "Marrones"
+      },
+      {
+        "campo": "Pelo",
+        "valor": "Castaño largo"
+      },
+      {
+        "campo": "Residencia",
+        "valor": "Valencia"
+      },
+      {
+        "campo": "Disponibilidad",
+        "valor": "Viajar dentro de España"
+      }
     ],
     "idiomas": [
-      { "idioma": "Español", "nivel": "Nativo" },
-      { "idioma": "Valenciano", "nivel": "Nativo" },
-      { "idioma": "Inglés", "nivel": "Intermedio" }
+      {
+        "idioma": "Español",
+        "nivel": "Nativo"
+      },
+      {
+        "idioma": "Valenciano",
+        "nivel": "Nativo"
+      },
+      {
+        "idioma": "Inglés",
+        "nivel": "Intermedio"
+      }
     ],
-    "habilidades": ["Danza", "Canto", "Natación", "Patinaje", "Bicicleta", "Improvisación"],
+    "habilidades": [
+      "Danza",
+      "Canto",
+      "Natación",
+      "Patinaje",
+      "Bicicleta",
+      "Improvisación"
+    ],
     "creditos": [
       {
         "categoria": "Cine",
         "trabajos": [
-          { "anio": "2026", "titulo": "Título del cortometraje", "personaje": "Personaje", "direccion": "Nombre de dirección", "productora": "Productora" }
+          {
+            "anio": "2026",
+            "titulo": "Título del cortometraje",
+            "personaje": "Personaje",
+            "direccion": "Nombre de dirección",
+            "productora": "Productora"
+          }
         ]
       },
       {
         "categoria": "Televisión",
         "trabajos": [
-          { "anio": "2025", "titulo": "Título de la serie", "personaje": "Personaje episódico", "direccion": "Nombre de dirección", "productora": "Cadena / Productora" }
+          {
+            "anio": "2025",
+            "titulo": "Título de la serie",
+            "personaje": "Personaje episódico",
+            "direccion": "Nombre de dirección",
+            "productora": "Cadena / Productora"
+          }
         ]
       },
       {
         "categoria": "Teatro",
         "trabajos": [
-          { "anio": "2025", "titulo": "Título de la obra", "personaje": "Personaje", "direccion": "Nombre de dirección", "productora": "Compañía / Sala" }
+          {
+            "anio": "2025",
+            "titulo": "Título de la obra",
+            "personaje": "Personaje",
+            "direccion": "Nombre de dirección",
+            "productora": "Compañía / Sala"
+          }
         ]
       },
       {
         "categoria": "Publicidad",
         "trabajos": [
-          { "anio": "2025", "titulo": "Marca", "personaje": "Protagonista", "direccion": "Nombre de dirección", "productora": "Agencia" }
+          {
+            "anio": "2025",
+            "titulo": "Marca",
+            "personaje": "Protagonista",
+            "direccion": "Nombre de dirección",
+            "productora": "Agencia"
+          }
         ]
       },
       {
         "categoria": "Formación",
         "trabajos": [
-          { "anio": "2024 - actualidad", "titulo": "Interpretación ante la cámara", "personaje": "", "direccion": "Profesor/a", "productora": "Escuela" },
-          { "anio": "2023", "titulo": "Danza", "personaje": "", "direccion": "", "productora": "Conservatorio / Escuela" }
+          {
+            "anio": "2024 - actualidad",
+            "titulo": "Interpretación ante la cámara",
+            "direccion": "Profesor/a",
+            "productora": "Escuela"
+          },
+          {
+            "anio": "2023",
+            "titulo": "Danza",
+            "productora": "Conservatorio / Escuela"
+          }
         ]
       }
     ]
   },
-
   "contacto": {
     "titulo": "Contacto",
     "etiqueta": "Representación",
     "persona": "Alex Cervantes (padre)",
     "email": "alex@hampastudio.com",
-    "telefono": "",
-    "nota": "Para castings, pruebas y disponibilidad, escribid al correo.",
-    "redes": []
+    "nota": "Para castings, pruebas y disponibilidad, escribid al correo."
   }
 }

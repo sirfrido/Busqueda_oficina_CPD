@@ -14,8 +14,11 @@ sin servidor y sin cuota mensual.
 │   ├── js/app.js                 el motor que pinta la web
 │   └── img/                      las fotos
 ├── robots.txt, _headers          quién puede ver la web y cómo se cachea
+├── herramientas/
+│   ├── optimizar.py              encoge las fotos pesadas que se suban
+│   └── portada.py                fabrica la portada apaisada
 └── .github/workflows/
-    └── optimizar-fotos.yml       encoge las fotos pesadas que se suban
+    └── optimizar-fotos.yml       lanza las dos con cada cambio
 ```
 
 ## El panel de control
@@ -64,16 +67,19 @@ experiencia. Sin título no se muestra; vacía tampoco.
 
 ### Cambiar la foto de portada
 
-La portada ocupa toda la pantalla y lleva **dos versiones**, porque una foto
-vertical metida en una pantalla apaisada se queda en un primer plano de la
-nariz:
+Sube la foto vertical en *Portada → Foto de portada* y ya está. **La versión
+apaisada para ordenador se construye sola** en un par de minutos.
 
-- *Foto de portada (vertical)* — la del móvil.
-- *Foto de portada (apaisada)* — la del ordenador. Que sea 16:9 y con aire
-  alrededor.
+Hace falta una apaisada porque una foto vertical a pantalla completa en un
+monitor se queda en un primer plano de la nariz. `herramientas/portada.py` la
+fabrica: recorta en vertical alrededor de ella y ensancha el lienzo a los
+lados rellenando con el ciclorama del estudio, que reconstruye midiendo su
+color fila a fila allí donde no está ella. Si la foto ya es un primer plano
+que ocupa todo el ancho, no hay fondo que reconstruir y entonces recorta una
+banda a la altura de la cara.
 
-La apaisada de ahora está hecha ensanchando el fondo gris del estudio a los
-lados; por ser un ciclorama de degradado liso, el estirado no se nota.
+El nombre va abajo a propósito: ahí no tapa la cara, que en un retrato
+siempre está arriba.
 
 ## Cómo se publica
 

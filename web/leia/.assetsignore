@@ -9,6 +9,7 @@
 
 # Y esto es del repositorio, no de la web.
 .github
+herramientas
 .pages.yml
 .assetsignore
 wrangler.jsonc

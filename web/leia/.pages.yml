@@ -23,17 +23,9 @@ content:
           - { name: marca, label: Nombre en la barra de arriba, type: string }
           - { name: titular, label: Debajo del nombre, en la barra, type: string, description: "Actriz" }
           - name: portada
-            label: Foto de portada (vertical, para el móvil)
+            label: Foto de portada
             type: image
-            description: "Vertical. La que se ve en el móvil."
-          - name: portada_ancha
-            label: Foto de portada (apaisada, para ordenador)
-            type: image
-            description: "Apaisada 16:9, con aire alrededor. Una foto vertical aquí sale demasiado cerrada."
-          - name: portada_encuadre
-            label: Encuadre de la portada
-            type: string
-            description: "center = centrada. center 20% sube el recorte, center 80% lo baja."
+            description: "Sube la foto vertical, tal cual. La versión apaisada para ordenador se genera sola en un par de minutos."
           - { name: boton, label: Texto del botón, type: string }
 
       # ── Foto book ────────────────────────────────────────────────────
