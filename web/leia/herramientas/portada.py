@@ -20,7 +20,7 @@ import pathlib
 import sys
 
 ANCHO_MAX = 2560                         # el ancho máximo que se sirve (16:9)
-SALIDA = pathlib.Path("assets/img/portada-ancha.jpg")
+SALIDA = pathlib.Path("portada-ancha.jpg")   # en la raíz: no es una foto subida
 MARGEN = 0.06                            # aire por encima y por debajo de ella
 ANCHA_SI_OCUPA = 0.80                    # a partir de aquí se trata como primer plano
 CALIDAD = 82

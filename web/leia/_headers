@@ -14,3 +14,10 @@
 
 /assets/img/*
   Cache-Control: public, max-age=86400
+
+/portada-ancha.jpg
+  # Se rehace sola al cambiar la foto de portada y conserva el nombre, así que
+  # con una caché larga el navegador seguiría enseñando la anterior. Vive en la
+  # raíz y no en assets/img justamente para que no le aplique aquella regla:
+  # las dos se sumarían y el navegador recibiría una cabecera contradictoria.
+  Cache-Control: public, max-age=60

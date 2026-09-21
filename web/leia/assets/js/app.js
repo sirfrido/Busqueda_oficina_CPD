@@ -10,6 +10,12 @@
 
   var $ = function (sel) { return document.querySelector(sel); };
 
+  /* La portada apaisada la fabrica herramientas/portada.py y siempre se llama
+     igual. NO se guarda en contenido.json a propósito: el panel borra del
+     contenido todo campo que no aparezca en sus formularios, y así ya se
+     perdió una vez, dejando la web sirviendo la foto vertical en ordenador. */
+  var PORTADA_ANCHA = "portada-ancha.jpg";
+
   function crear(etiqueta, clase, texto) {
     var el = document.createElement(etiqueta);
     if (clase) el.className = clase;
@@ -37,17 +43,25 @@
     sec.id = "inicio";
 
     var picture = crear("picture", "hero__imagen");
-    if (id.portada_ancha) {
-      var fuente = document.createElement("source");
-      fuente.media = "(min-aspect-ratio: 4/5)";
-      fuente.srcset = ruta(id.portada_ancha);
-      picture.appendChild(fuente);
-    }
+    var fuente = document.createElement("source");
+    fuente.media = "(min-aspect-ratio: 4/5)";      // pantallas apaisadas
+    fuente.srcset = PORTADA_ANCHA;
+    picture.appendChild(fuente);
+
     var img = crear("img", "hero__fondo");
-    img.src = ruta(id.portada || id.portada_ancha);
     img.alt = [id.nombre, id.apellidos].filter(Boolean).join(" ") + ", retrato";
     img.setAttribute("fetchpriority", "high");
-    if (id.portada_encuadre) img.style.objectPosition = id.portada_encuadre;
+
+    /* Si la apaisada todavía no se ha fabricado (los dos minutos justos
+       después de cambiar la foto), se cae a la vertical en vez de dejar un
+       hueco roto. */
+    img.addEventListener("error", function alFallar() {
+      img.removeEventListener("error", alFallar);
+      if (fuente.parentNode) fuente.parentNode.removeChild(fuente);
+      img.src = ruta(id.portada);
+    });
+
+    img.src = ruta(id.portada);
     picture.appendChild(img);
     sec.appendChild(picture);
 
@@ -464,7 +478,7 @@
     if (D.contacto)    pintarContacto(D.contacto, id.nombre);
 
     // 5. Marco: portada, barra y pie
-    if (id.portada || id.portada_ancha) pintarPortada(id);
+    if (id.portada) pintarPortada(id);
     pintarBarra(id);
     pintarPie(id);
 
