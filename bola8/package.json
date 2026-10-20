@@ -1,0 +1,8 @@
+{
+  "name": "bola8-hampa",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@anthropic-ai/sdk": "0.132.1"
+  }
+}

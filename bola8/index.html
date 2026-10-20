@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Bola 8 Hampa</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -238,6 +243,8 @@
     .face, .die { transition: none; }
   }
 </style>
+</head>
+<body>
 
 <canvas id="grain" aria-hidden="true"></canvas>
 
@@ -341,7 +348,7 @@ ${text}
     ["A CAGAR", "La bola está en huelga. El mensaje es el mismo de siempre: vete a cagar."]
   ];
 
-  let last = { text: "", answer: "" }, busy = false, ctl = null, spinTimer = null;
+  let last = { text: "", answer: "" }, busy = false, spinTimer = null;
 
   function setThinking(on) {
     busy = on;
@@ -362,6 +369,16 @@ ${text}
     label.textContent = "Veredicto de la bola";
     tools.hidden = false;
     ball.classList.add("revealed");
+  }
+
+  function errorLine(code) {
+    if (code === "rate_limited") return ["RELÁJATE", "Demasiadas quejas seguidas, hasta la bola se ha cansado de ti. Espera un rato."];
+    if (code === "refused") return ["NI YO", "Esta queja es tan chunga que ni la bola quiere tocarla. Reescríbela, anda."];
+    if (code === "not_granted" || code === "sampling_disabled") {
+      notice.textContent = "La bola necesita permiso para usar Claude. Sin él, solo suelta frases de repuesto.";
+      notice.hidden = false; return [];
+    }
+    return ["SIN SEÑAL", "Se ha caído la conexión con el más allá. Dale otra vez."];
   }
 
   async function ask(text, previous) {
@@ -387,29 +404,29 @@ ${text}
     await ready;
     let bola, answer;
     if (sample) {
-      ctl = new AbortController();
+      // Abierta dentro de Claude: usa la IA del propio visor
       try {
-        const data = await sample.json(PROMPT(text.slice(0, 6000), previous), { modelTier: "quick", cache: false, signal: ctl.signal });
+        const data = await sample.json(PROMPT(text.slice(0, 6000), previous), { modelTier: "quick", cache: false });
         bola = data && data.bola; answer = data && data.respuesta;
-        if (!answer) throw { code: "invalid_json" };
         notice.hidden = true;
       } catch (e) {
-        const code = e && e.code;
-        if (code === "not_granted" || code === "sampling_disabled" || code === "not_declared" || code === "capability_disabled") {
-          sample = null;
-          notice.textContent = "La bola necesita permiso para usar Claude. Sin él, solo suelta frases de repuesto.";
-          notice.hidden = false;
-        } else if (code === "rate_limited") {
-          [bola, answer] = ["RELÁJATE", "Demasiadas quejas seguidas, hasta la bola se ha cansado de ti. Espera un rato."];
-        } else if (code === "refused") {
-          [bola, answer] = ["NI YO", "Esta queja es tan chunga que ni la bola quiere tocarla. Reescríbela, anda."];
-        } else {
-          [bola, answer] = ["SIN SEÑAL", "Se ha caído la conexión con el más allá. Dale otra vez."];
-        }
+        [bola, answer] = errorLine(e && e.code);
       }
     } else {
-      notice.textContent = "Para que la bola conteste con IA tienes que abrir este enlace con tu cuenta de Claude iniciada. Ahora mismo van frases de repuesto.";
-      notice.hidden = false;
+      // Navegador normal: pregunta al servidor (/api/bola)
+      try {
+        const r = await fetch("api/bola", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: text.slice(0, 6000), previous: previous || "" })
+        });
+        const data = await r.json().catch(() => ({}));
+        if (r.ok) { bola = data.bola; answer = data.respuesta; notice.hidden = true; }
+        else [bola, answer] = errorLine(data.error);
+      } catch {
+        notice.textContent = "No hay conexión con la bola. Mira tu internet y vuelve a probar.";
+        notice.hidden = false;
+      }
     }
     if (!answer) [bola, answer] = BACKUP[Math.floor(Math.random() * BACKUP.length)];
 
@@ -434,3 +451,5 @@ ${text}
   });
 })();
 </script>
+</body>
+</html>
