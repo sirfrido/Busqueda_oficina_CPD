@@ -38,8 +38,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 28px;
-    padding-block: 36px 48px;
+    gap: 14px;
+    padding-block: 14px 24px;
     padding-left: max(16px, env(safe-area-inset-left, 0px));
     padding-right: max(16px, env(safe-area-inset-right, 0px));
     isolation: isolate;
@@ -56,22 +56,22 @@
   #grain { position: fixed; inset: 0; z-index: -1; width: 100%; height: 100%; opacity: .5; pointer-events: none; }
 
   /* ---------- cabecera ---------- */
-  header { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
-  header img { width: min(300px, 70vw); height: auto; display: block; }
+  header { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+  header img { width: min(190px, 50vw); height: auto; display: block; }
   .desk {
     font-family: var(--font-label);
     font-weight: 700;
-    font-size: 13px;
-    letter-spacing: .42em;
+    font-size: 11px;
+    letter-spacing: .38em;
     text-transform: uppercase;
-    padding: 8px 6px 6px 14px; /* compensa el tracking */
+    padding: 6px 4px 4px 10px; /* compensa el tracking */
     border-top: 2px solid var(--ink);
     border-bottom: 2px solid var(--ink);
   }
   .desk span { color: var(--red); }
 
   /* ---------- bola ---------- */
-  .stage { position: relative; width: min(360px, 80vw); aspect-ratio: 1; max-width: 100%; }
+  .stage { position: relative; width: min(280px, 70vw, 36vh); min-width: 200px; aspect-ratio: 1; max-width: 100%; margin-block: 6px 10px; }
   .shadow {
     position: absolute; left: 12%; right: 12%; bottom: -7%; height: 10%;
     background: radial-gradient(ellipse, rgba(0,0,0,.85), transparent 70%);
@@ -131,14 +131,14 @@
     clip-path: polygon(50% 98%, 2% 6%, 98% 6%);
     background: linear-gradient(180deg, #4057ff 0%, var(--window) 60%, #1527a8 100%);
     display: flex; justify-content: center; align-items: flex-start;
-    padding: 16% 22% 0;
+    padding: 17% 25% 0;
     opacity: 0; transform: translateY(14%) scale(.7) rotate(-14deg);
     transition: opacity .9s ease .2s, transform 1.1s cubic-bezier(.2,1.2,.4,1) .2s;
   }
   .ball.revealed .die { opacity: 1; transform: none; }
   .die span {
     font-family: var(--font-die);
-    font-size: clamp(15px, 4.4vw, 24px); line-height: .95;
+    font-size: clamp(12px, 3.4vw, 18px); line-height: .95;
     letter-spacing: .02em; text-align: center; color: #e6ebff;
     text-shadow: 0 0 8px rgba(170,190,255,.9);
     overflow-wrap: anywhere;
@@ -166,9 +166,9 @@
   /* ---------- veredicto ---------- */
   .verdict {
     width: min(620px, 100%);
-    min-height: 4.5em;
+    min-height: 3.5em;
     text-align: center;
-    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
   }
   .verdict .label {
     font-family: var(--font-label); font-weight: 700; font-size: 11px;
@@ -177,18 +177,19 @@
   #reply {
     margin: 0;
     font-family: var(--font-body); font-weight: 800;
-    font-size: clamp(20px, 4.4vw, 28px); line-height: 1.22;
+    font-size: clamp(19px, 4vw, 25px); line-height: 1.22;
     text-wrap: balance;
   }
   #reply.idle { color: var(--muted); font-weight: 600; font-size: clamp(16px, 3.4vw, 19px); }
   #reply.pop { animation: pop .5s ease both; }
   @keyframes pop { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  #tema { margin: 0; font-size: 13px; color: var(--muted); font-style: italic; }
   .tools { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 
   /* ---------- mostrador ---------- */
   form {
     width: min(620px, 100%);
-    display: flex; flex-direction: column; gap: 10px;
+    display: flex; flex-direction: column; gap: 8px;
   }
   .formhead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
   .formhead label {
@@ -197,8 +198,8 @@
   }
   .formhead small { color: var(--muted); font-size: 12px; }
   textarea {
-    width: 100%; min-height: 110px; max-height: 320px; resize: vertical;
-    padding: 14px 16px;
+    width: 100%; min-height: 84px; max-height: 300px; resize: vertical;
+    padding: 12px 14px;
     font: 16px/1.45 var(--font-body);
     color: var(--ink);
     background: rgba(20,21,23,.85);
@@ -268,6 +269,7 @@
   <section class="verdict" aria-live="polite">
     <div class="label" id="verdictLabel">Veredicto de la bola</div>
     <p id="reply" class="idle">Pega aquí la queja o el email del cliente. La bola lo lee entero y le contesta como se merece.</p>
+    <p id="tema" hidden></p>
     <div class="tools" id="tools" hidden>
       <button type="button" class="ghost" id="copy">Copiar</button>
       <button type="button" class="ghost" id="again">Otra respuesta</button>
@@ -296,7 +298,7 @@
   const $ = id => document.getElementById(id);
   const ball = $("ball"), die = $("die"), reply = $("reply"), q = $("q"),
         send = $("send"), form = $("form"), tools = $("tools"),
-        notice = $("notice"), count = $("count"), label = $("verdictLabel");
+        notice = $("notice"), count = $("count"), label = $("verdictLabel"), temaEl = $("tema");
 
   // ---------- grano de pizarra ----------
   const g = $("grain");
@@ -323,18 +325,41 @@
   let sample = null;
   const ready = window.claude?.use ? window.claude.use("sample").then(s => (sample = s)).catch(() => null) : Promise.resolve(null);
 
-  const PROMPT = (text, previous) => `Eres la Bola Negra del 8 del "Servicio de Atención al Cliente" de HAMPA STUDIO, un estudio creativo y de diseño en España. Es una BROMA INTERNA del equipo: la respuesta la leen solo los del estudio para reírse, el cliente nunca la verá.
+  // Estilos de respuesta: se elige uno al azar en cada consulta para que no salgan todas iguales
+  const ESTILOS = [
+    "Falsa amabilidad de atención al cliente que acaba en insulto.",
+    "Dale la vuelta a lo que pide y devuélveselo exagerado hasta el absurdo.",
+    "Funcionario harto: formularios, ventanillas y plazos ridículos.",
+    "Comparación cotidiana bestia (tu cuñado, tu madre, el bar de abajo, la Seguridad Social...).",
+    "Refrán o frase hecha retorcida.",
+    "Sinceridad brutal: lo que el estudio piensa de verdad y nunca le diría.",
+    "Contraoferta absurda: le ofreces algo peor y encima se lo cobras.",
+    "Promesa falsa que se ve venir a la legua."
+  ];
 
-Te pasan la queja o el email de un cliente. Tu trabajo es mandarlo a la mierda con mucha gracia: muy bruto, ácido, faltón, castizo y con tacos (joder, coño, hostia, me cago en..., que te den, vete a tomar por culo, a la mierda...). Tono de bar con los colegas del estudio, nada de corrección.
+  // El mismo texto está en api/bola.js (versión web). Si cambias uno, cambia el otro.
+  const PROMPT = (text, previous) => `Eres la Bola Negra del 8 de "Atención al Cliente" de HAMPA STUDIO, un estudio creativo y de diseño en España. Es una broma interna: solo lo leen los del estudio para reírse, el cliente nunca lo verá.
 
-Reglas:
-- La respuesta TIENE que agarrarse a algo concreto de lo que dice el cliente (su petición, sus prisas, su "hazlo más grande", su presupuesto, su forma de escribir, su firma...) y retorcerlo o exagerarlo. Si es genérica, has fracasado.
-- Corta: máximo 2 frases y 30 palabras. Que pegue rápido.
-- Métete con la queja, su pesadez, su gusto, sus prisas o su tacañería. Nunca con raza, origen, género, orientación, religión, discapacidad o físico.
-- Nada de explicaciones, disculpas ni "como IA".
-${previous ? `- Ya respondiste esto y quieren otra distinta, no la repitas: "${previous}"\n` : ""}
-Devuelve SOLO este JSON:
-{"bola": "frase de 2 a 4 palabras para la ventanita del triángulo de la bola, en mayúsculas", "respuesta": "la respuesta"}
+Te pasan la queja o el email de un cliente.
+
+PASO 1. Entiende qué pide o de qué se queja DE VERDAD el cliente y resúmelo en una frase corta (campo "tema"). No te quedes con palabras sueltas, piensa en la intención. Ejemplo: si dice "avisadnos mucho antes de cualquier cambio", el tema es que quiere que le avisemos con mucha antelación para tener tiempo de organizarse. No va de cambios, va de avisar con tiempo.
+
+PASO 2. Contesta a ESE tema mandándolo a la mierda con mucha gracia. La gracia tiene que salir de lo que pide de verdad. Si la respuesta valdría para cualquier otra queja, está mal.
+Estilo para esta respuesta: ${ESTILOS[Math.floor(Math.random() * ESTILOS.length)]}
+
+Cómo tiene que sonar:
+- Castellano de España, coloquial, como un colega del estudio en el bar. Frases claras que se entiendan a la primera. Nada de metáforas raras, nada poético ni rebuscado.
+- Bruto y faltón, con tacos (joder, coño, hostia, me cago en..., que te den, a tomar por culo, vete a la mierda).
+- Máximo 2 frases y 25 palabras.
+- Métete con lo que pide, su pesadez, sus prisas, su tacañería o su gusto. Nunca con raza, origen, género, orientación, religión, discapacidad o físico.
+${previous ? `- Ya le contestaste esto y quieren otra respuesta distinta, que no se parezca: "${previous}"\n` : ""}
+Ejemplos solo para que veas el tono y cómo se agarran al tema (no los copies):
+Queja: "¿Podéis hacer el logo un poco más grande?" -> {"tema": "quiere el logo más grande", "bola": "MÁS GRANDE TU JETA", "respuesta": "Claro, lo hacemos tan grande que no quepa ni tu ego. Y ahora a tomar por culo."}
+Queja: "Lo necesito para mañana a primera hora" -> {"tema": "tiene prisa, lo quiere para mañana", "bola": "HABER LLAMADO AYER", "respuesta": "¿Para mañana? Si querías milagros haberte ido a Lourdes, que aquí trabajamos, coño."}
+Queja: "No me ha llegado la factura" -> {"tema": "no le ha llegado la factura", "bola": "QUÉ PENA", "respuesta": "Hostia, el primero en la historia que se queja de no recibir una factura. Tranquilo, que la de los cambios te llega fijo."}
+
+Devuelve SOLO este JSON, sin nada más:
+{"tema": "lo que pide de verdad, en una frase corta", "bola": "2 a 4 palabras en mayúsculas para la ventanita de la bola", "respuesta": "la respuesta"}
 
 Queja del cliente:
 <<<
@@ -362,7 +387,9 @@ ${text}
     }
   }
 
-  function show(bola, text) {
+  function show(bola, text, tema) {
+    temaEl.textContent = tema ? "La bola ha entendido: " + tema : "";
+    temaEl.hidden = !tema;
     die.textContent = String(bola || "A LA MIERDA").toUpperCase().slice(0, 40);
     reply.textContent = text;
     reply.classList.remove("idle", "pop"); void reply.offsetWidth; reply.classList.add("pop");
@@ -396,18 +423,19 @@ ${text}
     reply.classList.add("idle");
     reply.textContent = "Pensando cómo decírtelo con cariño…";
     tools.hidden = true;
+    temaEl.hidden = true;
 
     await new Promise(r => setTimeout(r, 900));
     ball.classList.remove("shaking");
     setThinking(true);
 
     await ready;
-    let bola, answer;
+    let bola, answer, tema;
     if (sample) {
       // Abierta dentro de Claude: usa la IA del propio visor
       try {
-        const data = await sample.json(PROMPT(text.slice(0, 6000), previous), { modelTier: "quick", cache: false });
-        bola = data && data.bola; answer = data && data.respuesta;
+        const data = await sample.json(PROMPT(text.slice(0, 6000), previous), { cache: false });
+        bola = data && data.bola; answer = data && data.respuesta; tema = data && data.tema;
         notice.hidden = true;
       } catch (e) {
         [bola, answer] = errorLine(e && e.code);
@@ -421,7 +449,7 @@ ${text}
           body: JSON.stringify({ text: text.slice(0, 6000), previous: previous || "" })
         });
         const data = await r.json().catch(() => ({}));
-        if (r.ok) { bola = data.bola; answer = data.respuesta; notice.hidden = true; }
+        if (r.ok) { bola = data.bola; answer = data.respuesta; tema = data.tema; notice.hidden = true; }
         else [bola, answer] = errorLine(data.error);
       } catch {
         notice.textContent = "No hay conexión con la bola. Mira tu internet y vuelve a probar.";
@@ -432,7 +460,7 @@ ${text}
 
     setThinking(false);
     last.answer = answer;
-    show(bola, answer);
+    show(bola, answer, tema);
   }
 
   form.addEventListener("submit", e => { e.preventDefault(); ask(q.value); });
