@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atención al Cliente · HAMPA STUDIO</title>
+<style>
+  :root {
+    --bg: #14110f;
+    --felt: #0c4d2e;
+    --felt-dark: #062716;
+    --wood: #5a3418;
+    --wood-light: #8a5a2b;
+    --sign: #f4e9c8;
+    --sign-ink: #1b1b1b;
+    --accent: #e0262b;
+    --window: #1a2bd6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: radial-gradient(ellipse at center, var(--felt) 0%, var(--felt-dark) 75%, #020a05 100%);
+    color: #fff;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 40px;
+    overflow-x: hidden;
+  }
+
+  /* ---------- Cartel ---------- */
+  .sign-wrap { position: relative; margin-top: 30px; }
+  .sign-wrap::before, .sign-wrap::after {
+    content: ""; position: absolute; top: -34px; width: 2px; height: 36px;
+    background: linear-gradient(#999, #444);
+  }
+  .sign-wrap::before { left: 18%; transform: rotate(-12deg); }
+  .sign-wrap::after  { right: 18%; transform: rotate(12deg); }
+  .sign {
+    background: var(--sign);
+    color: var(--sign-ink);
+    border: 8px solid var(--wood);
+    outline: 3px solid var(--wood-light);
+    outline-offset: -12px;
+    border-radius: 6px;
+    padding: 18px 32px 16px;
+    text-align: center;
+    box-shadow: 0 14px 30px rgba(0,0,0,.55);
+    transform: rotate(-1.5deg);
+    animation: swing 6s ease-in-out infinite;
+    transform-origin: top center;
+    max-width: 92vw;
+  }
+  .sign small {
+    display: block; letter-spacing: .35em; font-size: 12px; font-weight: 700;
+    text-transform: uppercase; color: #555;
+  }
+  .sign h1 {
+    margin: 4px 0 2px; font-family: Impact, "Arial Black", sans-serif;
+    font-size: clamp(30px, 7vw, 54px); letter-spacing: .04em; line-height: 1;
+  }
+  .sign h1 span { color: var(--accent); }
+  .sign p { margin: 6px 0 0; font-size: 13px; font-style: italic; color: #444; }
+  @keyframes swing {
+    0%,100% { transform: rotate(-1.5deg); }
+    50% { transform: rotate(1.5deg); }
+  }
+
+  /* ---------- Bola ---------- */
+  .stage { margin: 46px 0 28px; perspective: 800px; }
+  .ball {
+    position: relative;
+    width: min(340px, 78vw); aspect-ratio: 1;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 32% 26%, rgba(255,255,255,.55) 0 6%, rgba(255,255,255,.12) 14%, transparent 30%),
+      radial-gradient(circle at 50% 50%, #2b2b2b 0%, #0b0b0b 60%, #000 100%);
+    box-shadow:
+      inset -20px -30px 60px rgba(0,0,0,.9),
+      inset 10px 10px 30px rgba(255,255,255,.06),
+      0 30px 40px rgba(0,0,0,.6);
+    display: grid; place-items: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  .ball::after { /* sombra en la mesa */
+    content: ""; position: absolute; bottom: -38px; left: 15%; width: 70%; height: 22px;
+    border-radius: 50%; background: rgba(0,0,0,.45); filter: blur(8px); z-index: -1;
+  }
+  .face {
+    width: 46%; aspect-ratio: 1; border-radius: 50%;
+    display: grid; place-items: center;
+    transition: transform .5s ease;
+  }
+  .eight {
+    background: radial-gradient(circle at 40% 35%, #fff, #e8e8e8 70%, #cfcfcf);
+    color: #000; font-family: Georgia, serif; font-weight: 700;
+    font-size: clamp(60px, 15vw, 110px); line-height: 1;
+    box-shadow: inset -4px -6px 10px rgba(0,0,0,.25);
+  }
+  .window {
+    display: none;
+    background: radial-gradient(circle, #0d1a8a 0%, #050a3a 80%);
+    box-shadow: inset 0 0 20px #000, 0 0 0 4px #111;
+    width: 60%;
+  }
+  .triangle {
+    width: 92%; aspect-ratio: 1.1;
+    clip-path: polygon(50% 100%, 0 8%, 100% 8%);
+    background: linear-gradient(180deg, #2f45ff, var(--window));
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 16% 20% 0;
+    opacity: 0;
+    transform: scale(.6) rotate(10deg);
+    transition: opacity .8s ease, transform .8s cubic-bezier(.2,1.4,.4,1);
+  }
+  .triangle.show { opacity: 1; transform: scale(1) rotate(0); }
+  .triangle span {
+    font-size: clamp(9px, 2.4vw, 13px); font-weight: 700; text-transform: uppercase;
+    text-align: center; line-height: 1.15; color: #dfe6ff;
+    text-shadow: 0 0 6px rgba(160,180,255,.8);
+  }
+  .ball.revealed .eight { display: none; }
+  .ball.revealed .window { display: grid; }
+
+  .ball.shaking { animation: shake 1.2s cubic-bezier(.36,.07,.19,.97) both; }
+  @keyframes shake {
+    0%   { transform: translate(0,0) rotate(0); }
+    10%  { transform: translate(-18px, 6px) rotate(-14deg); }
+    20%  { transform: translate(20px,-10px) rotate(18deg); }
+    30%  { transform: translate(-24px, 4px) rotate(-22deg); }
+    40%  { transform: translate(22px, 10px) rotate(20deg); }
+    50%  { transform: translate(-16px,-8px) rotate(-16deg) scale(1.03); }
+    60%  { transform: translate(14px, 6px) rotate(12deg); }
+    70%  { transform: translate(-10px,-4px) rotate(-8deg); }
+    80%  { transform: translate(6px, 2px) rotate(5deg); }
+    90%  { transform: translate(-3px, 0) rotate(-2deg); }
+    100% { transform: translate(0,0) rotate(0); }
+  }
+
+  /* ---------- Formulario ---------- */
+  form { width: min(560px, 100%); }
+  label { display: block; font-size: 14px; margin-bottom: 8px; opacity: .85; text-align: center; }
+  .row { display: flex; gap: 8px; }
+  input {
+    flex: 1; min-width: 0;
+    padding: 14px 16px; font-size: 16px;
+    border-radius: 10px; border: 2px solid #0a0a0a;
+    background: #f8f4e8; color: #111;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,.25);
+  }
+  input:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
+  button {
+    padding: 0 18px; font-size: 15px; font-weight: 700;
+    border: 0; border-radius: 10px; cursor: pointer;
+    background: var(--accent); color: #fff;
+    box-shadow: 0 4px 0 #7d1013;
+  }
+  button:active { transform: translateY(3px); box-shadow: 0 1px 0 #7d1013; }
+  button:disabled { opacity: .6; cursor: wait; }
+
+  .answer {
+    margin-top: 22px; min-height: 3.2em;
+    text-align: center; font-size: clamp(17px, 3.6vw, 22px); font-weight: 600;
+    line-height: 1.35; max-width: 640px;
+    opacity: 0; transform: translateY(8px);
+    transition: opacity .6s ease .2s, transform .6s ease .2s;
+  }
+  .answer.show { opacity: 1; transform: none; }
+  .answer q { quotes: "«" "»"; }
+  .complaint { margin-top: 8px; font-size: 13px; opacity: .55; font-style: italic; text-align: center; }
+
+  .counter {
+    position: fixed; right: 12px; bottom: 10px; font-size: 12px; opacity: .55;
+  }
+  footer { margin-top: auto; padding-top: 30px; font-size: 11px; opacity: .4; text-align: center; }
+</style>
+</head>
+<body>
+
+  <div class="sign-wrap">
+    <div class="sign">
+      <small>Departamento de</small>
+      <h1>ATENCIÓN AL CLIENTE<br><span>HAMPA STUDIO</span></h1>
+      <p>Tu queja nos importa muchísimo. Mentira.</p>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="ball" id="ball" title="No me toques">
+      <div class="face eight">8</div>
+      <div class="face window"><div class="triangle" id="tri"><span id="triText"></span></div></div>
+    </div>
+  </div>
+
+  <form id="form" autocomplete="off">
+    <label for="q">Cuéntale tu problema a la bola. Ella lo escucha (y se ríe).</label>
+    <div class="row">
+      <input id="q" type="text" placeholder="Ej: el logo no me convence…" maxlength="200" required>
+      <button id="btn" type="submit">Quejarme</button>
+    </div>
+  </form>
+
+  <div class="answer" id="answer"></div>
+  <div class="complaint" id="complaint"></div>
+
+  <div class="counter" id="counter"></div>
+  <footer>Uso interno. Si un cliente real ve esto, tú no has visto nada.</footer>
+
+<script>
+  // Texto corto para el triángulo de la bola
+  const short = [
+    "NI DE COÑA", "A LA MIERDA", "NOPE", "VETE A CAGAR", "PUES VALE",
+    "QUE TE DEN", "JA", "NO ME DA LA GANA", "LLORA", "SIGUIENTE",
+    "MIS COJONES", "MUY TRISTE", "CERRADO", "PASO", "OK BOOMER"
+  ];
+
+  // Respuestas largas
+  const answers = [
+    "Hemos analizado tu queja con un equipo de expertos y la conclusión es unánime: vete a la mierda, pero con cariño.",
+    "Tu problema ha sido escalado al departamento correspondiente: la papelera.",
+    "Gracias por contactar con HAMPA STUDIO. Tu queja es importante para nosotros. Por eso la hemos enmarcado y la usamos de diana.",
+    "Lo hemos consultado con la bola y dice que el problema eres tú. La bola nunca se equivoca.",
+    "¿Has probado a apagarte y volverte a encender? Pues hazlo lejos de aquí.",
+    "Entendemos tu frustración. De verdad. Ahora, a tomar por culo, que estamos ocupados.",
+    "Hemos abierto un ticket con tu queja. Prioridad: cuando las ranas críen pelo.",
+    "Tu satisfacción es nuestra prioridad número 847. Vas subiendo, campeón.",
+    "Te pedimos disculpas por las molestias. Bueno, en realidad no. Vete a la mierda.",
+    "Esto lo arreglamos en la próxima versión. La próxima versión sale el día del juicio final.",
+    "Según nuestros datos, el 100% de las quejas como la tuya se solucionan solas si dejas de dar por saco.",
+    "Hemos trasladado tu queja a nuestro becario. El becario ha dimitido.",
+    "Pagaste por un diseño, no por nuestra paciencia. Esa va aparte y está agotada.",
+    "Interesantísimo. Ahora cuéntaselo a alguien a quien le importe. Pista: aquí no.",
+    "Hemos revisado el contrato y en la cláusula 14 pone, textualmente: \"que te jodan\".",
+    "Tu queja ha sido recibida, leída, procesada y mandada a la mierda en tiempo récord. Somos muy eficientes.",
+    "La bola mágica ha hablado: \"Sal de aquí antes de que te cobremos la consulta\".",
+    "Vale, lo apuntamos. *No lo apunta*.",
+    "Queremos que sepas que nos has alegrado el día. Nos hemos reído un montón de ti.",
+    "Si lo quieres para ayer, haberlo pedido anteayer. Y aun así, no.",
+    "Te entendemos perfectamente. Simplemente nos la suda.",
+    "Hemos convocado una reunión de crisis por tu queja. Ha durado 4 segundos y ha acabado en risas.",
+    "No es un bug, es una feature. Y tú no eres un cliente, eres un reto.",
+    "Por favor, rellena el formulario de reclamaciones. Está en la última planta. No tenemos última planta.",
+    "Lo sentimos, el servicio de \"me importa\" no está disponible en tu zona.",
+    "Tu queja es tan buena que vamos a hacer camisetas con ella. Tú no tendrás una.",
+    "Hemos pasado tu problema por Photoshop y ahora es más bonito. Sigue siendo tu problema.",
+    "¿El logo más grande? Claro. ¿Algo más? ¿Un riñón? Vete a la mierda.",
+    "Sentimos comunicarte que la bola te ha bloqueado. En el corazón.",
+    "Prometemos solucionarlo en un plazo de 24 a 48 años hábiles.",
+    "Nuestro equipo está trabajando en ello. Mentira, están jugando al futbolín.",
+    "Querido cliente: no. Atentamente, todo el estudio.",
+    "Hemos encontrado al culpable del problema. Mírate en un espejo.",
+    "La respuesta está dentro de ti. Y lejos de nosotros. Muy lejos.",
+    "Has desbloqueado el logro \"Pesado nivel Dios\". Tu recompensa: que te den.",
+    "Comprendemos tu situación y la compartimos. En el grupo de WhatsApp. Con memes.",
+    "Si fuera fácil lo harías tú. Ah, que no sabes. Pues eso.",
+    "La bola dice que lo vuelvas a intentar más tarde. Mucho más tarde. En otra vida.",
+    "Hemos mandado tu queja al cliente misterioso. Ha dicho que eres un pesado.",
+    "Con todo el respeto del mundo y un poquito de amor: vete a cagar a la vía."
+  ];
+
+  const form = document.getElementById("form");
+  const input = document.getElementById("q");
+  const btn = document.getElementById("btn");
+  const ball = document.getElementById("ball");
+  const tri = document.getElementById("tri");
+  const triText = document.getElementById("triText");
+  const answerEl = document.getElementById("answer");
+  const complaintEl = document.getElementById("complaint");
+  const counterEl = document.getElementById("counter");
+
+  let count = 0;
+  try { count = parseInt(localStorage.getItem("hampa-quejas") || "0", 10) || 0; } catch (e) {}
+  renderCounter();
+
+  // Barajado sin repetir hasta agotar todas
+  let bag = [];
+  function nextAnswer() {
+    if (!bag.length) bag = answers.map((_, i) => i).sort(() => Math.random() - .5);
+    return answers[bag.pop()];
+  }
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+  function renderCounter() {
+    counterEl.textContent = `Quejas mandadas a la mierda: ${count}`;
+  }
+
+  function shake() {
+    const text = input.value.trim();
+    if (!text) { input.focus(); return; }
+
+    btn.disabled = true;
+    tri.classList.remove("show");
+    answerEl.classList.remove("show");
+    ball.classList.remove("revealed", "shaking");
+    void ball.offsetWidth; // reinicia la animación
+    ball.classList.add("shaking");
+
+    setTimeout(() => {
+      triText.textContent = pick(short);
+      ball.classList.add("revealed");
+      requestAnimationFrame(() => tri.classList.add("show"));
+      answerEl.textContent = nextAnswer();
+      complaintEl.textContent = `Tu queja: "${text}" — archivada en /dev/null`;
+      answerEl.classList.add("show");
+      count++;
+      try { localStorage.setItem("hampa-quejas", String(count)); } catch (e) {}
+      renderCounter();
+      input.value = "";
+      btn.disabled = false;
+      input.focus();
+    }, 1200);
+  }
+
+  form.addEventListener("submit", e => { e.preventDefault(); shake(); });
+  ball.addEventListener("click", () => {
+    if (!input.value.trim()) input.value = "Me quejo porque sí";
+    shake();
+  });
+  input.focus();
+</script>
+</body>
+</html>
