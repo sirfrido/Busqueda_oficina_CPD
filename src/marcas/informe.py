@@ -9,6 +9,9 @@ from html import escape
 from .modelos import Alerta
 
 LOCALIZADOR = "https://consultas2.oepm.es/LocalizadorWeb/"
+# Asunto fijo, idéntico en todos los envíos: los filtros de Gmail archivan por
+# asunto exacto. El resultado de cada semana va en la primera línea del cuerpo.
+ASUNTO = "[VIGILANCIA-BOPI] HAMPA STUDIO M2723901"
 COLOR = {"alto": "#b42318", "medio": "#b54708", "bajo": "#475467", "local": "#475467"}
 
 
@@ -37,6 +40,10 @@ class Resultado:
 
     @property
     def asunto(self) -> str:
+        return ASUNTO
+
+    @property
+    def resumen(self) -> str:
         ini, fin = self.periodo
         periodo = f"{ini:%d/%m}–{fin:%d/%m}"
         if not self.revisadas:
@@ -79,7 +86,7 @@ def _estado(r: Resultado) -> str:
 
 def texto(r: Resultado) -> str:
     ini, fin = r.periodo
-    bloques = [f"Vigilancia de la marca {r.marca} en el BOPI, del {ini:%d/%m/%Y} al {fin:%d/%m/%Y}."]
+    bloques = [r.resumen, f"Vigilancia de la marca {r.marca} en el BOPI, del {ini:%d/%m/%Y} al {fin:%d/%m/%Y}."]
     if r.alertas:
         bloques.append("MARCAS PARECIDAS\n\n" + "\n\n".join(_linea(a) for a in r.alertas))
     elif r.revisadas:
@@ -117,6 +124,7 @@ def _tarjeta(a: Alerta) -> str:
 def html(r: Resultado) -> str:
     ini, fin = r.periodo
     cuerpo = [
+        f'<p style="font-size:18px;font-weight:600;margin:0 0 12px">{escape(r.resumen)}</p>',
         f'<h2 style="margin:0 0 4px">Vigilancia de «{escape(r.marca)}»</h2>',
         f'<div style="color:#475467">BOPI del {ini:%d/%m/%Y} al {fin:%d/%m/%Y} · {r.revisadas} solicitudes revisadas</div>',
     ]

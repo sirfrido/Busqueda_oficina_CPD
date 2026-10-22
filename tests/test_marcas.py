@@ -133,7 +133,8 @@ def test_pasada_completa_sin_red(monkeypatch):
     monkeypatch.setattr("marcas.cli.FUENTES", {"imarcas": lambda d, h, http: list(SEMANA)})
     r = revisar(cfg(), date(2026, 10, 15), date(2026, 10, 21), analizador=Analizador(cfg(), cliente=ClaudeFalso()))
     assert r.revisadas == 3 and r.canario is True
-    assert "🔴" in r.asunto
+    assert "🔴" in r.resumen
+    assert r.asunto == "[VIGILANCIA-BOPI] HAMPA STUDIO M2723901"
     cuerpo = informe.texto(r)
     assert "HAMPA RECORDS" in cuerpo and "HAMPAH" not in cuerpo
     assert "FUNCIONANDO" in cuerpo
