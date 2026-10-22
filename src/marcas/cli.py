@@ -72,9 +72,21 @@ def revisar(
     hasta: date,
     analizador: Analizador | None = None,
     ya_revisados: set[date] = frozenset(),
+    exportar: str | None = None,
 ) -> informe.Resultado:
     r = informe.Resultado(marca=cfg.marca, desde=desde, hasta=hasta)
     solicitudes = [s for s in recoger(cfg, desde, hasta, r) if s.fecha_bopi not in ya_revisados]
+    if exportar:
+        # Lista completa (número | denominación | clases | fecha) para que la
+        # revise otro proceso, p. ej. una sesión de Claude sin API key.
+        Path(exportar).parent.mkdir(parents=True, exist_ok=True)
+        Path(exportar).write_text(
+            "".join(
+                f"{s.numero} | {s.denominacion} | {', '.join(map(str, s.clases)) or '-'} | {s.fecha_bopi:%d/%m/%Y}\n"
+                for s in solicitudes
+            ),
+            encoding="utf-8",
+        )
     r.revisadas = len(solicitudes)
     r.dias_bopi = sorted({s.fecha_bopi for s in solicitudes})
     if not solicitudes:
@@ -126,7 +138,7 @@ def cmd_revisar(args: argparse.Namespace) -> int:
     explicito = bool(args.desde or args.hasta)
     revisados = set() if explicito else leer_estado()
 
-    r = revisar(cfg, desde, hasta, ya_revisados=revisados)
+    r = revisar(cfg, desde, hasta, ya_revisados=revisados, exportar=args.exportar)
     if not explicito and r.dias_bopi and not any(e.startswith("Claude") for e in r.errores):
         guardar_estado(revisados | set(r.dias_bopi))
 
@@ -174,6 +186,7 @@ def main(argv: list[str] | None = None) -> int:
     rv.add_argument("--desde", help="AAAA-MM-DD (por defecto: ventana_dias antes de --hasta)")
     rv.add_argument("--hasta", help="AAAA-MM-DD (por defecto: ayer)")
     rv.add_argument("--fuentes", help="lista separada por comas: imarcas,oepm")
+    rv.add_argument("--exportar", help="guarda aquí la lista completa de solicitudes revisadas")
     rv.set_defaults(func=cmd_revisar)
 
     dg = sub.add_parser("diagnostico", help="¿qué fuentes responden?")

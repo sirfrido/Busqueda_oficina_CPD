@@ -1,17 +1,20 @@
 # Vigilancia de marcas: qué marca se protege y cómo se cribe el BOPI.
 # Ajustes propios sin tocar el repo: sección `marcas:` en config/local.yaml.
 
+# Marca nacional M2723901 (mixta), renovada hasta el 24/07/2036.
 marca: HAMPA STUDIO
 # El elemento distintivo. «STUDIO» es genérico: lo que hay que vigilar es HAMPA.
 nucleo: HAMPA
 # A qué se dedica: el riesgo de confusión depende de que los productos o
 # servicios se parezcan, no sólo el nombre.
 actividad: >-
-  Estudio creativo: diseño gráfico, branding, diseño web, publicidad y
-  producción audiovisual.
-# Clases de Niza de tu registro. Déjalas vacías y el análisis tratará como
-# relevantes las clases habituales de un estudio creativo (35, 41, 42, 9, 16).
-clases_niza: []
+  Estudio de animación y productora audiovisual (películas, series, branded
+  content). Clase 35: agencias y servicios de publicidad, publicidad en TV,
+  radio y en línea, relaciones públicas, gestión de negocios. Clase 41:
+  producción de películas, programas de TV y películas animadas, doblaje,
+  estudios de grabación, producciones discográficas, espectáculos y festivales.
+# Clases de Niza del título de renovación de 2026.
+clases_niza: [35, 41]
 
 # Días hacia atrás que mira cada pasada. Los BOPI que ya salieron en un informe
 # anterior se saltan (data/marcas/bopi_revisados.json), así que una ventana
