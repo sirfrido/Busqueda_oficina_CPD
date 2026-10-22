@@ -3,3 +3,4 @@ beautifulsoup4>=4.12
 lxml>=5.0
 PyYAML>=6.0
 anthropic>=1.0
+pypdf>=4.0

@@ -1,0 +1,76 @@
+name: Vigilancia de marcas (BOPI)
+
+on:
+  schedule:
+    # Miércoles a las 08:00 en Madrid (07:00 UTC en invierno; 09:00 en verano).
+    - cron: "0 7 * * 3"
+  workflow_dispatch:
+    inputs:
+      sin_email:
+        description: "Ejecutar sin enviar el email (sólo generar el informe)"
+        type: boolean
+        default: false
+      desde:
+        description: "Revisar desde (AAAA-MM-DD). Vacío = BOPI aún no revisados"
+        required: false
+      hasta:
+        description: "Revisar hasta (AAAA-MM-DD). Vacío = ayer"
+        required: false
+
+concurrency:
+  group: vigilancia-marcas
+  cancel-in-progress: false
+
+jobs:
+  revisar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Revisar el BOPI
+        env:
+          PYTHONPATH: src
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PUERTO: ${{ secrets.SMTP_PUERTO }}
+          SMTP_USUARIO: ${{ secrets.SMTP_USUARIO }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_REMITENTE: ${{ secrets.EMAIL_REMITENTE }}
+          EMAIL_DESTINATARIOS: ${{ secrets.EMAIL_DESTINATARIOS }}
+          MARCAS_DESTINATARIOS: ${{ secrets.MARCAS_DESTINATARIOS }}
+          SIN_EMAIL: ${{ inputs.sin_email }}
+          DESDE: ${{ inputs.desde }}
+          HASTA: ${{ inputs.hasta }}
+        run: |
+          ARGS=()
+          if [ "$SIN_EMAIL" = "true" ]; then ARGS+=(--sin-email); fi
+          if [ -n "$DESDE" ]; then ARGS+=(--desde "$DESDE"); fi
+          if [ -n "$HASTA" ]; then ARGS+=(--hasta "$HASTA"); fi
+          python -m marcas.cli revisar "${ARGS[@]}"
+
+      # La memoria (qué BOPI ya se revisaron) y el último informe viven en el
+      # repositorio: así una semana en que la fuente publique tarde no se
+      # pierde, y el informe se puede leer aunque no haya SMTP configurado.
+      - name: Guardar memoria e informe
+        if: always()
+        run: |
+          git config user.name "Agente marcas"
+          git config user.email "actions@users.noreply.github.com"
+          git add -f data/marcas/bopi_revisados.json data/out/marcas/ultimo-informe.html 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "Nada nuevo que guardar."
+          else
+            git commit -m "Vigilancia de marcas: informe del $(date -u +%F)"
+            git push
+          fi

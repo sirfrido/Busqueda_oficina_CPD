@@ -9,6 +9,7 @@ dependencies = [
     "lxml>=5.0",
     "PyYAML>=6.0",
     "anthropic>=1.0",
+    "pypdf>=4.0",
 ]
 
 [project.optional-dependencies]
@@ -16,6 +17,7 @@ dev = ["pytest>=8.0"]
 
 [project.scripts]
 oficinas = "oficinas.cli:main"
+vigilancia-marcas = "marcas.cli:main"
 
 [build-system]
 requires = ["setuptools>=68"]

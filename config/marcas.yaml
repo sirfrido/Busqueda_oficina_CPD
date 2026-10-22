@@ -1,0 +1,45 @@
+# Vigilancia de marcas: qué marca se protege y cómo se cribe el BOPI.
+# Ajustes propios sin tocar el repo: sección `marcas:` en config/local.yaml.
+
+marca: HAMPA STUDIO
+# El elemento distintivo. «STUDIO» es genérico: lo que hay que vigilar es HAMPA.
+nucleo: HAMPA
+# A qué se dedica: el riesgo de confusión depende de que los productos o
+# servicios se parezcan, no sólo el nombre.
+actividad: >-
+  Estudio creativo: diseño gráfico, branding, diseño web, publicidad y
+  producción audiovisual.
+# Clases de Niza de tu registro. Déjalas vacías y el análisis tratará como
+# relevantes las clases habituales de un estudio creativo (35, 41, 42, 9, 16).
+clases_niza: []
+
+# Días hacia atrás que mira cada pasada. Los BOPI que ya salieron en un informe
+# anterior se saltan (data/marcas/bopi_revisados.json), así que una ventana
+# mayor que la semana no repite nada: sólo recoge los días que la fuente
+# publicó con retraso. La primera pasada revisa estas tres semanas enteras,
+# todas dentro aún del plazo de oposición de dos meses.
+ventana_dias: 21
+
+# Fuentes, en orden de preferencia. Se usan todas las que respondan y se
+# combinan por número de solicitud.
+#   oepm    -> Tomo 1 del BOPI (PDF) en la web de la OEPM: sólo el del día.
+#   imarcas -> listado diario de solicitudes publicado en imarcas.com: cubre
+#              la semana entera y es la que hace el trabajo en las pasadas
+#              semanales.
+fuentes: [imarcas, oepm]
+
+# Puntuación (0-1) a partir de la cual el cribado local, sin Claude, considera
+# que una denominación se parece. Todo lo que pasa de aquí sale en el informe
+# aunque Claude lo descarte, para que nada se pierda en silencio.
+umbral_local: 0.85
+
+# Denominación de control: se mezcla con las reales sin decirle a Claude cuál
+# es; si no la detecta, el informe avisa de que el análisis no es fiable.
+# Nunca aparece en la lista de alertas.
+canario: HAMPAH DESIGN STUDIO
+
+# Claude
+modelo: claude-opus-5-5
+effort: high
+# Denominaciones por petición: el BOPI trae ~400 al día, ~2.000 a la semana.
+lote: 700

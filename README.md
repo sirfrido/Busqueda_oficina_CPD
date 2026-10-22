@@ -1,5 +1,9 @@
 # Agente de búsqueda de oficinas y naves para CPD — Valencia
 
+> Este repositorio incluye también la **vigilancia semanal de la marca HAMPA
+> STUDIO en el BOPI** (aviso los miércoles de solicitudes parecidas a las que
+> oponerse): ver [`docs/VIGILANCIA_MARCAS.md`](docs/VIGILANCIA_MARCAS.md).
+
 Agente autónomo que **busca cada día** oficinas y naves pequeñas en venta que
 sirvan para montar la sede y un CPD propio, las filtra contra unos criterios
 técnicos exigentes, y envía **un email con lo que cumple** y con el mensaje a la
