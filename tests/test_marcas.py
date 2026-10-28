@@ -40,17 +40,60 @@ def test_imarcas_fecha_desde_el_slug_incluido_el_sufijo_de_republicacion():
     assert fechas[date(2026, 10, 14)].endswith("-14-10-2026-2/")
 
 
-def test_oepm_encuentra_el_tomo_1_como_hacia_make():
-    html = """<a onclick="cargaForm('UCM_123','pdf','Descarga TOMO 2 en formato PDF')">
-              <a onclick="cargaForm('UCM_999','pdf','Descarga TOMO 1 en formato PDF')"> 21/10/2026"""
-    assert oepm.id_tomo1(html) == "UCM_999"
-    assert oepm.fecha_publicacion(html, date(2000, 1, 1)) == date(2026, 10, 21)
+TOMO1 = """1. MARCAS
+20 DE OCTUBRE DE 2026 - BOLETÍN OFICIAL DE LA PROPIEDAD INDUSTRIAL 1
+1
+CVE-BOPI-T1-20261020-00000001
+SOLICITUDES
+A partir de la fecha de publicación del presente Boletín Oficial de la Propiedad Industrial queda
+abierto el plazo de dos meses para que toda persona que se considere perjudicada pueda formular
+210 M \xa0 4380114 \xa0 \xa0(  )5
+220 \xa013-05-2026
+731 Hadrath ,  Yara
+08017   Barcelona   ( BARCELONA )  ES
+541
+ The Compass Atelier
+
+511 35 SERVICIOS DE CONSULTORIA Y ASESORAMIENTO EN ESTRATEGIA EMPRESARIAL;
+210 M   4384838      (  )9
+220  04-06-2026
+546
 
 
-def test_oepm_saca_denominaciones_del_texto_del_pdf():
-    texto = "(210) M 4401234\n(220) 01/10/2026\n541\n\nHAMPA BEATS\n(511) 41\n(210) M 4401235\n541\n\nOTRA COSA\n"
-    sols = oepm.solicitudes_desde_texto(texto, date(2026, 10, 21))
-    assert [(s.numero, s.denominacion) for s in sols] == [("4401234", "HAMPA BEATS"), ("4401235", "OTRA COSA")]
+531 27 05 10
+511 41 EDUCACION; FORMACION; SERVICIOS DE ENTRETENIMIENTO
+210 M   4388499      (  )7
+731 Méndez García ,  Javier
+20 DE OCTUBRE DE 2026 - BOLETÍN OFICIAL DE LA PROPIEDAD INDUSTRIAL 2
+2
+CVE-BOPI-T1-20261020-00000002
+541
+ Xoves Cálidos
+
+511 41 EDUCACION; FORMACION; SERVICIOS DE ENTRETENIMIENTO
+43 SERVICIOS DE RESTAURACION (ALIMENTACION); HOSPEDAJE TEMPORAL; BAR
+SUSPENSOS DE SOLICITUD
+210 M   4300000      (  )1
+541
+ NO CUENTA
+"""
+
+
+def test_oepm_lee_el_tomo_1_del_bopi_nuevo():
+    sols = oepm.solicitudes_desde_texto(TOMO1, date(2026, 10, 20))
+    assert [(s.numero, s.denominacion, s.clases) for s in sols] == [
+        ("4380114", "The Compass Atelier", [35]),
+        ("4384838", oepm.SIN_DENOMINACION, [41]),
+        # La ficha cruza un salto de página: la cabecera no se confunde con el 541.
+        ("4388499", "Xoves Cálidos", [41, 43]),
+    ]
+
+
+def test_oepm_no_descarga_los_dias_ya_revisados(monkeypatch):
+    pedidos = []
+    monkeypatch.setattr(oepm, "hay_bopi", lambda d, http: pedidos.append(d) or False)
+    oepm.descargar(date(2026, 10, 19), date(2026, 10, 25), http=object(), saltar={date(2026, 10, 20)})
+    assert pedidos == [date(2026, 10, 19), date(2026, 10, 21), date(2026, 10, 22), date(2026, 10, 23)]
 
 
 # -- similitud -------------------------------------------------------------
@@ -130,7 +173,7 @@ def test_lo_que_el_modelo_descarta_pero_se_parece_no_se_pierde():
 
 
 def test_pasada_completa_sin_red(monkeypatch):
-    monkeypatch.setattr("marcas.cli.FUENTES", {"imarcas": lambda d, h, http: list(SEMANA)})
+    monkeypatch.setattr("marcas.cli.FUENTES", {"imarcas": lambda *_: list(SEMANA)})
     r = revisar(cfg(), date(2026, 10, 15), date(2026, 10, 21), analizador=Analizador(cfg(), cliente=ClaudeFalso()))
     assert r.revisadas == 3 and r.canario is True
     assert "🔴" in r.resumen
@@ -144,14 +187,14 @@ def test_pasada_completa_sin_red(monkeypatch):
 def test_sin_api_key_avisa_con_el_cribado_local(monkeypatch):
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     monkeypatch.delenv("ANTHROPIC_AUTH_TOKEN", raising=False)
-    monkeypatch.setattr("marcas.cli.FUENTES", {"imarcas": lambda d, h, http: list(SEMANA)})
+    monkeypatch.setattr("marcas.cli.FUENTES", {"imarcas": lambda *_: list(SEMANA)})
     r = revisar(cfg(), date(2026, 10, 15), date(2026, 10, 21))
     assert not r.con_modelo
     assert {a.solicitud.numero for a in r.alertas} == {"4400002", "4400003"}
 
 
 def test_los_bopi_ya_revisados_se_saltan(monkeypatch):
-    monkeypatch.setattr("marcas.cli.FUENTES", {"imarcas": lambda d, h, http: list(SEMANA)})
+    monkeypatch.setattr("marcas.cli.FUENTES", {"imarcas": lambda *_: list(SEMANA)})
     r = revisar(
         cfg(), date(2026, 10, 1), date(2026, 10, 21),
         analizador=Analizador(cfg(), cliente=ClaudeFalso()),
@@ -161,10 +204,10 @@ def test_los_bopi_ya_revisados_se_saltan(monkeypatch):
 
 
 def test_fuente_caida_no_tumba_la_pasada(monkeypatch):
-    def rota(d, h, http):
+    def rota(*_):
         raise oepm.FuenteNoDisponible("oepm: HTTP 403")
 
-    monkeypatch.setattr("marcas.cli.FUENTES", {"oepm": rota, "imarcas": lambda d, h, http: list(SEMANA)})
+    monkeypatch.setattr("marcas.cli.FUENTES", {"oepm": rota, "imarcas": lambda *_: list(SEMANA)})
     r = revisar(cfg(fuentes=["oepm", "imarcas"]), date(2026, 10, 15), date(2026, 10, 21),
                 analizador=Analizador(cfg(), cliente=ClaudeFalso()))
     assert r.revisadas == 3

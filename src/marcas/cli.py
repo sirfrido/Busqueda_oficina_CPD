@@ -46,13 +46,18 @@ def guardar_estado(fechas: set[date]) -> None:
     ESTADO.write_text(json.dumps(recientes, indent=0) + "\n", encoding="utf-8")
 
 
-def recoger(cfg: ConfigMarcas, desde: date, hasta: date, r: informe.Resultado) -> list[Solicitud]:
-    """Todas las fuentes que respondan, sin duplicar números de solicitud."""
+def recoger(
+    cfg: ConfigMarcas, desde: date, hasta: date, r: informe.Resultado, saltar: set[date] = frozenset()
+) -> list[Solicitud]:
+    """Todas las fuentes que respondan, sin duplicar números de solicitud.
+
+    `saltar` son los BOPI ya revisados: las fuentes no los descargan.
+    """
     http = sesion()
     por_numero: dict[str, Solicitud] = {}
     for nombre in cfg.fuentes:
         try:
-            lote = FUENTES[nombre](desde, hasta, http)
+            lote = FUENTES[nombre](desde, hasta, http, saltar)
         except (FuenteNoDisponible, KeyError) as exc:
             r.errores.append(str(exc) if not isinstance(exc, KeyError) else f"fuente desconocida: {nombre}")
             continue
@@ -75,7 +80,7 @@ def revisar(
     exportar: str | None = None,
 ) -> informe.Resultado:
     r = informe.Resultado(marca=cfg.marca, desde=desde, hasta=hasta)
-    solicitudes = [s for s in recoger(cfg, desde, hasta, r) if s.fecha_bopi not in ya_revisados]
+    solicitudes = [s for s in recoger(cfg, desde, hasta, r, ya_revisados) if s.fecha_bopi not in ya_revisados]
     if exportar:
         # Lista completa (número | denominación | clases | fecha) para que la
         # revise otro proceso, p. ej. una sesión de Claude sin API key.

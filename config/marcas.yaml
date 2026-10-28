@@ -25,11 +25,12 @@ ventana_dias: 21
 
 # Fuentes, en orden de preferencia. Se usan todas las que respondan y se
 # combinan por número de solicitud.
-#   oepm    -> Tomo 1 del BOPI (PDF) en la web de la OEPM: sólo el del día.
-#   imarcas -> listado diario de solicitudes publicado en imarcas.com: cubre
-#              la semana entera y es la que hace el trabajo en las pasadas
-#              semanales.
-fuentes: [imarcas, oepm]
+#   oepm    -> Tomo 1 del BOPI en PDF, de la API pública del BOPI nuevo de la
+#              OEPM (fuente oficial; cualquier fecha). En las marcas mixtas o
+#              gráficas el nombre va en la imagen y no sale en el texto.
+#   imarcas -> listado diario que publica imarcas.com (no oficial). Respaldo:
+#              dejó de publicar el 19/10/2026.
+fuentes: [oepm, imarcas]
 
 # Puntuación (0-1) a partir de la cual el cribado local, sin Claude, considera
 # que una denominación se parece. Todo lo que pasa de aquí sale en el informe

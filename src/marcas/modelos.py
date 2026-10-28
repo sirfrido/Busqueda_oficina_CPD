@@ -55,7 +55,7 @@ class ConfigMarcas:
     actividad: str = ""
     clases_niza: list[int] = field(default_factory=list)
     ventana_dias: int = 21
-    fuentes: list[str] = field(default_factory=lambda: ["imarcas", "oepm"])
+    fuentes: list[str] = field(default_factory=lambda: ["oepm", "imarcas"])
     umbral_local: float = 0.85
     canario: str = ""
     modelo: str = "claude-opus-5-5"
@@ -97,7 +97,7 @@ class ConfigMarcas:
             actividad=datos.get("actividad", ""),
             clases_niza=[int(c) for c in datos.get("clases_niza") or []],
             ventana_dias=int(datos.get("ventana_dias", 21)),
-            fuentes=list(datos.get("fuentes") or ["imarcas", "oepm"]),
+            fuentes=list(datos.get("fuentes") or ["oepm", "imarcas"]),
             umbral_local=float(datos.get("umbral_local", 0.85)),
             canario=datos.get("canario", ""),
             modelo=os.getenv("MODELO_MARCAS", datos.get("modelo", "claude-opus-5-5")),

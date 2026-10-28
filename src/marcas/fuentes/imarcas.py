@@ -64,7 +64,9 @@ def solicitudes(html: str, fecha: date, url: str = "") -> list[Solicitud]:
     return salida
 
 
-def descargar(desde: date, hasta: date, http: requests.Session | None = None) -> list[Solicitud]:
+def descargar(
+    desde: date, hasta: date, http: requests.Session | None = None, saltar: set[date] = frozenset()
+) -> list[Solicitud]:
     http = http or sesion()
     urls: dict[date, str] = {}
     for pagina in range(1, MAX_PAGINAS + 1):
@@ -77,7 +79,7 @@ def descargar(desde: date, hasta: date, http: requests.Session | None = None) ->
                 raise FuenteNoDisponible(f"imarcas: {exc}") from exc
             break
         encontradas = entradas(r.text)
-        urls.update({f: u for f, u in encontradas.items() if desde <= f <= hasta})
+        urls.update({f: u for f, u in encontradas.items() if desde <= f <= hasta and f not in saltar})
         if not encontradas or min(encontradas) < desde:
             break
 

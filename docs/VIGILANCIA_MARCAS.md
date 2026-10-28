@@ -7,7 +7,7 @@ fecha límite para oponerte** (dos meses desde la publicación, art. 19 de la Le
 17/2001 de Marcas).
 
 ```
-imarcas.com (listado diario del BOPI)  +  OEPM (Tomo 1 en PDF, si responde)
+OEPM (Tomo 1 del BOPI en PDF, API pública)  +  imarcas.com (respaldo)
         ↓  se combinan por número de solicitud; se saltan los BOPI ya revisados
 cribado local: parecido escrito y sonoro con «HAMPA» (sin red ni modelo)
         ↓
@@ -36,9 +36,11 @@ email: riesgo alto / medio / bajo, motivo, recomendación y plazo de oposición
 
 ## Qué hace distinto
 
-- **Dos fuentes.** El listado diario que publica imarcas.com (HTML limpio, con
-  número, denominación y clases, cualquier fecha) y la OEPM cuando responde.
-  Si una cae, lo dice al pie del email y sigue con la otra.
+- **Dos fuentes.** La oficial: el Tomo 1 del BOPI en PDF, que la aplicación
+  nueva de la OEPM sirve por una API pública sin registro
+  (`sede.oepm.gob.es/apibopiweb`). Y de respaldo, el listado diario de
+  imarcas.com, que dejó de publicarse el 19/10/2026. Si una cae, lo dice al
+  pie del email y sigue con la otra.
 - **Cubre la semana entera** y recuerda qué BOPI ya revisó
   (`data/marcas/bopi_revisados.json`): si un día se publica tarde, entra en la
   pasada siguiente en vez de perderse.
@@ -87,11 +89,11 @@ rechazara una petición, la API la reintenta con otro modelo automáticamente.
 
 ## Limitaciones
 
-- imarcas.com no es la fuente oficial. Antes de oponerte, comprueba el
-  expediente en el [Localizador de la OEPM](https://consultas2.oepm.es/LocalizadorWeb/).
-- La lectura del Tomo 1 en PDF de la OEPM no se ha podido probar contra un PDF
-  real: el cortafuegos de la OEPM bloqueaba el entorno donde se desarrolló.
-- Sólo mira **denominaciones**: las marcas puramente gráficas («marca gráfica
-  sin denominación») no se pueden comparar por texto.
+- Antes de oponerte, comprueba el expediente en el
+  [Localizador de la OEPM](https://consultas2.oepm.es/LocalizadorWeb/).
+- En el PDF del BOPI, las marcas **mixtas o gráficas** (más de la mitad) llevan
+  el nombre dentro de la imagen, y el texto sale como «(marca gráfica o
+  mixta)». La pasada semanal en Claude mira esos logotipos aparte; el cribado
+  automático por texto no los ve.
 - No sustituye a un agente de la propiedad industrial: decide con él si una
   alerta «alto» merece oposición.
