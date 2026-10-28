@@ -138,6 +138,8 @@ def cmd_revisar(args: argparse.Namespace) -> int:
     desde = date.fromisoformat(args.desde) if args.desde else hasta - timedelta(days=cfg.ventana_dias - 1)
     if args.fuentes:
         cfg.fuentes = args.fuentes.split(",")
+    if args.guardar_pdf:
+        oepm.GUARDAR_PDF = Path(args.guardar_pdf)
     # Con fechas explícitas se revisa todo; en la pasada normal se saltan los
     # BOPI que ya salieron en un informe anterior.
     explicito = bool(args.desde or args.hasta)
@@ -192,6 +194,7 @@ def main(argv: list[str] | None = None) -> int:
     rv.add_argument("--hasta", help="AAAA-MM-DD (por defecto: ayer)")
     rv.add_argument("--fuentes", help="lista separada por comas: imarcas,oepm")
     rv.add_argument("--exportar", help="guarda aquí la lista completa de solicitudes revisadas")
+    rv.add_argument("--guardar-pdf", help="guarda aquí los Tomo 1 descargados de la OEPM (para marcas.logos)")
     rv.set_defaults(func=cmd_revisar)
 
     dg = sub.add_parser("diagnostico", help="¿qué fuentes responden?")

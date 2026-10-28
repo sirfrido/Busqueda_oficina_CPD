@@ -21,6 +21,7 @@ import io
 import logging
 import re
 from datetime import date, timedelta
+from pathlib import Path
 
 import requests
 
@@ -30,6 +31,9 @@ from . import FuenteNoDisponible, sesion
 log = logging.getLogger(__name__)
 
 API = "https://sede.oepm.gob.es/apibopiweb"
+# Si se fija (revisar --guardar-pdf), cada Tomo 1 descargado se guarda aquí para
+# sacar después las hojas de logotipos (marcas.logos).
+GUARDAR_PDF: Path | None = None
 SIN_DENOMINACION = "(marca gráfica o mixta)"
 
 # Cabecera de página que el texto del PDF intercala entre los campos; la siguen
@@ -131,6 +135,9 @@ def descargar(
                     )
                     if not pdf.content.startswith(b"%PDF"):
                         raise RuntimeError(f"la descarga no es un PDF (HTTP {pdf.status_code})")
+                    if GUARDAR_PDF:
+                        GUARDAR_PDF.mkdir(parents=True, exist_ok=True)
+                        (GUARDAR_PDF / f"{_fecha(d)}.pdf").write_bytes(pdf.content)
                     del_dia = solicitudes_desde_texto(_texto_pdf(pdf.content), d)
                     log.info("oepm: BOPI %s -> %d solicitudes", d, len(del_dia))
                     salida.extend(del_dia)
